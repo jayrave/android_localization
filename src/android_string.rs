@@ -13,4 +13,16 @@ impl AndroidString {
             is_translatable,
         }
     }
+
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    pub fn value(&self) -> &str {
+        &self.value
+    }
+
+    pub fn is_translatable(&self) -> bool {
+        self.is_translatable
+    }
 }
