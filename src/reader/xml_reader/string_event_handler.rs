@@ -1,4 +1,5 @@
 use android_string::AndroidString;
+use constants;
 use reader::error::Error;
 use reader::xml_reader::event_handler::EventHandler;
 use reader::xml_reader::sinking_event_handler::SinkingEventHandler;
@@ -13,11 +14,6 @@ pub struct StringEventHandler {
 }
 
 impl StringEventHandler {
-    const STRING_NAME_TEXT: &'static str = "name";
-    const STRING_TRANSLATABLE_TEXT: &'static str = "translatable";
-    const TRUE_TEXT: &'static str = "true";
-    const FALSE_TEXT: &'static str = "false";
-
     pub fn new(
         strings: Rc<RefCell<Vec<AndroidString>>>,
         attributes: Vec<OwnedAttribute>,
@@ -26,10 +22,9 @@ impl StringEventHandler {
         let mut is_translatable = true;
         for attribute in attributes {
             match attribute.name.local_name.as_str() {
-                StringEventHandler::STRING_NAME_TEXT => string_name = Some(attribute.value),
-                StringEventHandler::STRING_TRANSLATABLE_TEXT => match attribute.value.as_str() {
-                    StringEventHandler::TRUE_TEXT => is_translatable = true,
-                    StringEventHandler::FALSE_TEXT => is_translatable = false,
+                constants::attributes::NAME => string_name = Some(attribute.value),
+                constants::attributes::TRANSLATABLE => match attribute.value.as_str() {
+                    constants::flags::FALSE => is_translatable = false,
                     _ => {}
                 },
                 _ => {}

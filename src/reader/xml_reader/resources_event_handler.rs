@@ -1,4 +1,5 @@
 use android_string::AndroidString;
+use constants;
 use reader::error::Error;
 use reader::xml_reader::event_handler::EventHandler;
 use reader::xml_reader::sinking_event_handler::SinkingEventHandler;
@@ -12,8 +13,6 @@ pub struct ResourcesEventHandler {
 }
 
 impl ResourcesEventHandler {
-    const STRING_TEXT: &'static str = "string";
-
     pub fn new(strings: Rc<RefCell<Vec<AndroidString>>>) -> ResourcesEventHandler {
         ResourcesEventHandler { strings }
     }
@@ -26,7 +25,7 @@ impl EventHandler for ResourcesEventHandler {
         attributes: Vec<OwnedAttribute>,
     ) -> Result<Box<EventHandler>, Error> {
         match tag_name.as_str() {
-            ResourcesEventHandler::STRING_TEXT => Ok(Box::new(StringEventHandler::new(
+            constants::elements::STRING => Ok(Box::new(StringEventHandler::new(
                 Rc::clone(&self.strings),
                 attributes,
             )?)),

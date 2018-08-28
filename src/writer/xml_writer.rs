@@ -1,4 +1,5 @@
 use android_string::AndroidString;
+use constants;
 use std::io::BufWriter;
 use std::io::Write;
 use xml::writer::Error;
@@ -13,14 +14,15 @@ pub fn to<W: Write>(sink: &mut W, android_strings: Vec<AndroidString>) -> Result
         .create_writer(BufWriter::new(sink));
 
     // Start resources element
-    writer.write(XmlEvent::start_element("resources"))?;
+    writer.write(XmlEvent::start_element(constants::elements::RESOURCES))?;
 
     // Write all string elements
     for android_string in android_strings {
-        let mut string_element =
-            XmlEvent::start_element("string").attr("name", android_string.name());
+        let mut string_element = XmlEvent::start_element(constants::elements::STRING)
+            .attr(constants::attributes::NAME, android_string.name());
         if !android_string.is_translatable() {
-            string_element = string_element.attr("translatable", "false");
+            string_element =
+                string_element.attr(constants::attributes::TRANSLATABLE, constants::flags::FALSE);
         }
 
         writer.write(string_element)?;
