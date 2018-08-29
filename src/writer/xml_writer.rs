@@ -37,8 +37,6 @@ pub fn to<W: Write>(sink: &mut W, android_strings: Vec<AndroidString>) -> Result
 
 #[cfg(test)]
 mod tests {
-    extern crate tempfile;
-
     use android_string::AndroidString;
 
     #[test]
