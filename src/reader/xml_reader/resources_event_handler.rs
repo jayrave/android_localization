@@ -1,6 +1,6 @@
 use android_string::AndroidString;
 use constants;
-use reader::error::Error;
+use reader::xml_reader::error::Error;
 use reader::xml_reader::event_handler::EventHandler;
 use reader::xml_reader::sinking_event_handler::SinkingEventHandler;
 use reader::xml_reader::string_event_handler::StringEventHandler;

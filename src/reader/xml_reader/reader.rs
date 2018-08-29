@@ -1,5 +1,5 @@
 use android_string::AndroidString;
-use reader::error::Error;
+use reader::xml_reader::error::Error;
 use reader::xml_reader::events_handler::EventsHandler;
 use std::io::BufReader;
 use std::io::Read;

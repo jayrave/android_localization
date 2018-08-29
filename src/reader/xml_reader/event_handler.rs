@@ -1,4 +1,4 @@
-use reader::error::Error;
+use reader::xml_reader::error::Error;
 use xml::attribute::OwnedAttribute;
 
 pub trait EventHandler {

@@ -1,3 +1,4 @@
+mod error;
 mod event_handler;
 mod events_handler;
 mod reader;

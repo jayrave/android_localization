@@ -1,4 +1,4 @@
-use reader::error::Error;
+use reader::xml_reader::error::Error;
 use reader::xml_reader::event_handler::EventHandler;
 use xml::attribute::OwnedAttribute;
 
