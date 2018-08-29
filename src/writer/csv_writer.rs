@@ -7,7 +7,7 @@ pub fn to<W: Write>(
     sink: &mut W,
     translatable_android_strings: Vec<TranslatableAndroidString>,
 ) -> Result<(), Error> {
-    let mut writer = Writer::from_writer(sink);
+    let mut writer = Writer::from_writer(sink); // Sink is automatically buffered
     for string in translatable_android_strings {
         writer.write_record(vec![string.name(), string.value()]);
     }
