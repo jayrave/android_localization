@@ -1,15 +1,15 @@
 use android_string::AndroidString;
+use ops::sort;
 
 /// While grouping strings, strings from `strings_1` take precedence over `strings_2` in case both
 /// strings have the same name
-fn merge_and_group_strings(
+pub fn merge_and_group_strings(
     strings_1: &mut Vec<AndroidString>,
     strings_2: &mut Vec<AndroidString>,
 ) -> Vec<AndroidString> {
-    // Sort both the incoming strings. Not using `sort_by_key` as I can't figure out how to specify
-    // lifetime for closure's return :(
-    strings_1.sort_by(|s1, s2| s1.name().cmp(s2.name()));
-    strings_2.sort_by(|s1, s2| s1.name().cmp(s2.name()));
+    // Sort both the list to group list-wise
+    sort::sort_strings(strings_1);
+    sort::sort_strings(strings_2);
 
     // Since both the lists are sorted, we can use a 2-index pointer method to merge them
     // & keep the strings with same name together
