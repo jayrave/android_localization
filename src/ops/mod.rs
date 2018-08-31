@@ -1,1 +1,2 @@
 mod dedup;
+mod merge;
