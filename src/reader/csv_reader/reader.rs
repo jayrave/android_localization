@@ -1,5 +1,4 @@
 use csv;
-use csv::Reader;
 use csv::ReaderBuilder;
 use reader::csv_reader::error::Error;
 use std::io::Read;
@@ -92,7 +91,7 @@ mod tests {
 
     #[test]
     fn errors_for_file_with_record_having_too_few_values() {
-        let mut error = read_strings_from_file("string_1");
+        let error = read_strings_from_file("string_1");
         assert_eq!(
             error.unwrap_err().to_string(),
             format!("Too few values in record => \"{}\"", "string_1")
@@ -101,7 +100,7 @@ mod tests {
 
     #[test]
     fn errors_for_file_with_record_having_too_many_values() {
-        let mut error = read_strings_from_file("string_1, string 1 value, useless value");
+        let error = read_strings_from_file("string_1, string 1 value, useless value");
         assert_eq!(
             error.unwrap_err().to_string(),
             format!(

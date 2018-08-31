@@ -9,7 +9,7 @@ pub fn to<W: Write>(
 ) -> Result<(), Error> {
     let mut writer = Writer::from_writer(sink); // Sink is automatically buffered
     for string in translatable_android_strings {
-        writer.write_record(vec![string.name(), string.value()]);
+        writer.write_record(vec![string.name(), string.value()])?;
     }
 
     writer.flush()?;
