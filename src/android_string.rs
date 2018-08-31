@@ -14,6 +14,14 @@ impl AndroidString {
         }
     }
 
+    pub fn translatable(name: String, value: String) -> AndroidString {
+        AndroidString {
+            name,
+            value,
+            is_translatable: true,
+        }
+    }
+
     pub fn name(&self) -> &str {
         &self.name
     }

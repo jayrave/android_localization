@@ -1,11 +1,11 @@
+use android_string::AndroidString;
 use csv::Error;
 use csv::Writer;
 use std::io::Write;
-use translatable_android_string::TranslatableAndroidString;
 
 pub fn to<W: Write>(
     sink: &mut W,
-    translatable_android_strings: Vec<TranslatableAndroidString>,
+    translatable_android_strings: Vec<AndroidString>,
 ) -> Result<(), Error> {
     let mut writer = Writer::from_writer(sink); // Sink is automatically buffered
     for string in translatable_android_strings {
@@ -18,19 +18,13 @@ pub fn to<W: Write>(
 
 #[cfg(test)]
 mod tests {
-    use translatable_android_string::TranslatableAndroidString;
+    use android_string::AndroidString;
 
     #[test]
     fn strings_are_written_to_file() {
         let translatable_android_strings = vec![
-            TranslatableAndroidString::new(
-                String::from("string_1"),
-                String::from("string 1 value"),
-            ),
-            TranslatableAndroidString::new(
-                String::from("string_2"),
-                String::from("string 2 value"),
-            ),
+            AndroidString::translatable(String::from("string_1"), String::from("string 1 value")),
+            AndroidString::translatable(String::from("string_2"), String::from("string 2 value")),
         ];
 
         // Write strings to a vector & split o/p into lines
