@@ -2,6 +2,10 @@ use android_string::AndroidString;
 use ops::sort;
 use std::cmp::Ordering;
 
+pub fn find_translatable_strings(strings: Vec<AndroidString>) -> Vec<AndroidString> {
+    strings.into_iter().filter(|s| s.is_translatable()).collect()
+}
+
 /// It is assumed that neither lists have strings with the same names. If they
 /// do, the result is undefined! This method doesn't check whether `all_strings`
 /// contains everything that is contained in `lacking_strings`
@@ -53,7 +57,42 @@ mod tests {
     use android_string::AndroidString;
 
     #[test]
-    fn finds() {
+    fn finds_translatable_strings() {
+        let mut translatable_strings = super::find_translatable_strings(vec![
+            AndroidString::new(
+                String::from("translatable_string_1"),
+                String::from("string value"),
+                true,
+            ),
+            AndroidString::new(
+                String::from("non_translatable_string"),
+                String::from("string value"),
+                false,
+            ),
+            AndroidString::new(
+                String::from("translatable_string_2"),
+                String::from("string value"),
+                true,
+            ),
+        ]).into_iter();
+
+        assert_eq!(translatable_strings.next().unwrap(), AndroidString::new(
+            String::from("translatable_string_1"),
+            String::from("string value"),
+            true,
+        ));
+
+        assert_eq!(translatable_strings.next().unwrap(), AndroidString::new(
+            String::from("translatable_string_2"),
+            String::from("string value"),
+            true,
+        ));
+
+        assert_eq!(translatable_strings.next(), None);
+    }
+
+    #[test]
+    fn finds_missing_strings() {
         let mut lacking_strings = vec![
             AndroidString::new(
                 String::from("common_string_3"),
