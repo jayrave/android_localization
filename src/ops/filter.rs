@@ -3,16 +3,19 @@ use ops::sort;
 use std::cmp::Ordering;
 
 pub fn find_translatable_strings(strings: Vec<AndroidString>) -> Vec<AndroidString> {
-    strings.into_iter().filter(|s| s.is_translatable()).collect()
+    strings
+        .into_iter()
+        .filter(|s| s.is_translatable())
+        .collect()
 }
 
 /// It is assumed that neither lists have strings with the same names. If they
 /// do, the result is undefined! This method doesn't check whether `all_strings`
 /// contains everything that is contained in `lacking_strings`
-pub fn find_missing_from_unique_lists(
+pub fn find_missing_strings(
     lacking_strings: &mut Vec<AndroidString>,
     all_strings: &mut Vec<AndroidString>,
-) -> Vec<String> {
+) -> Vec<AndroidString> {
     // Sort both the strings
     sort::sort_strings(lacking_strings);
     sort::sort_strings(all_strings);
@@ -26,7 +29,7 @@ pub fn find_missing_from_unique_lists(
             match lacking_string {
                 None => {
                     // `lacking_string` has run out of strings!
-                    result.push(String::from(string.name()));
+                    result.push(string.clone());
                     break; // To go out of the infinite loop
                 }
 
@@ -41,7 +44,7 @@ pub fn find_missing_from_unique_lists(
 
                     Ordering::Greater => {
                         // `lacking_strings` doesn't have this string from `all_strings`
-                        result.push(String::from(string.name()));
+                        result.push(string.clone());
                         break; // To go out of the infinite loop
                     }
                 },
@@ -76,17 +79,23 @@ mod tests {
             ),
         ]).into_iter();
 
-        assert_eq!(translatable_strings.next().unwrap(), AndroidString::new(
-            String::from("translatable_string_1"),
-            String::from("string value"),
-            true,
-        ));
+        assert_eq!(
+            translatable_strings.next().unwrap(),
+            AndroidString::new(
+                String::from("translatable_string_1"),
+                String::from("string value"),
+                true,
+            )
+        );
 
-        assert_eq!(translatable_strings.next().unwrap(), AndroidString::new(
-            String::from("translatable_string_2"),
-            String::from("string value"),
-            true,
-        ));
+        assert_eq!(
+            translatable_strings.next().unwrap(),
+            AndroidString::new(
+                String::from("translatable_string_2"),
+                String::from("string value"),
+                true,
+            )
+        );
 
         assert_eq!(translatable_strings.next(), None);
     }
@@ -140,11 +149,32 @@ mod tests {
         ];
 
         let mut missing_strings =
-            super::find_missing_from_unique_lists(&mut lacking_strings, &mut all_strings)
-                .into_iter();
-        assert_eq!(missing_strings.next().unwrap(), "only_in_all_strings_1");
-        assert_eq!(missing_strings.next().unwrap(), "only_in_all_strings_2");
-        assert_eq!(missing_strings.next().unwrap(), "only_in_all_strings_3");
+            super::find_missing_strings(&mut lacking_strings, &mut all_strings).into_iter();
+
+        assert_eq!(
+            missing_strings.next().unwrap(),
+            AndroidString::new(
+                String::from("only_in_all_strings_1"),
+                String::from("string value"),
+                false,
+            )
+        );
+        assert_eq!(
+            missing_strings.next().unwrap(),
+            AndroidString::new(
+                String::from("only_in_all_strings_2"),
+                String::from("string value"),
+                false,
+            )
+        );
+        assert_eq!(
+            missing_strings.next().unwrap(),
+            AndroidString::new(
+                String::from("only_in_all_strings_3"),
+                String::from("string value"),
+                false,
+            )
+        );
         assert_eq!(missing_strings.next(), None);
     }
 }
