@@ -25,30 +25,39 @@ pub fn from<R: Read>(read: R) -> Result<Vec<LocalizedString>, Error> {
 fn extract_string_from_record(record: csv::StringRecord) -> Result<LocalizedString, Error> {
     let mut iterator = record.iter();
     let name = iterator.next();
-    let value = iterator.next();
+    let default_value = iterator.next();
+    let localized_value = iterator.next();
     let extra = iterator.next();
 
     if name.is_none() {
         return Err(Error::SyntaxError(format!("Empty record!")));
     }
 
-    if value.is_none() {
+    if default_value.is_none() {
         return Err(Error::SyntaxError(format!(
-            "Too few values in record (exactly 2 required) => \"{}\"",
+            "Too few values in record (exactly 3 required). 1st field => \"{}\"",
             name.unwrap()
+        )));
+    }
+
+    if localized_value.is_none() {
+        return Err(Error::SyntaxError(format!(
+            "Too few values in record (exactly 3 required). 2nd field => \"{}\"",
+            default_value.unwrap()
         )));
     }
 
     if extra.is_some() {
         return Err(Error::SyntaxError(format!(
-            "Too many values in record (exactly 2 required). 3rd field => \"{}\"",
+            "Too many values in record (exactly 3 required). 4th field => \"{}\"",
             extra.unwrap()
         )));
     }
 
     Ok(LocalizedString::new(
         String::from(name.unwrap()),
-        String::from(value.unwrap()),
+        String::from(default_value.unwrap()),
+        String::from(localized_value.unwrap()),
     ))
 }
 
@@ -63,13 +72,15 @@ mod tests {
 
     #[test]
     fn strings_are_read_from_valid_file() {
-        let mut strings = read_strings_from_file("english 1, french 1\nenglish 2, french 2")
-            .unwrap()
+        let mut strings = read_strings_from_file(
+            "string_1, english 1, french 1\nstring_2, english 2, french 2",
+        ).unwrap()
             .into_iter();
 
         assert_eq!(
             strings.next(),
             Some(LocalizedString::new(
+                String::from("string_1"),
                 String::from("english 1"),
                 String::from("french 1")
             ))
@@ -78,6 +89,7 @@ mod tests {
         assert_eq!(
             strings.next(),
             Some(LocalizedString::new(
+                String::from("string_2"),
                 String::from("english 2"),
                 String::from("french 2")
             ))
@@ -87,26 +99,29 @@ mod tests {
     }
 
     #[test]
-    fn errors_for_file_with_record_having_too_few_values() {
+    fn errors_for_file_with_record_having_only_1_value() {
         let error = read_strings_from_file("english 1");
         assert_eq!(
             error.unwrap_err().to_string(),
-            format!(
-                "Too few values in record (exactly 2 required) => \"{}\"",
-                "english 1"
-            )
+            "Too few values in record (exactly 3 required). 1st field => \"english 1\""
+        )
+    }
+
+    #[test]
+    fn errors_for_file_with_record_having_only_2_values() {
+        let error = read_strings_from_file("english 1, french 1");
+        assert_eq!(
+            error.unwrap_err().to_string(),
+            "Too few values in record (exactly 3 required). 2nd field => \"french 1\""
         )
     }
 
     #[test]
     fn errors_for_file_with_record_having_too_many_values() {
-        let error = read_strings_from_file("english 1, french 1, useless value");
+        let error = read_strings_from_file("string_1, english 1, french 1, useless value");
         assert_eq!(
             error.unwrap_err().to_string(),
-            format!(
-                "Too many values in record (exactly 2 required). 3rd field => \"{}\"",
-                "useless value"
-            )
+            "Too many values in record (exactly 3 required). 4th field => \"useless value\""
         )
     }
 

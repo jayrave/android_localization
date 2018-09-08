@@ -9,17 +9,10 @@ pub fn sort_android_strings_by_name(strings: &mut Vec<AndroidString>) {
 }
 
 /// In place, stable sorting
-pub fn sort_android_strings_by_value(strings: &mut Vec<AndroidString>) {
+pub fn sort_localized_strings_by_name(strings: &mut Vec<LocalizedString>) {
     // Not using `sort_by_key` as I can't figure out how to specify
     // lifetime for closure's return :(
-    strings.sort_by(|s1, s2| s1.value().cmp(s2.value()));
-}
-
-/// In place, stable sorting
-pub fn sort_localized_strings_by_default(strings: &mut Vec<LocalizedString>) {
-    // Not using `sort_by_key` as I can't figure out how to specify
-    // lifetime for closure's return :(
-    strings.sort_by(|s1, s2| s1.default().cmp(s2.default()));
+    strings.sort_by(|s1, s2| s1.name().cmp(s2.name()));
 }
 
 #[cfg(test)]
@@ -79,86 +72,67 @@ mod tests {
     }
 
     #[test]
-    fn android_sorted_by_value() {
+    fn localized_sorted_by_name() {
         let mut strings = vec![
-            AndroidString::new(String::from("string"), String::from("string 2 value"), true),
-            AndroidString::new(
-                String::from("string"),
+            LocalizedString::new(
+                String::from("string_2"),
+                String::from("string value"),
+                String::from("string value"),
+            ),
+            LocalizedString::new(
+                String::from("string_3"),
                 String::from("string 3 value 1"),
-                true,
+                String::from("string 3 value 1"),
             ),
-            AndroidString::new(
-                String::from("string"),
+            LocalizedString::new(
+                String::from("string_3"),
                 String::from("string 3 value 2"),
-                true,
+                String::from("string 3 value 2"),
             ),
-            AndroidString::new(String::from("string"), String::from("string 1 value"), true),
+            LocalizedString::new(
+                String::from("string_1"),
+                String::from("string value"),
+                String::from("string value"),
+            ),
         ];
 
-        super::sort_android_strings_by_value(&mut strings);
+        super::sort_localized_strings_by_name(&mut strings);
         let mut strings = strings.into_iter();
 
         assert_eq!(
             strings.next().unwrap(),
-            AndroidString::new(String::from("string"), String::from("string 1 value"), true)
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::new(String::from("string"), String::from("string 2 value"), true)
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::new(
-                String::from("string"),
-                String::from("string 3 value 1"),
-                true
+            LocalizedString::new(
+                String::from("string_1"),
+                String::from("string value"),
+                String::from("string value")
             )
         );
 
         assert_eq!(
             strings.next().unwrap(),
-            AndroidString::new(
-                String::from("string"),
-                String::from("string 3 value 2"),
-                true
+            LocalizedString::new(
+                String::from("string_2"),
+                String::from("string value"),
+                String::from("string value")
             )
         );
 
-        assert_eq!(strings.next(), None);
-    }
-
-    #[test]
-    fn localized_sorted_by_default() {
-        let mut strings = vec![
-            LocalizedString::new(String::from("english 2"), String::from("french value")),
-            LocalizedString::new(String::from("english 3"), String::from("french 3 value 1")),
-            LocalizedString::new(String::from("english 3"), String::from("french 3 value 2")),
-            LocalizedString::new(String::from("english 1"), String::from("french value")),
-        ];
-
-        super::sort_localized_strings_by_default(&mut strings);
-        let mut strings = strings.into_iter();
-
         assert_eq!(
             strings.next().unwrap(),
-            LocalizedString::new(String::from("english 1"), String::from("french value"))
+            LocalizedString::new(
+                String::from("string_3"),
+                String::from("string 3 value 1"),
+                String::from("string 3 value 1")
+            )
         );
 
         assert_eq!(
             strings.next().unwrap(),
-            LocalizedString::new(String::from("english 2"), String::from("french value"))
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            LocalizedString::new(String::from("english 3"), String::from("french 3 value 1"))
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            LocalizedString::new(String::from("english 3"), String::from("french 3 value 2"))
+            LocalizedString::new(
+                String::from("string_3"),
+                String::from("string 3 value 2"),
+                String::from("string 3 value 2")
+            )
         );
 
         assert_eq!(strings.next(), None);
