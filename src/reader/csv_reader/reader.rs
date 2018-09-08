@@ -1,10 +1,10 @@
-use android_string::AndroidString;
 use csv;
 use csv::ReaderBuilder;
 use reader::csv_reader::error::Error;
+use reader::localized_string::LocalizedString;
 use std::io::Read;
 
-pub fn from<R: Read>(read: R) -> Result<Vec<AndroidString>, Error> {
+pub fn from<R: Read>(read: R) -> Result<Vec<LocalizedString>, Error> {
     let mut strings = vec![];
     let mut reader = ReaderBuilder::new()
         .has_headers(false)
@@ -22,7 +22,7 @@ pub fn from<R: Read>(read: R) -> Result<Vec<AndroidString>, Error> {
     Ok(strings)
 }
 
-fn extract_string_from_record(record: csv::StringRecord) -> Result<AndroidString, Error> {
+fn extract_string_from_record(record: csv::StringRecord) -> Result<LocalizedString, Error> {
     let mut iterator = record.iter();
     let name = iterator.next();
     let value = iterator.next();
@@ -34,19 +34,19 @@ fn extract_string_from_record(record: csv::StringRecord) -> Result<AndroidString
 
     if value.is_none() {
         return Err(Error::SyntaxError(format!(
-            "Too few values in record => \"{}\"",
+            "Too few values in record (exactly 2 required) => \"{}\"",
             name.unwrap()
         )));
     }
 
     if extra.is_some() {
         return Err(Error::SyntaxError(format!(
-            "Too many values in record. 3rd field => \"{}\"",
+            "Too many values in record (exactly 2 required). 3rd field => \"{}\"",
             extra.unwrap()
         )));
     }
 
-    Ok(AndroidString::translatable(
+    Ok(LocalizedString::new(
         String::from(name.unwrap()),
         String::from(value.unwrap()),
     ))
@@ -56,31 +56,30 @@ fn extract_string_from_record(record: csv::StringRecord) -> Result<AndroidString
 mod tests {
     extern crate tempfile;
 
-    use android_string::AndroidString;
     use reader::csv_reader::error::Error;
+    use reader::localized_string::LocalizedString;
     use std::fs::File;
     use std::io::{Seek, SeekFrom, Write};
 
     #[test]
     fn strings_are_read_from_valid_file() {
-        let mut strings = read_strings_from_file(
-            "string_1, string 1 value\nstring_2, string 2 value",
-        ).unwrap()
+        let mut strings = read_strings_from_file("english 1, french 1\nenglish 2, french 2")
+            .unwrap()
             .into_iter();
 
         assert_eq!(
             strings.next(),
-            Some(AndroidString::translatable(
-                String::from("string_1"),
-                String::from("string 1 value")
+            Some(LocalizedString::new(
+                String::from("english 1"),
+                String::from("french 1")
             ))
         );
 
         assert_eq!(
             strings.next(),
-            Some(AndroidString::translatable(
-                String::from("string_2"),
-                String::from("string 2 value")
+            Some(LocalizedString::new(
+                String::from("english 2"),
+                String::from("french 2")
             ))
         );
 
@@ -89,26 +88,29 @@ mod tests {
 
     #[test]
     fn errors_for_file_with_record_having_too_few_values() {
-        let error = read_strings_from_file("string_1");
+        let error = read_strings_from_file("english 1");
         assert_eq!(
             error.unwrap_err().to_string(),
-            format!("Too few values in record => \"{}\"", "string_1")
+            format!(
+                "Too few values in record (exactly 2 required) => \"{}\"",
+                "english 1"
+            )
         )
     }
 
     #[test]
     fn errors_for_file_with_record_having_too_many_values() {
-        let error = read_strings_from_file("string_1, string 1 value, useless value");
+        let error = read_strings_from_file("english 1, french 1, useless value");
         assert_eq!(
             error.unwrap_err().to_string(),
             format!(
-                "Too many values in record. 3rd field => \"{}\"",
+                "Too many values in record (exactly 2 required). 3rd field => \"{}\"",
                 "useless value"
             )
         )
     }
 
-    fn read_strings_from_file(file_content: &str) -> Result<Vec<AndroidString>, Error> {
+    fn read_strings_from_file(file_content: &str) -> Result<Vec<LocalizedString>, Error> {
         // Write content to file
         let mut tmpfile: File = tempfile::tempfile().unwrap();
         tmpfile.write(file_content.as_bytes()).unwrap();
