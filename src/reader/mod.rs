@@ -1,3 +1,3 @@
 mod csv_reader;
-mod localized_string;
+pub mod localized_string;
 mod xml_reader;

@@ -17,8 +17,8 @@ pub fn find_missing_strings(
     all_strings: &mut Vec<AndroidString>,
 ) -> Vec<AndroidString> {
     // Sort both the strings
-    sort::sort_strings(lacking_strings);
-    sort::sort_strings(all_strings);
+    sort::sort_android_strings_by_name(lacking_strings);
+    sort::sort_android_strings_by_name(all_strings);
 
     // Iterate through `all_strings` & find those missing in `lacking_strings`
     let mut result = vec![];

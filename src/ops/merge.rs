@@ -8,8 +8,8 @@ pub fn merge_and_group_strings(
     strings_2: &mut Vec<AndroidString>,
 ) -> Vec<AndroidString> {
     // Sort both the list to group list-wise
-    sort::sort_strings(strings_1);
-    sort::sort_strings(strings_2);
+    sort::sort_android_strings_by_name(strings_1);
+    sort::sort_android_strings_by_name(strings_2);
 
     // Since both the lists are sorted, we can use a 2-index pointer method to merge them
     // & keep the strings with same name together
