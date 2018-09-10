@@ -1,2 +1,2 @@
-mod csv_writer;
+pub mod csv_writer;
 mod xml_writer;

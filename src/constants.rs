@@ -11,3 +11,8 @@ pub mod attributes {
 pub mod flags {
     pub const FALSE: &str = "false";
 }
+
+pub mod fs {
+    pub const BASE_VALUES_DIR_NAME: &str = "values";
+    pub const STRING_FILE_NAME: &str = "strings.xml";
+}

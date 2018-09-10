@@ -1,6 +1,9 @@
 use android_string::AndroidString;
-use csv::Error;
+use csv;
 use csv::Writer;
+use std::error;
+use std::fmt;
+use std::io;
 use std::io::Write;
 
 pub fn to<W: Write>(
@@ -9,11 +12,39 @@ pub fn to<W: Write>(
 ) -> Result<(), Error> {
     let mut writer = Writer::from_writer(sink); // Sink is automatically buffered
     for string in translatable_android_strings {
-        writer.write_record(vec![string.name(), string.value()])?;
+        if let Err(error) = writer.write_record(vec![string.name(), string.value()]) {
+            return Err(Error::CsvError(error));
+        }
     }
 
-    writer.flush()?;
-    Ok(())
+    match writer.flush() {
+        Err(error) => Err(Error::IoError(error)),
+        Ok(_) => Ok(()),
+    }
+}
+
+#[derive(Debug)]
+pub enum Error {
+    CsvError(csv::Error),
+    IoError(io::Error),
+}
+
+impl error::Error for Error {
+    fn cause(&self) -> Option<&error::Error> {
+        match self {
+            Error::CsvError(error) => Some(error),
+            Error::IoError(error) => Some(error),
+        }
+    }
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Error::CsvError(error) => fmt::Display::fmt(error, f),
+            Error::IoError(error) => fmt::Display::fmt(error, f),
+        }
+    }
 }
 
 #[cfg(test)]
