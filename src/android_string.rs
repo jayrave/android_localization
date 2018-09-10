@@ -1,3 +1,5 @@
+use std::fmt;
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct AndroidString {
     name: String,
@@ -32,5 +34,17 @@ impl AndroidString {
 
     pub fn is_translatable(&self) -> bool {
         self.is_translatable
+    }
+}
+
+impl fmt::Display for AndroidString {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "Translatable: {}; Name: {}; Value: {})",
+            self.is_translatable(),
+            self.name(),
+            self.value()
+        )
     }
 }

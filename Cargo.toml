@@ -5,6 +5,8 @@ authors = ["jayrave <jayanthan.raveendiran@gmail.com>"]
 
 [dependencies]
 csv = "1"
+lazy_static = "1.1.0"
+regex = "1.0.5"
 xml-rs = "0.8"
 
 [dev-dependencies]
