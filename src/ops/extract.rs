@@ -1,48 +1,48 @@
 use android_string::AndroidString;
 use ops::sort;
-use reader::localized_string::LocalizedString;
+use reader::translated_string::TranslatedString;
 use std::cmp::Ordering;
 
-/// Localized strings will be converted into `AndroidString` only if both the name
-/// & the default value from `LocalizedString` match up with whatever is in the
-/// default locale
-pub fn extract_android_strings_from_localized(
-    localized_strings: &mut Vec<LocalizedString>,
+/// Translated strings will be converted into `AndroidString` only if both the name
+/// & the default value from `TranslatedString` match up with whatever is in the
+/// default string
+pub fn extract_android_strings_from_translated(
+    translated_strings: &mut Vec<TranslatedString>,
     default_strings: &mut Vec<AndroidString>,
 ) -> Vec<AndroidString> {
     // Sort both the incoming strings
     sort::sort_android_strings_by_name(default_strings);
-    sort::sort_localized_strings_by_name(localized_strings);
+    sort::sort_translated_strings_by_name(translated_strings);
 
-    let total_strings_count = localized_strings.len() + default_strings.len();
-    let mut result = Vec::with_capacity(localized_strings.len()); // Max number of expected strings
-    let mut localized_strings_index = 0;
+    let total_strings_count = translated_strings.len() + default_strings.len();
+    let mut result = Vec::with_capacity(translated_strings.len()); // Max number of expected strings
+    let mut translated_strings_index = 0;
     let mut default_strings_index = 0;
 
     for _ in 0..total_strings_count {
-        let localized_string = localized_strings.get(localized_strings_index);
+        let translated_string = translated_strings.get(translated_strings_index);
         let default_string = default_strings.get(default_strings_index);
 
         // Can't compare if either of the strings have run out! This check is imperative as the
         // code flow in the else block increments both strings' pointers if there is a match
-        if localized_string.is_none() || default_string.is_none() {
+        if translated_string.is_none() || default_string.is_none() {
             break;
         } else {
-            let localized_string = localized_string.unwrap();
+            let translated_string = translated_string.unwrap();
             let default_string = default_string.unwrap();
-            match localized_string.name().cmp(default_string.name()) {
-                Ordering::Less => localized_strings_index += 1,
+            match translated_string.name().cmp(default_string.name()) {
+                Ordering::Less => translated_strings_index += 1,
                 Ordering::Greater => default_strings_index += 1,
-                Ordering::Equal => if localized_string.default() == default_string.value() {
+                Ordering::Equal => if translated_string.default() == default_string.value() {
                     result.push(AndroidString::new(
-                        String::from(localized_string.name()),
-                        String::from(localized_string.localized()),
+                        String::from(translated_string.name()),
+                        String::from(translated_string.translated()),
                         default_string.is_translatable(),
                     ));
 
                     // Feel free to increment both the indices as we have a `is_none` check
                     // for both the strings
-                    localized_strings_index += 1;
+                    translated_strings_index += 1;
                     default_strings_index += 1;
                 },
             }
@@ -55,7 +55,7 @@ pub fn extract_android_strings_from_localized(
 #[cfg(test)]
 mod tests {
     use android_string::AndroidString;
-    use reader::localized_string::LocalizedString;
+    use reader::translated_string::TranslatedString;
 
     #[test]
     fn extracted() {
@@ -82,26 +82,26 @@ mod tests {
             ),
         ];
 
-        let mut localized_strings = vec![
-            LocalizedString::new(
+        let mut translated_strings = vec![
+            TranslatedString::new(
                 String::from("string_3"),
                 String::from("english 3 value"),
                 String::from("french 3 value"),
             ),
-            LocalizedString::new(
+            TranslatedString::new(
                 String::from("string_4"),
                 String::from("english 4 value"),
                 String::from("french 4 value"),
             ),
-            LocalizedString::new(
+            TranslatedString::new(
                 String::from("string_2"),
                 String::from("english 2 value"),
                 String::from("french 2 value"),
             ),
         ];
 
-        let mut strings = super::extract_android_strings_from_localized(
-            &mut localized_strings,
+        let mut strings = super::extract_android_strings_from_translated(
+            &mut translated_strings,
             &mut default_strings,
         ).into_iter();
 

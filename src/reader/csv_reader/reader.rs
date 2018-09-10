@@ -1,10 +1,10 @@
 use csv;
 use csv::ReaderBuilder;
 use reader::csv_reader::error::Error;
-use reader::localized_string::LocalizedString;
+use reader::translated_string::TranslatedString;
 use std::io::Read;
 
-pub fn from<R: Read>(read: R) -> Result<Vec<LocalizedString>, Error> {
+pub fn from<R: Read>(read: R) -> Result<Vec<TranslatedString>, Error> {
     let mut strings = vec![];
     let mut reader = ReaderBuilder::new()
         .has_headers(false)
@@ -22,11 +22,11 @@ pub fn from<R: Read>(read: R) -> Result<Vec<LocalizedString>, Error> {
     Ok(strings)
 }
 
-fn extract_string_from_record(record: csv::StringRecord) -> Result<LocalizedString, Error> {
+fn extract_string_from_record(record: csv::StringRecord) -> Result<TranslatedString, Error> {
     let mut iterator = record.iter();
     let name = iterator.next();
     let default_value = iterator.next();
-    let localized_value = iterator.next();
+    let translated_value = iterator.next();
     let extra = iterator.next();
 
     if name.is_none() {
@@ -40,7 +40,7 @@ fn extract_string_from_record(record: csv::StringRecord) -> Result<LocalizedStri
         )));
     }
 
-    if localized_value.is_none() {
+    if translated_value.is_none() {
         return Err(Error::SyntaxError(format!(
             "Too few values in record (exactly 3 required). 2nd field => \"{}\"",
             default_value.unwrap()
@@ -54,10 +54,10 @@ fn extract_string_from_record(record: csv::StringRecord) -> Result<LocalizedStri
         )));
     }
 
-    Ok(LocalizedString::new(
+    Ok(TranslatedString::new(
         String::from(name.unwrap()),
         String::from(default_value.unwrap()),
-        String::from(localized_value.unwrap()),
+        String::from(translated_value.unwrap()),
     ))
 }
 
@@ -66,7 +66,7 @@ mod tests {
     extern crate tempfile;
 
     use reader::csv_reader::error::Error;
-    use reader::localized_string::LocalizedString;
+    use reader::translated_string::TranslatedString;
     use std::fs::File;
     use std::io::{Seek, SeekFrom, Write};
 
@@ -79,7 +79,7 @@ mod tests {
 
         assert_eq!(
             strings.next(),
-            Some(LocalizedString::new(
+            Some(TranslatedString::new(
                 String::from("string_1"),
                 String::from("english 1"),
                 String::from("french 1")
@@ -88,7 +88,7 @@ mod tests {
 
         assert_eq!(
             strings.next(),
-            Some(LocalizedString::new(
+            Some(TranslatedString::new(
                 String::from("string_2"),
                 String::from("english 2"),
                 String::from("french 2")
@@ -125,7 +125,7 @@ mod tests {
         )
     }
 
-    fn read_strings_from_file(file_content: &str) -> Result<Vec<LocalizedString>, Error> {
+    fn read_strings_from_file(file_content: &str) -> Result<Vec<TranslatedString>, Error> {
         // Write content to file
         let mut tmpfile: File = tempfile::tempfile().unwrap();
         tmpfile.write(file_content.as_bytes()).unwrap();

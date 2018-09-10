@@ -81,10 +81,7 @@ fn read_default_strings(res_dir_path: &Path) -> Result<Vec<AndroidString>, Error
     read_strings(res_dir_path, constants::fs::BASE_VALUES_DIR_NAME)
 }
 
-fn read_strings_to_localize(
-    res_dir_path: &Path,
-    lang_id: &str,
-) -> Result<Vec<AndroidString>, Error> {
+fn read_foreign_strings(res_dir_path: &Path, lang_id: &str) -> Result<Vec<AndroidString>, Error> {
     let mut values_dir_name = String::from(constants::fs::BASE_VALUES_DIR_NAME);
     let values_dir_name = values_dir_name.add(&format!("-{}", lang_id));
     read_strings(res_dir_path, &values_dir_name)
@@ -111,9 +108,9 @@ fn write_out_strings_to_translate(
     file_name: &str,
     translatable_default_strings: &mut Vec<AndroidString>,
 ) -> Result<(), Error> {
-    let mut locale_specific_strings = read_strings_to_localize(res_dir_path, lang_id)?;
+    let mut foreign_strings = read_foreign_strings(res_dir_path, lang_id)?;
     let strings_to_translate =
-        filter::find_missing_strings(&mut locale_specific_strings, translatable_default_strings);
+        filter::find_missing_strings(&mut foreign_strings, translatable_default_strings);
     if !strings_to_translate.is_empty() {
         let mut sink = create_output_file(output_dir_path, file_name)?;
         if let Err(error) = csv_writer::to(&mut sink, strings_to_translate) {
