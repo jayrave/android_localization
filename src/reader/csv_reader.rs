@@ -1,7 +1,8 @@
 use csv;
 use csv::ReaderBuilder;
-use reader::csv_reader::error::Error;
 use reader::translated_string::TranslatedString;
+use std::error;
+use std::fmt;
 use std::io::Read;
 
 pub fn from<R: Read>(read: R) -> Result<Vec<TranslatedString>, Error> {
@@ -61,11 +62,35 @@ fn extract_string_from_record(record: csv::StringRecord) -> Result<TranslatedStr
     ))
 }
 
+#[derive(Debug)]
+pub enum Error {
+    CsvError(csv::Error),
+    SyntaxError(String),
+}
+
+impl error::Error for Error {
+    fn cause(&self) -> Option<&error::Error> {
+        match self {
+            Error::CsvError(error) => Some(error),
+            Error::SyntaxError(_message) => None,
+        }
+    }
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Error::CsvError(error) => fmt::Display::fmt(error, f),
+            Error::SyntaxError(message) => fmt::Display::fmt(message, f),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     extern crate tempfile;
 
-    use reader::csv_reader::error::Error;
+    use reader::csv_reader::Error;
     use reader::translated_string::TranslatedString;
     use std::fs::File;
     use std::io::{Seek, SeekFrom, Write};
