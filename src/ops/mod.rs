@@ -2,4 +2,4 @@ mod dedup;
 mod extract;
 pub mod filter;
 mod merge;
-mod sort;
+pub mod sort;

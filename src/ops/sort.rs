@@ -1,5 +1,6 @@
 use android_string::AndroidString;
 use reader::translated_string::TranslatedString;
+use std::cmp::Ordering;
 
 /// In place, stable sorting
 pub fn sort_android_strings_by_name(strings: &mut Vec<AndroidString>) {
@@ -13,6 +14,10 @@ pub fn sort_translated_strings_by_name(strings: &mut Vec<TranslatedString>) {
     // Not using `sort_by_key` as I can't figure out how to specify
     // lifetime for closure's return :(
     strings.sort_by(|s1, s2| s1.name().cmp(s2.name()));
+}
+
+pub fn compare_android_strings(s1: &AndroidString, s2: &AndroidString) -> Ordering {
+    s1.name().cmp(s2.name())
 }
 
 #[cfg(test)]

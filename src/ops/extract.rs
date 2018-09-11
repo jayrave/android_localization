@@ -33,18 +33,20 @@ pub fn extract_android_strings_from_translated(
             match translated_string.name().cmp(default_string.name()) {
                 Ordering::Less => translated_strings_index += 1,
                 Ordering::Greater => default_strings_index += 1,
-                Ordering::Equal => if translated_string.default() == default_string.value() {
-                    result.push(AndroidString::new(
-                        String::from(translated_string.name()),
-                        String::from(translated_string.translated()),
-                        default_string.is_translatable(),
-                    ));
+                Ordering::Equal => {
+                    if translated_string.default() == default_string.value() {
+                        result.push(AndroidString::new(
+                            String::from(translated_string.name()),
+                            String::from(translated_string.translated()),
+                            default_string.is_translatable(),
+                        ));
+                    }
 
                     // Feel free to increment both the indices as we have a `is_none` check
                     // for both the strings
                     translated_strings_index += 1;
                     default_strings_index += 1;
-                },
+                }
             }
         }
     }
