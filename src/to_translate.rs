@@ -12,6 +12,7 @@ use std::ops::Add;
 use std::path::Path;
 use std::path::PathBuf;
 use writer::csv_writer;
+use xml_read_helper;
 
 pub fn do_the_thing(
     res_dir_path: &str,
@@ -28,8 +29,9 @@ pub fn do_the_thing(
 
     // Read default strings
     let res_dir_path = Path::new(res_dir_path);
-    let mut translatable_default_strings =
-        filter::find_translatable_strings(read_default_strings(res_dir_path)?);
+    let mut translatable_default_strings = filter::find_translatable_strings(
+        xml_read_helper::read_default_strings(res_dir_path).map_err(|e| Error::from(e))?,
+    );
 
     // For all languages, write out strings requiring translation
     for (lang_id, human_friendly_name) in lang_id_to_human_friendly_name_mapping {
@@ -77,30 +79,6 @@ fn create_output_file(output_dir_path: &str, output_file_name: &str) -> Result<F
     }
 }
 
-fn read_default_strings(res_dir_path: &Path) -> Result<Vec<AndroidString>, Error> {
-    read_strings(res_dir_path, constants::fs::BASE_VALUES_DIR_NAME)
-}
-
-fn read_foreign_strings(res_dir_path: &Path, lang_id: &str) -> Result<Vec<AndroidString>, Error> {
-    let mut values_dir_name = String::from(constants::fs::BASE_VALUES_DIR_NAME);
-    let values_dir_name = values_dir_name.add(&format!("-{}", lang_id));
-    read_strings(res_dir_path, &values_dir_name)
-}
-
-fn read_strings(res_dir_path: &Path, values_dir_name: &str) -> Result<Vec<AndroidString>, Error> {
-    let mut default_values_file_path = res_dir_path.to_path_buf();
-    default_values_file_path.push(values_dir_name);
-    default_values_file_path.push(constants::fs::STRING_FILE_NAME);
-
-    match File::open(default_values_file_path) {
-        Err(error) => Err(Error::IoError(error)),
-        Ok(file) => match xml_reader::reader::from(file) {
-            Err(error) => Err(Error::XmlError(error)),
-            Ok(strings) => Ok(strings),
-        },
-    }
-}
-
 fn write_out_strings_to_translate(
     res_dir_path: &Path,
     lang_id: &str,
@@ -108,7 +86,8 @@ fn write_out_strings_to_translate(
     file_name: &str,
     translatable_default_strings: &mut Vec<AndroidString>,
 ) -> Result<(), Error> {
-    let mut foreign_strings = read_foreign_strings(res_dir_path, lang_id)?;
+    let mut foreign_strings =
+        xml_read_helper::read_foreign_strings(res_dir_path, lang_id).map_err(|e| Error::from(e))?;
     let strings_to_translate =
         filter::find_missing_strings(&mut foreign_strings, translatable_default_strings);
     if !strings_to_translate.is_empty() {
@@ -127,6 +106,15 @@ pub enum Error {
     CsvError(csv_writer::Error),
     IoError(io::Error),
     XmlError(xml_reader::Error),
+}
+
+impl From<xml_read_helper::Error> for Error {
+    fn from(error: xml_read_helper::Error) -> Self {
+        match error {
+            xml_read_helper::Error::IoError(e) => Error::IoError(e),
+            xml_read_helper::Error::XmlError(e) => Error::XmlError(e),
+        }
+    }
 }
 
 impl error::Error for Error {
@@ -205,35 +193,6 @@ mod tests {
         assert_eq!(
             error.unwrap_err().to_string(),
             format!("File (op_file) already exists in {}!", output_dir_path)
-        )
-    }
-
-    #[test]
-    fn read_strings_errors_if_values_dir_is_missing() {
-        let res_dir = tempfile::tempdir().unwrap();
-        let error = super::read_strings(res_dir.path(), "values");
-        assert!(
-            error
-                .unwrap_err()
-                .to_string()
-                .starts_with("No such file or directory")
-        )
-    }
-
-    #[test]
-    fn read_strings_errors_if_strings_file_is_missing() {
-        let res_dir = tempfile::tempdir().unwrap();
-
-        let mut values_dir_path = res_dir.path().to_path_buf();
-        values_dir_path.push("values");
-        fs::create_dir(values_dir_path).unwrap();
-
-        let error = super::read_strings(res_dir.path(), "values");
-        assert!(
-            error
-                .unwrap_err()
-                .to_string()
-                .starts_with("No such file or directory")
         )
     }
 
