@@ -1,8 +1,10 @@
 use android_string::AndroidString;
 use constants;
+use std::error;
+use std::fmt;
 use std::io::BufWriter;
 use std::io::Write;
-use xml::writer::Error;
+use xml::writer;
 use xml::writer::XmlEvent;
 use xml::EmitterConfig;
 
@@ -14,25 +16,56 @@ pub fn to<W: Write>(sink: &mut W, android_strings: Vec<AndroidString>) -> Result
         .create_writer(BufWriter::new(sink));
 
     // Start resources element
-    writer.write(XmlEvent::start_element(constants::elements::RESOURCES))?;
+    writer
+        .write(XmlEvent::start_element(constants::elements::RESOURCES))
+        .map_err(|e| Error { error: e })?;
 
     // Write all string elements
     for android_string in android_strings {
         let mut string_element = XmlEvent::start_element(constants::elements::STRING)
             .attr(constants::attributes::NAME, android_string.name());
+
         if !android_string.is_translatable() {
             string_element =
                 string_element.attr(constants::attributes::TRANSLATABLE, constants::flags::FALSE);
         }
 
-        writer.write(string_element)?;
-        writer.write(XmlEvent::characters(android_string.value()))?;
-        writer.write(XmlEvent::end_element())?;
+        writer
+            .write(string_element)
+            .map_err(|e| Error { error: e })?;
+
+        writer
+            .write(XmlEvent::characters(android_string.value()))
+            .map_err(|e| Error { error: e })?;
+
+        writer
+            .write(XmlEvent::end_element())
+            .map_err(|e| Error { error: e })?;
     }
 
     // Ending resources
-    writer.write(XmlEvent::end_element())?;
+    writer
+        .write(XmlEvent::end_element())
+        .map_err(|e| Error { error: e })?;
+
     Ok(())
+}
+
+#[derive(Debug)]
+pub struct Error {
+    error: writer::Error,
+}
+
+impl error::Error for Error {
+    fn cause(&self) -> Option<&error::Error> {
+        Some(&self.error)
+    }
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(&self.error, f)
+    }
 }
 
 #[cfg(test)]

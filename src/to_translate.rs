@@ -13,11 +13,11 @@ use std::path::Path;
 use std::path::PathBuf;
 use writer::csv_writer;
 
-pub fn from(
+pub fn do_the_thing(
     res_dir_path: &str,
     output_dir_path: &str,
     lang_id_to_human_friendly_name_mapping: HashMap<String, String>,
-) -> Result<Vec<String>, Error> {
+) -> Result<(), Error> {
     if lang_id_to_human_friendly_name_mapping.is_empty() {
         return Err(Error::ArgError(String::from(
             "Language ID to human friendly name mapping can't be empty",
@@ -42,7 +42,7 @@ pub fn from(
         )?;
     }
 
-    Ok(vec![])
+    Ok(())
 }
 
 fn create_output_dir_if_required(output_dir_path: &str) -> Result<(), Error> {
@@ -163,8 +163,8 @@ mod tests {
     use std::path::Path;
 
     #[test]
-    fn from_errors_for_empty_lang_to_human_friendly_name_mapping() {
-        let error = super::from("", "", HashMap::new());
+    fn do_the_thing_errors_for_empty_lang_id_to_human_friendly_name_mapping() {
+        let error = super::do_the_thing("", "", HashMap::new());
         assert_eq!(
             error.unwrap_err().to_string(),
             "Language ID to human friendly name mapping can't be empty"
