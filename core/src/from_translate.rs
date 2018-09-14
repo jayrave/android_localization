@@ -11,7 +11,6 @@ use std::error;
 use std::fmt;
 use std::io;
 use std::path::Path;
-use std::path::PathBuf;
 use writer::xml_writer;
 use xml_read_helper;
 

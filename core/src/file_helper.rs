@@ -1,5 +1,4 @@
 use constants;
-use std::fmt;
 use std::fs::File;
 use std::io;
 use std::ops::Add;
@@ -16,7 +15,7 @@ pub fn open_default_strings_file(res_dir_path: &Path) -> Result<File, io::Error>
 }
 
 pub fn open_foreign_strings_file(res_dir_path: &Path, lang_id: &str) -> Result<File, io::Error> {
-    let mut values_dir_name = String::from(constants::fs::BASE_VALUES_DIR_NAME);
+    let values_dir_name = String::from(constants::fs::BASE_VALUES_DIR_NAME);
     let values_dir_name = values_dir_name.add(&format!("-{}", lang_id));
     open_strings_file(res_dir_path, &values_dir_name)
 }
@@ -25,7 +24,7 @@ pub fn writable_empty_foreign_strings_file(
     res_dir_path: &Path,
     lang_id: &str,
 ) -> Result<File, io::Error> {
-    let mut values_dir_name = String::from(constants::fs::BASE_VALUES_DIR_NAME);
+    let values_dir_name = String::from(constants::fs::BASE_VALUES_DIR_NAME);
     let values_dir_name = values_dir_name.add(&format!("-{}", lang_id));
 
     let mut strings_file_path = res_dir_path.to_path_buf();

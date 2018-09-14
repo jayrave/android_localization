@@ -1,13 +1,9 @@
 use android_string::AndroidString;
-use constants;
 use file_helper;
 use reader::xml_reader;
 use std::error;
 use std::fmt;
-use std::fs::File;
 use std::io;
-use std::io::Read;
-use std::ops::Add;
 use std::path::Path;
 
 pub fn read_default_strings(res_dir_path: &Path) -> Result<Vec<AndroidString>, Error> {
