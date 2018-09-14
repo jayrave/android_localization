@@ -8,6 +8,7 @@ extern crate lazy_static;
 mod android_string;
 mod constants;
 mod file_helper;
+mod from_translate;
 mod ops;
 mod reader;
 mod to_translate;

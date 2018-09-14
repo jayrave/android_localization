@@ -1,5 +1,5 @@
-mod dedup;
-mod extract;
+pub mod dedup;
+pub mod extract;
 pub mod filter;
-mod merge;
+pub mod merge;
 pub mod sort;
