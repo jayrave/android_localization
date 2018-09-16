@@ -41,7 +41,7 @@ impl fmt::Display for AndroidString {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "Translatable: {}; Name: {}; Value: {})",
+            "Translatable: {}; Name: {}; Value: {}",
             self.is_translatable(),
             self.name(),
             self.value()

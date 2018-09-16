@@ -55,24 +55,12 @@ pub fn find(res_dir_path: &str) -> Result<Vec<String>, Error> {
 
 #[derive(Debug)]
 pub struct Error {
-    error: io::Error,
+    pub error: io::Error,
 }
 
 impl From<io::Error> for Error {
     fn from(error: io::Error) -> Self {
         Error { error }
-    }
-}
-
-impl error::Error for Error {
-    fn cause(&self) -> Option<&error::Error> {
-        Some(&self.error)
-    }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        fmt::Display::fmt(&self.error, f)
     }
 }
 
@@ -94,7 +82,7 @@ mod tests {
 
         let error = super::find(res_dir_path.to_str().unwrap());
         assert_eq!(
-            error.unwrap_err().to_string(),
+            error.unwrap_err().error.to_string(),
             format!(
                 "Res dir ({}) doesn't exist!",
                 res_dir_path.to_str().unwrap()

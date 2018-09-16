@@ -14,5 +14,6 @@ mod ops;
 mod reader;
 pub mod to_translate;
 mod validate;
+pub mod validator;
 mod writer;
 mod xml_read_helper;

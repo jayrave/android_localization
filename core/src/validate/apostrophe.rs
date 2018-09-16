@@ -41,7 +41,11 @@ impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.invalid_strings
             .iter()
-            .map(|s| fmt::Display::fmt(s, f))
+            .map(|s| {
+                write!(f, "(");
+                fmt::Display::fmt(s, f);
+                write!(f, ")")
+            })
             .collect()
     }
 }

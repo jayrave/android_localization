@@ -129,7 +129,11 @@ impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         self.mismatches
             .iter()
-            .map(|m| fmt::Display::fmt(m, f))
+            .map(|m| {
+                write!(f, "(");
+                fmt::Display::fmt(m, f);
+                write!(f, ")")
+            })
             .collect()
     }
 }
