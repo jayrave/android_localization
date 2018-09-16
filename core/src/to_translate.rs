@@ -203,7 +203,7 @@ mod tests {
 			</resources>
 		"##;
 
-        let mut default_strings = vec![AndroidString::new(
+        let default_strings = vec![AndroidString::new(
             String::from("string"),
             String::from("string value"),
             true,
