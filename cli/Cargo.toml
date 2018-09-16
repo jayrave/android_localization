@@ -1,0 +1,8 @@
+[package]
+name = "android_strings_cli"
+version = "0.1.0"
+authors = ["jayrave <jayanthan.raveendiran@gmail.com>"]
+
+[dependencies]
+android_strings_core = { path = "../core" }
+clap = "2.32.0"
