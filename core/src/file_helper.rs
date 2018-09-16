@@ -44,11 +44,9 @@ fn open_strings_file(res_dir_path: &Path, values_dir_name: &str) -> Result<File,
 mod tests {
     extern crate tempfile;
 
-    use android_string::AndroidString;
     use std::fs;
     use std::fs::File;
     use std::io::{Read, Write};
-    use std::path::Path;
 
     #[test]
     fn open_file_errors_if_file_is_missing() {

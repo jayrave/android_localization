@@ -1,4 +1,3 @@
-use android_string::AndroidString;
 use foreign_lang_ids_finder;
 use std::error;
 use std::fmt;
@@ -9,7 +8,7 @@ use validate::format_string;
 use xml_read_helper;
 
 /// Performs all validations for all foreign strings
-fn do_the_thing(res_dir_path: &str) -> Result<(), Error> {
+pub fn do_the_thing(res_dir_path: &str) -> Result<(), Error> {
     let res_dir_path_string = res_dir_path;
     let res_dir_path = Path::new(res_dir_path);
     let default_strings = match xml_read_helper::read_default_strings(res_dir_path) {
@@ -87,7 +86,7 @@ impl error::Error for Error {
     fn cause(&self) -> Option<&error::Error> {
         match self {
             Error::IoError(error) => Some(error),
-            Error::ValidationError(error) => None,
+            Error::ValidationError(_) => None,
             Error::XmlReadError(error) => Some(error),
         }
     }
@@ -129,7 +128,6 @@ mod tests {
     use android_string::AndroidString;
     use std::fs;
     use std::fs::File;
-    use std::path::Path;
     use std::path::PathBuf;
     use writer::xml_writer;
 
@@ -160,7 +158,7 @@ mod tests {
                 AndroidString::new(String::from("s1"), String::from("value"), true),
                 AndroidString::new(String::from("s2"), String::from("v'alue"), true),
             ],
-        );
+        ).unwrap();
 
         xml_writer::to(
             &mut french_strings_file,
@@ -168,7 +166,7 @@ mod tests {
                 AndroidString::new(String::from("s1"), String::from("val'ue %1$s"), true),
                 AndroidString::new(String::from("s2"), String::from("v'alue %1$d"), true),
             ],
-        );
+        ).unwrap();
 
         xml_writer::to(
             &mut spanish_strings_file,
@@ -177,7 +175,7 @@ mod tests {
                 String::from("v'alue"),
                 true,
             )],
-        );
+        ).unwrap();
 
         let error = super::do_the_thing(res_dir_path.to_str().unwrap()).unwrap_err();
         assert_eq!(

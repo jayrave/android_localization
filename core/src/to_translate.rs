@@ -222,7 +222,7 @@ mod tests {
 			</resources>
 		"##;
 
-        let mut default_strings = vec![
+        let default_strings = vec![
             AndroidString::new(String::from("string_1"), String::from("string value"), true),
             AndroidString::new(String::from("string_2"), String::from("string value"), true),
         ];
@@ -230,7 +230,7 @@ mod tests {
         test_write_out_strings_to_translate(&contents, default_strings, |output_file_path| {
             let mut output_file = File::open(output_file_path).unwrap();
             let mut output = String::new();
-            output_file.read_to_string(&mut output);
+            output_file.read_to_string(&mut output).unwrap();
             assert_eq!(output, "string_1,string value\nstring_2,string value\n");
         })
     }
@@ -254,10 +254,10 @@ mod tests {
         output_file_path.push("french");
 
         // Create required dirs & files with content
-        fs::create_dir_all(values_dir_path.clone());
-        fs::create_dir_all(output_dir_path.clone());
+        fs::create_dir_all(values_dir_path.clone()).unwrap();
+        fs::create_dir_all(output_dir_path.clone()).unwrap();
         let mut strings_file = File::create(strings_file_path).unwrap();
-        strings_file.write(values_file_content.as_bytes());
+        strings_file.write(values_file_content.as_bytes()).unwrap();
         strings_file.seek(SeekFrom::Start(0)).unwrap();
 
         // Perform action

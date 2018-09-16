@@ -129,13 +129,10 @@ mod tests {
     extern crate tempfile;
 
     use android_string::AndroidString;
-    use file_helper;
     use std::collections::HashMap;
     use std::fs;
     use std::fs::File;
-    use std::io::{Read, Seek, SeekFrom, Write};
-    use std::path::Path;
-    use writer::csv_writer;
+    use std::io::Write;
     use writer::xml_writer;
     use xml_read_helper;
 
@@ -171,9 +168,9 @@ mod tests {
         fr_translations_file_path.push("french");
 
         // Create required dirs & files with content
-        fs::create_dir_all(default_values_dir_path.clone());
-        fs::create_dir_all(fr_values_dir_path.clone());
-        fs::create_dir_all(translations_dir_path.clone());
+        fs::create_dir_all(default_values_dir_path.clone()).unwrap();
+        fs::create_dir_all(fr_values_dir_path.clone()).unwrap();
+        fs::create_dir_all(translations_dir_path.clone()).unwrap();
         let mut default_strings_file = File::create(default_strings_file_path).unwrap();
         let mut fr_strings_file = File::create(fr_strings_file_path).unwrap();
         let mut fr_translations_file = File::create(fr_translations_file_path).unwrap();

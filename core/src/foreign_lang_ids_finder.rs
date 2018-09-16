@@ -1,7 +1,5 @@
 use constants;
 use regex::Regex;
-use std::error;
-use std::fmt;
 use std::fs;
 use std::io;
 use std::path::Path;
@@ -70,8 +68,6 @@ mod tests {
 
     use std::fs;
     use std::fs::File;
-    use std::io::{Read, Seek, SeekFrom, Write};
-    use std::path::Path;
     use std::path::PathBuf;
 
     #[test]
