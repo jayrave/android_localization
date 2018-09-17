@@ -14,10 +14,10 @@ use std::path::Path;
 use writer::xml_writer;
 use xml_read_helper;
 
-pub fn do_the_thing(
+pub fn do_the_thing<S: ::std::hash::BuildHasher>(
     res_dir_path: &str,
     translated_text_input_dir_path: &str,
-    human_friendly_name_to_lang_id_mapping: HashMap<String, String>,
+    human_friendly_name_to_lang_id_mapping: HashMap<String, String, S>,
 ) -> Result<(), Error> {
     if human_friendly_name_to_lang_id_mapping.is_empty() {
         return Err(Error::ArgError(String::from(
@@ -28,7 +28,7 @@ pub fn do_the_thing(
     // Read default strings
     let res_dir_path = Path::new(res_dir_path);
     let mut translatable_default_strings = filter::find_translatable_strings(
-        xml_read_helper::read_default_strings(res_dir_path).map_err(|e| Error::from(e))?,
+        xml_read_helper::read_default_strings(res_dir_path).map_err(Error::from)?,
     );
 
     // For all languages, handle translations
@@ -54,14 +54,14 @@ fn handle_translations(
 ) -> Result<(), Error> {
     // Read already translated foreign strings
     let mut already_translated_foreign_strings = filter::find_translatable_strings(
-        xml_read_helper::read_foreign_strings(res_dir_path, lang_id).map_err(|e| Error::from(e))?,
+        xml_read_helper::read_foreign_strings(res_dir_path, lang_id).map_err(Error::from)?,
     );
 
     // Read newly translated foreign strings
     let mut new_translated_foreign_strings = csv_reader::from(
         file_helper::open_file(Path::new(translated_text_input_dir_path), file_name)
-            .map_err(|e| Error::IoError(e))?,
-    ).map_err(|e| Error::CsvError(e))?;
+            .map_err(Error::IoError)?,
+    ).map_err(Error::CsvError)?;
 
     // Extract android strings out of the newly translated strings
     let mut new_translated_foreign_strings = extract::extract_android_strings_from_translated(
@@ -78,8 +78,8 @@ fn handle_translations(
 
     // Write out foreign strings back to file
     let mut file = file_helper::writable_empty_foreign_strings_file(res_dir_path, lang_id)
-        .map_err(|e| Error::IoError(e))?;
-    xml_writer::to(&mut file, to_be_written_foreign_strings).map_err(|e| Error::XmlWriteError(e))
+        .map_err(Error::IoError)?;
+    xml_writer::to(&mut file, to_be_written_foreign_strings).map_err(Error::XmlWriteError)
 }
 
 #[derive(Debug)]

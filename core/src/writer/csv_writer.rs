@@ -54,8 +54,16 @@ mod tests {
     #[test]
     fn strings_are_written_to_file() {
         let translatable_android_strings = vec![
-            AndroidString::new(String::from("string_1"), String::from("string 1 value"), true),
-            AndroidString::new(String::from("string_2"), String::from("string 2 value"), true),
+            AndroidString::new(
+                String::from("string_1"),
+                String::from("string 1 value"),
+                true,
+            ),
+            AndroidString::new(
+                String::from("string_2"),
+                String::from("string 2 value"),
+                true,
+            ),
         ];
 
         // Write strings to a vector & split o/p into lines

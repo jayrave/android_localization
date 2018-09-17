@@ -8,7 +8,7 @@ use std::process;
 /// In this file, you most probably would see wide spread usages of `Option#unwrap`.
 /// Please don't let that bother you as the requirements are correctly setup in
 /// `args_parser.rs` & unwrapped values are guaranteed to be present there
-pub fn do_the_thing(matches: ArgMatches) {
+pub fn do_the_thing(matches: &ArgMatches) {
     if let Some(from_csv_command) = matches.subcommand_matches(constants::command::FROM_CSV) {
         do_from_csv(&from_csv_command);
     }

@@ -115,8 +115,7 @@ impl fmt::Display for Error {
                         "Lang ID: {}; apostrophe errors: [{}]; format string errors: [{}]",
                         e.foreign_lang_id, apos_error_string, fs_error_string
                     )
-                })
-                .collect(),
+                }).collect(),
         }
     }
 }

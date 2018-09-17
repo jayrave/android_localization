@@ -16,14 +16,14 @@ pub fn from<R: Read>(read: R) -> Result<Vec<TranslatedString>, Error> {
     for record_or_error in reader.records() {
         match record_or_error {
             Err(error) => return Err(Error::CsvError(error)),
-            Ok(record) => strings.push(extract_string_from_record(record)?),
+            Ok(record) => strings.push(extract_string_from_record(&record)?),
         }
     }
 
     Ok(strings)
 }
 
-fn extract_string_from_record(record: csv::StringRecord) -> Result<TranslatedString, Error> {
+fn extract_string_from_record(record: &csv::StringRecord) -> Result<TranslatedString, Error> {
     let mut iterator = record.iter();
     let name = iterator.next();
     let default_value = iterator.next();
@@ -31,7 +31,7 @@ fn extract_string_from_record(record: csv::StringRecord) -> Result<TranslatedStr
     let extra = iterator.next();
 
     if name.is_none() {
-        return Err(Error::SyntaxError(format!("Empty record!")));
+        return Err(Error::SyntaxError(String::from("Empty record!")));
     }
 
     if default_value.is_none() {
@@ -97,10 +97,10 @@ mod tests {
 
     #[test]
     fn strings_are_read_from_valid_file() {
-        let mut strings = read_strings_from_file(
-            "string_1, english 1, french 1\nstring_2, english 2, french 2",
-        ).unwrap()
-            .into_iter();
+        let mut strings =
+            read_strings_from_file("string_1, english 1, french 1\nstring_2, english 2, french 2")
+                .unwrap()
+                .into_iter();
 
         assert_eq!(
             strings.next(),

@@ -63,20 +63,20 @@ pub fn validate(
         }
     }
 
-    match mismatches.is_empty() {
-        true => Ok(()),
-        false => Err(Error { mismatches }),
+    if mismatches.is_empty() {
+        Ok(())
+    } else {
+        Err(Error { mismatches })
     }
 }
 
-pub fn parse_and_build_data(strings: &Vec<AndroidString>) -> Vec<ParsedData> {
+pub fn parse_and_build_data(strings: &[AndroidString]) -> Vec<ParsedData> {
     strings
         .iter()
         .map(|s| ParsedData {
             android_string: s.clone(),
             sorted_format_strings: parse_and_sort_format_strings(s),
-        })
-        .collect()
+        }).collect()
 }
 
 fn parse_and_sort_format_strings(string: &AndroidString) -> Vec<String> {

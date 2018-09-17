@@ -7,7 +7,7 @@ use std::io;
 use std::path::Path;
 
 pub fn read_default_strings(res_dir_path: &Path) -> Result<Vec<AndroidString>, Error> {
-    let file = file_helper::open_default_strings_file(res_dir_path).map_err(|e| Error::IoError(e))?;
+    let file = file_helper::open_default_strings_file(res_dir_path).map_err(Error::IoError)?;
     match xml_reader::reader::from(file) {
         Err(error) => Err(Error::XmlError(error)),
         Ok(strings) => Ok(strings),
@@ -18,8 +18,8 @@ pub fn read_foreign_strings(
     res_dir_path: &Path,
     lang_id: &str,
 ) -> Result<Vec<AndroidString>, Error> {
-    let file = file_helper::open_foreign_strings_file(res_dir_path, lang_id)
-        .map_err(|e| Error::IoError(e))?;
+    let file =
+        file_helper::open_foreign_strings_file(res_dir_path, lang_id).map_err(Error::IoError)?;
     match xml_reader::reader::from(file) {
         Err(error) => Err(Error::XmlError(error)),
         Ok(strings) => Ok(strings),

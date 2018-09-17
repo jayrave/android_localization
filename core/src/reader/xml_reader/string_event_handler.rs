@@ -23,10 +23,11 @@ impl StringEventHandler {
         for attribute in attributes {
             match attribute.name.local_name.as_str() {
                 constants::attributes::NAME => string_name = Some(attribute.value),
-                constants::attributes::TRANSLATABLE => match attribute.value.as_str() {
-                    constants::flags::FALSE => is_translatable = false,
-                    _ => {}
-                },
+                constants::attributes::TRANSLATABLE => {
+                    if let constants::flags::FALSE = attribute.value.as_str() {
+                        is_translatable = false
+                    }
+                }
                 _ => {}
             }
         }

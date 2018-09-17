@@ -8,16 +8,17 @@ lazy_static! {
     static ref ESCAPED_APOSTROPHE: Regex = Regex::new(r"(\\')").unwrap();
 }
 
-pub fn validate(strings: &Vec<AndroidString>) -> Result<(), Error> {
+pub fn validate(strings: &[AndroidString]) -> Result<(), Error> {
     let invalid_strings: Vec<AndroidString> = strings
         .iter()
         .filter(|s| !is_valid_value(s.value()))
-        .map(|s| s.clone())
+        .cloned()
         .collect();
 
-    match invalid_strings.is_empty() {
-        true => Ok(()),
-        false => Err(Error { invalid_strings }),
+    if invalid_strings.is_empty() {
+        Ok(())
+    } else {
+        Err(Error { invalid_strings })
     }
 }
 

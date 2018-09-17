@@ -34,19 +34,17 @@ pub fn find(res_dir_path: &str) -> Result<Vec<String>, Error> {
                     if !strings_file_path.is_file() {
                         None
                     } else {
-                        dir_entry.file_name().to_str().map(|s| String::from(s))
+                        dir_entry.file_name().to_str().map(String::from)
                     }
                 },
             },
-        })
-        .filter_map(|file_name| match LANG_ID_REGEX.captures(&file_name) {
+        }).filter_map(|file_name| match LANG_ID_REGEX.captures(&file_name) {
             None => None,
             Some(capture) => match capture.get(1) {
                 None => None,
                 Some(m) => Some(String::from(m.as_str())),
             },
-        })
-        .collect();
+        }).collect();
 
     Ok(lang_ids)
 }

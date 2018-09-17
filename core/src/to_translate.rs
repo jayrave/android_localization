@@ -12,10 +12,10 @@ use std::path::PathBuf;
 use writer::csv_writer;
 use xml_read_helper;
 
-pub fn do_the_thing(
+pub fn do_the_thing<S: ::std::hash::BuildHasher>(
     res_dir_path: &str,
     output_dir_path: &str,
-    lang_id_to_human_friendly_name_mapping: HashMap<String, String>,
+    lang_id_to_human_friendly_name_mapping: HashMap<String, String, S>,
 ) -> Result<(), Error> {
     if lang_id_to_human_friendly_name_mapping.is_empty() {
         return Err(Error::ArgError(String::from(
@@ -28,7 +28,7 @@ pub fn do_the_thing(
     // Read default strings
     let res_dir_path = Path::new(res_dir_path);
     let mut translatable_default_strings = filter::find_translatable_strings(
-        xml_read_helper::read_default_strings(res_dir_path).map_err(|e| Error::from(e))?,
+        xml_read_helper::read_default_strings(res_dir_path).map_err(Error::from)?,
     );
 
     // For all languages, write out strings requiring translation
@@ -47,33 +47,34 @@ pub fn do_the_thing(
 
 fn create_output_dir_if_required(output_dir_path: &str) -> Result<(), Error> {
     let output_path = PathBuf::from(output_dir_path);
-    match output_path.is_file() {
-        true => Err(Error::ArgError(format!(
+    if output_path.is_file() {
+        Err(Error::ArgError(format!(
             "Output directory path ({}) points to a file!",
             output_dir_path
-        ))),
-        false => match output_path.exists() {
-            true => Ok(()),
-            false => match fs::create_dir_all(PathBuf::from(output_dir_path)) {
-                Err(error) => Err(Error::IoError(error)),
-                Ok(()) => Ok(()),
-            },
-        },
+        )))
+    } else if output_path.exists() {
+        Ok(())
+    } else {
+        match fs::create_dir_all(PathBuf::from(output_dir_path)) {
+            Err(error) => Err(Error::IoError(error)),
+            Ok(()) => Ok(()),
+        }
     }
 }
 
 fn create_output_file(output_dir_path: &str, output_file_name: &str) -> Result<File, Error> {
     let mut output_path = PathBuf::from(output_dir_path);
     output_path.push(output_file_name);
-    match output_path.exists() {
-        true => Err(Error::ArgError(format!(
+    if output_path.exists() {
+        Err(Error::ArgError(format!(
             "File ({}) already exists in {}!",
             output_file_name, output_dir_path
-        ))),
-        false => match File::create(output_path) {
+        )))
+    } else {
+        match File::create(output_path) {
             Ok(file) => Ok(file),
             Err(error) => Err(Error::IoError(error)),
-        },
+        }
     }
 }
 
@@ -85,7 +86,7 @@ fn write_out_strings_to_translate(
     translatable_default_strings: &mut Vec<AndroidString>,
 ) -> Result<(), Error> {
     let mut foreign_strings =
-        xml_read_helper::read_foreign_strings(res_dir_path, lang_id).map_err(|e| Error::from(e))?;
+        xml_read_helper::read_foreign_strings(res_dir_path, lang_id).map_err(Error::from)?;
     let strings_to_translate =
         filter::find_missing_strings(&mut foreign_strings, translatable_default_strings);
     if !strings_to_translate.is_empty() {
