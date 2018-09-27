@@ -1,4 +1,3 @@
-use android_string::AndroidString;
 use constants;
 use reader::xml_reader::error::Error;
 use reader::xml_reader::event_handler::EventHandler;
@@ -24,13 +23,5 @@ impl EventHandler for ResourcesEventHandler {
             constants::elements::STRING => Ok(Box::new(StringEventHandler::new(attributes)?)),
             _ => Ok(Box::new(SinkingEventHandler::new())),
         }
-    }
-
-    fn handle_characters_event(&mut self, _text: String) {
-        // No op
-    }
-
-    fn built_string(&self) -> Option<AndroidString> {
-        None
     }
 }
