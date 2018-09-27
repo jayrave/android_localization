@@ -38,6 +38,13 @@ impl EventsHandler {
             .handle_characters_event(text);
     }
 
+    pub fn handle_cdata_event(&mut self, text: String) {
+        self.event_handlers
+            .last_mut()
+            .unwrap()
+            .handle_cdata_event(text);
+    }
+
     pub fn handle_end_element_event(&mut self) {
         if let Some(event_handler) = self.event_handlers.pop() {
             if let Some(android_string) = event_handler.built_string() {
