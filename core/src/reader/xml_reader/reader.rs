@@ -39,19 +39,48 @@ mod tests {
 
     #[test]
     fn strings_are_read_from_valid_clean_file() {
-        perform_valid_file_test(r##"
+        let mut strings = write_to_file_and_read_strings_out(r##"
 			<?xml version="1.0" encoding="utf-8"?>
 			<resources>
 			    <string name="string_1">string 1 value</string>
 			    <string name="string_2" translatable="true">string 2 value</string>
 				<string name="non_translatable_string" translatable="false">non translatable string value</string>
 			</resources>
-		"##);
+		"##).into_iter();
+
+        assert_eq!(
+            strings.next(),
+            Some(AndroidString::new(
+                String::from("string_1"),
+                String::from("string 1 value"),
+                true
+            ))
+        );
+
+        assert_eq!(
+            strings.next(),
+            Some(AndroidString::new(
+                String::from("string_2"),
+                String::from("string 2 value"),
+                true
+            ))
+        );
+
+        assert_eq!(
+            strings.next(),
+            Some(AndroidString::new(
+                String::from("non_translatable_string"),
+                String::from("non translatable string value"),
+                false
+            ))
+        );
+
+        assert_eq!(strings.next(), None);
     }
 
     #[test]
     fn strings_are_read_from_valid_dirty_file() {
-        perform_valid_file_test(r##"
+        let mut strings = write_to_file_and_read_strings_out(r##"
 			<?xml version="1.0" encoding="utf-8"?>
 			<string name="dont_care_string_1">value</string>
 			<string name="dont_care_string_2" translatable="false">value</string>
@@ -68,24 +97,10 @@ mod tests {
 				<string name="dont_care_string_5">value</string>
 				<string name="dont_care_string_6" translatable="false">value</string>
 			</outside_container>
-		"##);
-    }
-
-    fn perform_valid_file_test(file_content: &str) {
-        // Write content to file
-        let mut tmpfile: File = tempfile::tempfile().unwrap();
-        tmpfile.write(file_content.as_bytes()).unwrap();
-
-        // Seek to start
-        tmpfile.seek(SeekFrom::Start(0)).unwrap();
-
-        // Read strings from file & assert
-        let mut it = super::from(tmpfile.try_clone().unwrap())
-            .unwrap()
-            .into_iter();
+		"##).into_iter();
 
         assert_eq!(
-            it.next(),
+            strings.next(),
             Some(AndroidString::new(
                 String::from("string_1"),
                 String::from("string 1 value"),
@@ -94,7 +109,7 @@ mod tests {
         );
 
         assert_eq!(
-            it.next(),
+            strings.next(),
             Some(AndroidString::new(
                 String::from("string_2"),
                 String::from("string 2 value"),
@@ -103,7 +118,7 @@ mod tests {
         );
 
         assert_eq!(
-            it.next(),
+            strings.next(),
             Some(AndroidString::new(
                 String::from("non_translatable_string"),
                 String::from("non translatable string value"),
@@ -111,6 +126,39 @@ mod tests {
             ))
         );
 
-        assert_eq!(it.next(), None);
+        assert_eq!(strings.next(), None);
+    }
+
+//    #[test]
+//    fn string_with_cdata_is_read_correctly() {
+//        let mut strings = write_to_file_and_read_strings_out(r##"
+//			<?xml version="1.0" encoding="utf-8"?>
+//			<resources>
+//			    <string name="s1">Hi there. <![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> is awesome</string>
+//			</resources>
+//		"##).into_iter();
+//
+//        assert_eq!(
+//            strings.next(),
+//            Some(AndroidString::new(
+//                String::from("s1"),
+//                String::from("Hi there. <![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> is awesome"),
+//                true
+//            ))
+//        );
+//
+//        assert_eq!(strings.next(), None);
+//    }
+
+    fn write_to_file_and_read_strings_out(file_content: &str) -> Vec<AndroidString> {
+        // Write content to file
+        let mut tmpfile: File = tempfile::tempfile().unwrap();
+        tmpfile.write(file_content.as_bytes()).unwrap();
+
+        // Seek to start
+        tmpfile.seek(SeekFrom::Start(0)).unwrap();
+
+        // Read strings from file & assert
+        super::from(tmpfile.try_clone().unwrap()).unwrap()
     }
 }
