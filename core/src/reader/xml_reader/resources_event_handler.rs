@@ -4,17 +4,13 @@ use reader::xml_reader::error::Error;
 use reader::xml_reader::event_handler::EventHandler;
 use reader::xml_reader::sinking_event_handler::SinkingEventHandler;
 use reader::xml_reader::string_event_handler::StringEventHandler;
-use std::cell::RefCell;
-use std::rc::Rc;
 use xml::attribute::OwnedAttribute;
 
-pub struct ResourcesEventHandler {
-    strings: Rc<RefCell<Vec<AndroidString>>>,
-}
+pub struct ResourcesEventHandler {}
 
 impl ResourcesEventHandler {
-    pub fn new(strings: Rc<RefCell<Vec<AndroidString>>>) -> ResourcesEventHandler {
-        ResourcesEventHandler { strings }
+    pub fn new() -> ResourcesEventHandler {
+        ResourcesEventHandler {}
     }
 }
 
@@ -25,15 +21,16 @@ impl EventHandler for ResourcesEventHandler {
         attributes: Vec<OwnedAttribute>,
     ) -> Result<Box<EventHandler>, Error> {
         match tag_name.as_str() {
-            constants::elements::STRING => Ok(Box::new(StringEventHandler::new(
-                Rc::clone(&self.strings),
-                attributes,
-            )?)),
+            constants::elements::STRING => Ok(Box::new(StringEventHandler::new(attributes)?)),
             _ => Ok(Box::new(SinkingEventHandler::new())),
         }
     }
 
-    fn handle_characters_event(&self, _text: String) {
+    fn handle_characters_event(&mut self, _text: String) {
         // No op
+    }
+
+    fn built_string(&self) -> Option<AndroidString> {
+        None
     }
 }

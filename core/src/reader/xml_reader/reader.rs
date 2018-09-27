@@ -26,7 +26,7 @@ pub fn from<R: Read>(read: R) -> Result<Vec<AndroidString>, Error> {
         }
     }
 
-    events_handler.strings()
+    Ok(events_handler.strings())
 }
 
 #[cfg(test)]
@@ -129,26 +129,26 @@ mod tests {
         assert_eq!(strings.next(), None);
     }
 
-//    #[test]
-//    fn string_with_cdata_is_read_correctly() {
-//        let mut strings = write_to_file_and_read_strings_out(r##"
-//			<?xml version="1.0" encoding="utf-8"?>
-//			<resources>
-//			    <string name="s1">Hi there. <![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> is awesome</string>
-//			</resources>
-//		"##).into_iter();
-//
-//        assert_eq!(
-//            strings.next(),
-//            Some(AndroidString::new(
-//                String::from("s1"),
-//                String::from("Hi there. <![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> is awesome"),
-//                true
-//            ))
-//        );
-//
-//        assert_eq!(strings.next(), None);
-//    }
+    //    #[test]
+    //    fn string_with_cdata_is_read_correctly() {
+    //        let mut strings = write_to_file_and_read_strings_out(r##"
+    //			<?xml version="1.0" encoding="utf-8"?>
+    //			<resources>
+    //			    <string name="s1">Hi there. <![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> is awesome</string>
+    //			</resources>
+    //		"##).into_iter();
+    //
+    //        assert_eq!(
+    //            strings.next(),
+    //            Some(AndroidString::new(
+    //                String::from("s1"),
+    //                String::from("Hi there. <![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> is awesome"),
+    //                true
+    //            ))
+    //        );
+    //
+    //        assert_eq!(strings.next(), None);
+    //    }
 
     fn write_to_file_and_read_strings_out(file_content: &str) -> Vec<AndroidString> {
         // Write content to file

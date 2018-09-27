@@ -2,22 +2,18 @@ use android_string::AndroidString;
 use reader::xml_reader::error::Error;
 use reader::xml_reader::event_handler::EventHandler;
 use reader::xml_reader::root_event_handler::RootEventHandler;
-use std::cell::RefCell;
-use std::rc::Rc;
 use xml::attribute::OwnedAttribute;
 
 pub struct EventsHandler {
-    android_strings: Rc<RefCell<Vec<AndroidString>>>,
+    android_strings: Vec<AndroidString>,
     event_handlers: Vec<Box<EventHandler>>,
 }
 
 impl EventsHandler {
     pub fn new() -> EventsHandler {
-        let strings = Rc::new(RefCell::new(vec![]));
-        let strings_clone = Rc::clone(&strings);
         EventsHandler {
-            android_strings: strings,
-            event_handlers: vec![Box::new(RootEventHandler::new(strings_clone))],
+            android_strings: vec![],
+            event_handlers: vec![Box::new(RootEventHandler::new())],
         }
     }
 
@@ -43,17 +39,15 @@ impl EventsHandler {
     }
 
     pub fn handle_end_element_event(&mut self) {
-        self.event_handlers.pop();
+        if let Some(event_handler) = self.event_handlers.pop() {
+            if let Some(android_string) = event_handler.built_string() {
+                self.android_strings.push(android_string);
+            }
+        }
     }
 
-    pub fn strings(mut self) -> Result<Vec<AndroidString>, Error> {
+    pub fn strings(mut self) -> Vec<AndroidString> {
         self.event_handlers.clear();
-        match Rc::try_unwrap(self.android_strings) {
-            Err(ref_cell) => Err(Error::LogicError(format!(
-                "Rc has {} strong references!",
-                Rc::strong_count(&ref_cell)
-            ))),
-            Ok(ref_cell) => Ok(ref_cell.into_inner()),
-        }
+        self.android_strings
     }
 }

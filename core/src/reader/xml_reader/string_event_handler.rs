@@ -3,21 +3,16 @@ use constants;
 use reader::xml_reader::error::Error;
 use reader::xml_reader::event_handler::EventHandler;
 use reader::xml_reader::sinking_event_handler::SinkingEventHandler;
-use std::cell::RefCell;
-use std::rc::Rc;
 use xml::attribute::OwnedAttribute;
 
 pub struct StringEventHandler {
-    strings: Rc<RefCell<Vec<AndroidString>>>,
     name: String,
     is_translatable: bool,
+    built_android_string: Option<AndroidString>,
 }
 
 impl StringEventHandler {
-    pub fn new(
-        strings: Rc<RefCell<Vec<AndroidString>>>,
-        attributes: Vec<OwnedAttribute>,
-    ) -> Result<StringEventHandler, Error> {
+    pub fn new(attributes: Vec<OwnedAttribute>) -> Result<StringEventHandler, Error> {
         let mut string_name = None;
         let mut is_translatable = true;
         for attribute in attributes {
@@ -37,9 +32,9 @@ impl StringEventHandler {
                 "string element is missing required name attribute",
             ))),
             Some(name) => Ok(StringEventHandler {
-                strings,
                 name,
                 is_translatable,
+                built_android_string: None,
             }),
         }
     }
@@ -54,11 +49,15 @@ impl EventHandler for StringEventHandler {
         Ok(Box::new(SinkingEventHandler::new()))
     }
 
-    fn handle_characters_event(&self, text: String) {
-        self.strings.borrow_mut().push(AndroidString::new(
+    fn handle_characters_event(&mut self, text: String) {
+        self.built_android_string = Some(AndroidString::new(
             self.name.clone(),
             text,
             self.is_translatable,
         ));
+    }
+
+    fn built_string(&self) -> Option<AndroidString> {
+        self.built_android_string.clone()
     }
 }
