@@ -1,4 +1,5 @@
 use android_string::AndroidString;
+use constants;
 use file_helper;
 use ops::dedup;
 use ops::extract;
@@ -9,8 +10,10 @@ use reader::xml_reader;
 use std::collections::HashMap;
 use std::error;
 use std::fmt;
+use std::fs::File;
 use std::io;
 use std::path::Path;
+use std::path::PathBuf;
 use writer::xml_writer;
 use xml_read_helper;
 
@@ -58,10 +61,12 @@ fn handle_translations(
     );
 
     // Read newly translated foreign strings
-    let mut new_translated_foreign_strings = csv_reader::from(
-        file_helper::open_file(Path::new(translated_text_input_dir_path), file_name)
-            .map_err(Error::IoError)?,
-    ).map_err(Error::CsvError)?;
+    let mut translated_text_file_path = PathBuf::from(translated_text_input_dir_path);
+    translated_text_file_path.push(file_name);
+    translated_text_file_path.set_extension(constants::extn::CSV);
+    let mut new_translated_foreign_strings =
+        csv_reader::from(File::open(translated_text_file_path).map_err(Error::IoError)?)
+            .map_err(Error::CsvError)?;
 
     // Extract android strings out of the newly translated strings
     let mut new_translated_foreign_strings = extract::extract_android_strings_from_translated(
@@ -165,7 +170,7 @@ mod tests {
         let mut translations_dir_path = temp_dir.path().to_path_buf();
         translations_dir_path.push("translations");
         let mut fr_translations_file_path = translations_dir_path.clone();
-        fr_translations_file_path.push("french");
+        fr_translations_file_path.push("french.csv");
 
         // Create required dirs & files with content
         fs::create_dir_all(default_values_dir_path.clone()).unwrap();

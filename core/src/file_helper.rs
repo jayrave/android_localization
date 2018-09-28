@@ -4,12 +4,6 @@ use std::io;
 use std::ops::Add;
 use std::path::Path;
 
-pub fn open_file(dir_path: &Path, file_name: &str) -> Result<File, io::Error> {
-    let mut file_path = dir_path.to_path_buf();
-    file_path.push(file_name);
-    File::open(file_path)
-}
-
 pub fn open_default_strings_file(res_dir_path: &Path) -> Result<File, io::Error> {
     open_strings_file(res_dir_path, constants::fs::BASE_VALUES_DIR_NAME)
 }
@@ -47,18 +41,6 @@ mod tests {
     use std::fs;
     use std::fs::File;
     use std::io::{Read, Write};
-
-    #[test]
-    fn open_file_errors_if_file_is_missing() {
-        let res_dir = tempfile::tempdir().unwrap();
-        let error = super::open_file(res_dir.path(), "asdf");
-        assert!(
-            error
-                .unwrap_err()
-                .to_string()
-                .starts_with("No such file or directory")
-        )
-    }
 
     #[test]
     fn open_strings_file_errors_if_values_dir_is_missing() {

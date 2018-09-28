@@ -16,3 +16,7 @@ pub mod fs {
     pub const BASE_VALUES_DIR_NAME: &str = "values";
     pub const STRING_FILE_NAME: &str = "strings.xml";
 }
+
+pub mod extn {
+    pub const CSV: &str = "csv";
+}

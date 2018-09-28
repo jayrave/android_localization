@@ -1,4 +1,5 @@
 use android_string::AndroidString;
+use constants;
 use ops::filter;
 use reader::xml_reader;
 use std::collections::HashMap;
@@ -65,10 +66,12 @@ fn create_output_dir_if_required(output_dir_path: &str) -> Result<(), Error> {
 fn create_output_file(output_dir_path: &str, output_file_name: &str) -> Result<File, Error> {
     let mut output_path = PathBuf::from(output_dir_path);
     output_path.push(output_file_name);
+    output_path.set_extension(constants::extn::CSV);
+
     if output_path.exists() {
         Err(Error::ArgError(format!(
-            "File ({}) already exists in {}!",
-            output_file_name, output_dir_path
+            "File ({}) already exists!",
+            output_path.to_str().unwrap_or(output_file_name)
         )))
     } else {
         match File::create(output_path) {
@@ -183,7 +186,7 @@ mod tests {
         let temp_dir = tempfile::tempdir().unwrap();
         let output_dir_path = temp_dir.path();
         let mut output_file_path = output_dir_path.to_path_buf();
-        output_file_path.push("op_file");
+        output_file_path.push("op_file.csv");
 
         File::create(&output_file_path).unwrap();
         let output_dir_path = output_dir_path.to_str().unwrap();
@@ -191,7 +194,10 @@ mod tests {
         let error = super::create_output_file(output_dir_path, "op_file");
         assert_eq!(
             error.unwrap_err().to_string(),
-            format!("File (op_file) already exists in {}!", output_dir_path)
+            format!(
+                "File ({}) already exists!",
+                output_file_path.to_str().unwrap()
+            )
         )
     }
 
@@ -252,7 +258,7 @@ mod tests {
         let mut output_dir_path = temp_dir.path().to_path_buf();
         output_dir_path.push("output");
         let mut output_file_path = output_dir_path.clone();
-        output_file_path.push("french");
+        output_file_path.push("french.csv");
 
         // Create required dirs & files with content
         fs::create_dir_all(values_dir_path.clone()).unwrap();
@@ -266,7 +272,7 @@ mod tests {
             values_dir_path.parent().unwrap(),
             "fr",
             output_dir_path.to_str().unwrap(),
-            output_file_path.file_name().unwrap().to_str().unwrap(),
+            output_file_path.file_stem().unwrap().to_str().unwrap(),
             &mut default_strings,
         ).unwrap();
 
