@@ -11,9 +11,9 @@ use std::error;
 use std::fmt;
 use std::fs::File;
 use std::io;
+use std::ops::Add;
 use std::path::Path;
 use std::path::PathBuf;
-use utils::file_helper;
 use utils::xml_read_helper;
 use writer::xml_writer;
 
@@ -82,9 +82,22 @@ fn handle_translations(
         ));
 
     // Write out foreign strings back to file
-    let mut file = file_helper::writable_empty_foreign_strings_file(res_dir_path, lang_id)
-        .map_err(Error::IoError)?;
+    let mut file =
+        writable_empty_foreign_strings_file(res_dir_path, lang_id).map_err(Error::IoError)?;
     xml_writer::to(&mut file, to_be_written_foreign_strings).map_err(Error::XmlWriteError)
+}
+
+fn writable_empty_foreign_strings_file(
+    res_dir_path: &Path,
+    lang_id: &str,
+) -> Result<File, io::Error> {
+    let values_dir_name = String::from(constants::fs::BASE_VALUES_DIR_NAME);
+    let values_dir_name = values_dir_name.add(&format!("-{}", lang_id));
+
+    let mut strings_file_path = res_dir_path.to_path_buf();
+    strings_file_path.push(values_dir_name);
+    strings_file_path.push(constants::fs::STRING_FILE_NAME);
+    File::create(strings_file_path) // empties out the file if it has any content
 }
 
 #[derive(Debug)]
@@ -137,6 +150,7 @@ mod tests {
     use std::collections::HashMap;
     use std::fs;
     use std::fs::File;
+    use std::io::Read;
     use std::io::Write;
     use utils::xml_read_helper;
     use writer::xml_writer;
@@ -218,5 +232,36 @@ mod tests {
                 AndroidString::new(String::from("s2"), String::from("french old value 2"), true),
             ]
         )
+    }
+
+    #[test]
+    fn writable_empty_foreign_strings_file() {
+        let res_dir = tempfile::tempdir().unwrap();
+
+        let mut values_dir_path = res_dir.path().to_path_buf();
+        values_dir_path.push("values-fr");
+
+        let mut strings_file_path = values_dir_path.clone();
+        strings_file_path.push("strings.xml");
+
+        fs::create_dir(values_dir_path).unwrap();
+        let mut file_with_old_content: File = File::create(strings_file_path.clone()).unwrap();
+        file_with_old_content
+            .write("example old content".as_bytes())
+            .unwrap();
+
+        let mut file_with_new_content: File =
+            super::writable_empty_foreign_strings_file(res_dir.path(), "fr").unwrap();
+        file_with_new_content
+            .write("example new content".as_bytes())
+            .unwrap();
+
+        let mut file_contents = String::new();
+        File::open(strings_file_path)
+            .unwrap()
+            .read_to_string(&mut file_contents)
+            .unwrap();
+
+        assert_eq!(file_contents, "example new content");
     }
 }

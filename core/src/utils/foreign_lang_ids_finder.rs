@@ -15,16 +15,15 @@ pub fn find(res_dir_path: &str) -> Result<Vec<String>, Error> {
     if !Path::new(res_dir_path).is_dir() {
         return Err(Error {
             path: String::from(res_dir_path),
-            error: io::Error::new(
-                io::ErrorKind::NotFound,
-                "res dir doesn't exist!",
-            ),
+            error: io::Error::new(io::ErrorKind::NotFound, "res dir doesn't exist!"),
         });
     }
 
     let lang_ids = fs::read_dir(res_dir_path)
-        .map_err(|e| Error { path: String::from(res_dir_path), error: e })?
-        .filter_map(|dir_entry| match dir_entry {
+        .map_err(|e| Error {
+            path: String::from(res_dir_path),
+            error: e,
+        })?.filter_map(|dir_entry| match dir_entry {
             Err(_) => None,
             Ok(dir_entry) => match dir_entry.file_type() {
                 Err(_) => None,
