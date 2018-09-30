@@ -14,14 +14,16 @@ lazy_static! {
 pub fn find(res_dir_path: &str) -> Result<Vec<String>, Error> {
     if !Path::new(res_dir_path).is_dir() {
         return Err(Error {
+            path: String::from(res_dir_path),
             error: io::Error::new(
                 io::ErrorKind::NotFound,
-                format!("Res dir ({}) doesn't exist!", res_dir_path),
+                "res dir doesn't exist!",
             ),
         });
     }
 
-    let lang_ids = fs::read_dir(res_dir_path)?
+    let lang_ids = fs::read_dir(res_dir_path)
+        .map_err(|e| Error { path: String::from(res_dir_path), error: e })?
         .filter_map(|dir_entry| match dir_entry {
             Err(_) => None,
             Ok(dir_entry) => match dir_entry.file_type() {
@@ -51,13 +53,8 @@ pub fn find(res_dir_path: &str) -> Result<Vec<String>, Error> {
 
 #[derive(Debug)]
 pub struct Error {
+    pub path: String,
     pub error: io::Error,
-}
-
-impl From<io::Error> for Error {
-    fn from(error: io::Error) -> Self {
-        Error { error }
-    }
 }
 
 #[cfg(test)]
@@ -74,14 +71,9 @@ mod tests {
         let mut res_dir_path = tempdir.path().to_path_buf();
         res_dir_path.push("res");
 
-        let error = super::find(res_dir_path.to_str().unwrap());
-        assert_eq!(
-            error.unwrap_err().error.to_string(),
-            format!(
-                "Res dir ({}) doesn't exist!",
-                res_dir_path.to_str().unwrap()
-            )
-        )
+        let error = super::find(res_dir_path.to_str().unwrap()).unwrap_err();
+        assert_eq!(error.path, res_dir_path.to_str().unwrap());
+        assert_eq!(error.error.to_string(), format!("res dir doesn't exist!"))
     }
 
     #[test]
