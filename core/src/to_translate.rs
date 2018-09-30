@@ -10,8 +10,8 @@ use std::fs::File;
 use std::io;
 use std::path::Path;
 use std::path::PathBuf;
+use utils::xml_read_helper;
 use writer::csv_writer;
-use xml_read_helper;
 
 pub fn do_the_thing<S: ::std::hash::BuildHasher>(
     res_dir_path: &str,

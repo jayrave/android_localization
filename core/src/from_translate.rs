@@ -1,6 +1,5 @@
 use android_string::AndroidString;
 use constants;
-use file_helper;
 use ops::dedup;
 use ops::extract;
 use ops::filter;
@@ -14,8 +13,9 @@ use std::fs::File;
 use std::io;
 use std::path::Path;
 use std::path::PathBuf;
+use utils::file_helper;
+use utils::xml_read_helper;
 use writer::xml_writer;
-use xml_read_helper;
 
 pub fn do_the_thing<S: ::std::hash::BuildHasher>(
     res_dir_path: &str,
@@ -138,8 +138,8 @@ mod tests {
     use std::fs;
     use std::fs::File;
     use std::io::Write;
+    use utils::xml_read_helper;
     use writer::xml_writer;
-    use xml_read_helper;
 
     #[test]
     fn do_the_thing_errors_for_empty_human_friendly_name_to_lang_id_mapping() {

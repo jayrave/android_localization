@@ -1,11 +1,11 @@
-use foreign_lang_ids_finder;
 use std::error;
 use std::fmt;
 use std::io;
 use std::path::Path;
+use utils::foreign_lang_ids_finder;
+use utils::xml_read_helper;
 use validate::apostrophe;
 use validate::format_string;
-use xml_read_helper;
 
 /// Performs all validations for all foreign strings
 pub fn do_the_thing(res_dir_path: &str) -> Result<(), Error> {

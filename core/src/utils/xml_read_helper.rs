@@ -1,10 +1,10 @@
 use android_string::AndroidString;
-use file_helper;
 use reader::xml_reader;
 use std::error;
 use std::fmt;
 use std::io;
 use std::path::Path;
+use utils::file_helper;
 
 pub fn read_default_strings(res_dir_path: &Path) -> Result<Vec<AndroidString>, Error> {
     let file = file_helper::open_default_strings_file(res_dir_path).map_err(Error::IoError)?;
