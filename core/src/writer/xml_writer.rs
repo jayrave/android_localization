@@ -8,7 +8,7 @@ use xml::writer;
 use xml::writer::XmlEvent;
 use xml::EmitterConfig;
 
-pub fn to<W: Write>(sink: &mut W, android_strings: Vec<AndroidString>) -> Result<(), Error> {
+pub fn write<S: Write>(sink: &mut S, android_strings: Vec<AndroidString>) -> Result<(), Error> {
     let mut writer = EmitterConfig::new()
         .perform_indent(true)
         .indent_string("    ") // 4 spaces
@@ -89,7 +89,7 @@ mod tests {
 
         // Write strings to a vector & split o/p into lines
         let mut sink: Vec<u8> = vec![];
-        super::to(&mut sink, android_strings).unwrap();
+        super::write(&mut sink, android_strings).unwrap();
         let written_content = String::from_utf8(sink).unwrap();
         let mut written_lines = written_content.lines();
 

@@ -6,9 +6,9 @@ use std::io::Read;
 use xml::reader::XmlEvent;
 use xml::ParserConfig;
 
-pub fn from<R: Read>(read: R) -> Result<Vec<AndroidString>, Error> {
+pub fn read<S: Read>(source: S) -> Result<Vec<AndroidString>, Error> {
     let mut events_handler = EventsHandler::new();
-    let reader = ParserConfig::new().create_reader(BufReader::new(read));
+    let reader = ParserConfig::new().create_reader(BufReader::new(source));
 
     for element_or_error in reader {
         match element_or_error {
@@ -179,6 +179,6 @@ mod tests {
         tmpfile.seek(SeekFrom::Start(0)).unwrap();
 
         // Read strings from file & assert
-        super::from(tmpfile.try_clone().unwrap()).unwrap()
+        super::read(tmpfile.try_clone().unwrap()).unwrap()
     }
 }

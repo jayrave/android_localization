@@ -5,13 +5,13 @@ use std::error;
 use std::fmt;
 use std::io::Read;
 
-pub fn from<R: Read>(read: R) -> Result<Vec<TranslatedString>, Error> {
+pub fn read<S: Read>(source: S) -> Result<Vec<TranslatedString>, Error> {
     let mut strings = vec![];
     let mut reader = ReaderBuilder::new()
         .has_headers(false)
         .flexible(true)
         .trim(csv::Trim::All)
-        .from_reader(read); // Read is automatically buffered
+        .from_reader(source); // Read is automatically buffered
 
     for record_or_error in reader.records() {
         match record_or_error {
@@ -159,6 +159,6 @@ mod tests {
         tmpfile.seek(SeekFrom::Start(0)).unwrap();
 
         // Read strings from file
-        super::from(tmpfile.try_clone().unwrap())
+        super::read(tmpfile.try_clone().unwrap())
     }
 }

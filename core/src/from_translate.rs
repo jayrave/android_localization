@@ -1,5 +1,6 @@
 use android_string::AndroidString;
 use constants;
+use helper::xml_read_helper;
 use ops::dedup;
 use ops::extract;
 use ops::filter;
@@ -14,7 +15,6 @@ use std::io;
 use std::ops::Add;
 use std::path::Path;
 use std::path::PathBuf;
-use utils::xml_read_helper;
 use writer::xml_writer;
 
 pub fn do_the_thing<S: ::std::hash::BuildHasher>(
@@ -65,7 +65,7 @@ fn handle_translations(
     translated_text_file_path.push(file_name);
     translated_text_file_path.set_extension(constants::extn::CSV);
     let mut new_translated_foreign_strings =
-        csv_reader::from(File::open(translated_text_file_path).map_err(Error::IoError)?)
+        csv_reader::read(File::open(translated_text_file_path).map_err(Error::IoError)?)
             .map_err(Error::CsvError)?;
 
     // Extract android strings out of the newly translated strings
@@ -84,7 +84,7 @@ fn handle_translations(
     // Write out foreign strings back to file
     let mut file =
         writable_empty_foreign_strings_file(res_dir_path, lang_id).map_err(Error::IoError)?;
-    xml_writer::to(&mut file, to_be_written_foreign_strings).map_err(Error::XmlWriteError)
+    xml_writer::write(&mut file, to_be_written_foreign_strings).map_err(Error::XmlWriteError)
 }
 
 fn writable_empty_foreign_strings_file(
@@ -147,12 +147,12 @@ mod tests {
     extern crate tempfile;
 
     use android_string::AndroidString;
+    use helper::xml_read_helper;
     use std::collections::HashMap;
     use std::fs;
     use std::fs::File;
     use std::io::Read;
     use std::io::Write;
-    use utils::xml_read_helper;
     use writer::xml_writer;
 
     #[test]
@@ -195,7 +195,7 @@ mod tests {
         let mut fr_translations_file = File::create(fr_translations_file_path).unwrap();
 
         // Write out required contents into files
-        xml_writer::to(
+        xml_writer::write(
             &mut default_strings_file,
             vec![
                 AndroidString::new(String::from("s1"), String::from("english value 1"), true),
@@ -203,7 +203,7 @@ mod tests {
             ],
         ).unwrap();
 
-        xml_writer::to(
+        xml_writer::write(
             &mut fr_strings_file,
             vec![
                 AndroidString::new(String::from("s1"), String::from("french old value 1"), true),

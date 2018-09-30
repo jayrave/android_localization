@@ -1,5 +1,6 @@
 use android_string::AndroidString;
 use constants;
+use helper::xml_read_helper;
 use ops::filter;
 use reader::xml_reader;
 use std::collections::HashMap;
@@ -10,7 +11,6 @@ use std::fs::File;
 use std::io;
 use std::path::Path;
 use std::path::PathBuf;
-use utils::xml_read_helper;
 use writer::csv_writer;
 
 pub fn do_the_thing<S: ::std::hash::BuildHasher>(
@@ -94,7 +94,7 @@ fn write_out_strings_to_translate(
         filter::find_missing_strings(&mut foreign_strings, translatable_default_strings);
     if !strings_to_translate.is_empty() {
         let mut sink = create_output_file(output_dir_path, file_name)?;
-        if let Err(error) = csv_writer::to(&mut sink, strings_to_translate) {
+        if let Err(error) = csv_writer::write(&mut sink, strings_to_translate) {
             return Err(Error::CsvError(error));
         }
     }

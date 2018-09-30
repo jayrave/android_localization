@@ -1,9 +1,9 @@
+use helper::xml_read_helper;
 use std::error;
 use std::fmt;
 use std::io;
 use std::path::Path;
-use utils::foreign_lang_ids_finder;
-use utils::xml_read_helper;
+use util::foreign_lang_ids_finder;
 use validate::apostrophe;
 use validate::format_string;
 
@@ -151,7 +151,7 @@ mod tests {
         fs::create_dir_all(&spanish_values_dir_path).unwrap();
         let mut spanish_strings_file = create_strings_file_in(&spanish_values_dir_path);
 
-        xml_writer::to(
+        xml_writer::write(
             &mut default_strings_file,
             vec![
                 AndroidString::new(String::from("s1"), String::from("value"), true),
@@ -159,7 +159,7 @@ mod tests {
             ],
         ).unwrap();
 
-        xml_writer::to(
+        xml_writer::write(
             &mut french_strings_file,
             vec![
                 AndroidString::new(String::from("s1"), String::from("val'ue %1$s"), true),
@@ -167,7 +167,7 @@ mod tests {
             ],
         ).unwrap();
 
-        xml_writer::to(
+        xml_writer::write(
             &mut spanish_strings_file,
             vec![AndroidString::new(
                 String::from("s1"),
