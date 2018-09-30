@@ -14,5 +14,6 @@ mod reader;
 pub mod to_translate;
 mod util;
 mod validate;
-pub mod validator;
 mod writer;
+
+pub use validate::validator;
