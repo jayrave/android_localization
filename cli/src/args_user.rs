@@ -23,25 +23,32 @@ pub fn do_the_thing(matches: &ArgMatches) {
 }
 
 fn do_to_csv(matches: &ArgMatches) {
-    exit_appropriately(core::to_translate::do_the_thing(
-        matches.value_of(constants::arg::RES_DIR).unwrap(),
-        matches.value_of(constants::arg::TO_CSV_OUTPUT).unwrap(),
-        build_mappings(matches),
-    ));
+    exit_appropriately(
+        String::from("Texts to be translated written to"),
+        core::to_translate::do_the_thing(
+            matches.value_of(constants::arg::RES_DIR).unwrap(),
+            matches.value_of(constants::arg::TO_CSV_OUTPUT).unwrap(),
+            build_mappings(matches),
+        ),
+    );
 }
 
 fn do_from_csv(matches: &ArgMatches) {
-    exit_appropriately(core::from_translate::do_the_thing(
-        matches.value_of(constants::arg::RES_DIR).unwrap(),
-        matches.value_of(constants::arg::FROM_CSV_INPUT).unwrap(),
-        build_mappings(matches),
-    ));
+    exit_appropriately(
+        String::from("Translated texts written to"),
+        core::from_translate::do_the_thing(
+            matches.value_of(constants::arg::RES_DIR).unwrap(),
+            matches.value_of(constants::arg::FROM_CSV_INPUT).unwrap(),
+            build_mappings(matches),
+        ),
+    );
 }
 
 fn do_validations(matches: &ArgMatches) {
-    exit_appropriately(core::validator::do_the_thing(
-        matches.value_of(constants::arg::RES_DIR).unwrap(),
-    ))
+    exit_appropriately(
+        String::from("No issues found. Validated the following files"),
+        core::validator::do_the_thing(matches.value_of(constants::arg::RES_DIR).unwrap()),
+    )
 }
 
 fn build_mappings(matches: &ArgMatches) -> HashMap<String, String> {
@@ -55,13 +62,15 @@ fn build_mappings(matches: &ArgMatches) -> HashMap<String, String> {
                 String::from(captures.get(1).unwrap().as_str()),
                 String::from(captures.get(2).unwrap().as_str()),
             )
-        })
-        .collect()
+        }).collect()
 }
 
-fn exit_appropriately<E: fmt::Display>(result: Result<Vec<String>, E>) {
+fn exit_appropriately<E: fmt::Display>(success_prefix: String, result: Result<Vec<String>, E>) {
     match result {
-        Ok(_) => process::exit(0),
+        Ok(file_names) => {
+            println!("{} - \n\n{}", success_prefix, file_names.join("\n"));
+            process::exit(0)
+        }
         Err(error) => {
             eprintln!("{}", error.to_string());
             process::exit(1)

@@ -73,6 +73,9 @@ fn mapping_validator(mapping: String) -> Result<(), String> {
     if valid_mapping {
         Ok(())
     } else {
-        Err(format!("Mapping should be of the format xx=XX; Found: {}", mapping))
+        Err(format!(
+            "Mapping should be of the format xx=yy; Found: {}",
+            mapping
+        ))
     }
 }
