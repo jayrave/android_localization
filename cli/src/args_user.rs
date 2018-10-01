@@ -59,7 +59,7 @@ fn build_mappings(matches: &ArgMatches) -> HashMap<String, String> {
         .collect()
 }
 
-fn exit_appropriately<E: fmt::Display>(result: Result<(), E>) {
+fn exit_appropriately<E: fmt::Display>(result: Result<Vec<String>, E>) {
     match result {
         Ok(_) => process::exit(0),
         Err(error) => {

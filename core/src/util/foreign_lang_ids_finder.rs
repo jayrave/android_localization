@@ -1,5 +1,7 @@
 use constants;
 use regex::Regex;
+use std::error;
+use std::fmt;
 use std::fs;
 use std::io;
 use std::path::Path;
@@ -54,6 +56,19 @@ pub fn find(res_dir_path: &str) -> Result<Vec<String>, Error> {
 pub struct Error {
     pub path: String,
     pub error: io::Error,
+}
+
+impl error::Error for Error {
+    fn cause(&self) -> Option<&error::Error> {
+        return Some(&self.error);
+    }
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Path: {}; Error: ", &self.path)?;
+        fmt::Display::fmt(&self.error, f)
+    }
 }
 
 #[cfg(test)]

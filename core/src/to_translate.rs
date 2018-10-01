@@ -13,70 +13,92 @@ use std::path::Path;
 use std::path::PathBuf;
 use writer::csv_writer;
 
+/// Returns the list of output files created by this call. These aren't guaranteed
+/// to be valid paths to files. Sometimes, if a file's path can't be expressed by
+/// `String` (in case it has non UTF-8 chars), it could just be the file's name
 pub fn do_the_thing<S: ::std::hash::BuildHasher>(
     res_dir_path: &str,
     output_dir_path: &str,
     lang_id_to_human_friendly_name_mapping: HashMap<String, String, S>,
-) -> Result<(), Error> {
+) -> Result<Vec<String>, Error> {
     if lang_id_to_human_friendly_name_mapping.is_empty() {
-        return Err(Error::ArgError(String::from(
-            "Language ID to human friendly name mapping can't be empty",
-        )));
+        return Err(Error {
+            path: None,
+            kind: ErrorKind::ArgError(String::from(
+                "Language ID to human friendly name mapping can't be empty",
+            )),
+        });
     }
 
+    let mut paths_of_created_file = vec![];
     create_output_dir_if_required(output_dir_path)?;
 
     // Read default strings
     let res_dir_path = Path::new(res_dir_path);
-    let mut translatable_default_strings = filter::find_translatable_strings(
-        xml_read_helper::read_default_strings(res_dir_path).map_err(Error::from)?,
-    );
+    let mut translatable_default_strings =
+        filter::find_translatable_strings(xml_read_helper::read_default_strings(res_dir_path)?);
 
     // For all languages, write out strings requiring translation
     for (lang_id, human_friendly_name) in lang_id_to_human_friendly_name_mapping {
-        write_out_strings_to_translate(
+        let possible_output_file_path = write_out_strings_to_translate(
             res_dir_path,
             &lang_id,
             output_dir_path,
             &human_friendly_name,
             &mut translatable_default_strings,
         )?;
+
+        if let Some(output_file_path) = possible_output_file_path {
+            paths_of_created_file.push(output_file_path)
+        }
     }
 
-    Ok(())
+    Ok(paths_of_created_file)
 }
 
 fn create_output_dir_if_required(output_dir_path: &str) -> Result<(), Error> {
     let output_path = PathBuf::from(output_dir_path);
     if output_path.is_file() {
-        Err(Error::ArgError(format!(
-            "Output directory path ({}) points to a file!",
-            output_dir_path
-        )))
+        Err(Error {
+            path: Some(String::from(output_dir_path)),
+            kind: ErrorKind::ArgError(String::from("Output directory path points to a file!")),
+        })
     } else if output_path.exists() {
         Ok(())
     } else {
         match fs::create_dir_all(PathBuf::from(output_dir_path)) {
-            Err(error) => Err(Error::IoError(error)),
             Ok(()) => Ok(()),
+            Err(error) => Err(Error {
+                path: Some(String::from(output_dir_path)),
+                kind: ErrorKind::IoError(error),
+            }),
         }
     }
 }
 
-fn create_output_file(output_dir_path: &str, output_file_name: &str) -> Result<File, Error> {
+/// Returns the created output file along with its path (if path computation
+/// is possible; if not, it passes out a fallback value)
+fn create_output_file(
+    output_dir_path: &str,
+    output_file_name: &str,
+) -> Result<(File, String), Error> {
     let mut output_path = PathBuf::from(output_dir_path);
     output_path.push(output_file_name);
     output_path.set_extension(constants::extn::CSV);
+    let output_path_or_fb = String::from(output_path.to_str().unwrap_or(output_file_name));
 
     if output_path.exists() {
-        Err(Error::ArgError(format!(
-            "File ({}) already exists!",
-            output_path.to_str().unwrap_or(output_file_name)
-        )))
+        Err(Error {
+            path: Some(output_path_or_fb),
+            kind: ErrorKind::ArgError(String::from("Output file already exists!")),
+        })
     } else {
         match File::create(output_path) {
-            Ok(file) => Ok(file),
-            Err(error) => Err(Error::IoError(error)),
+            Ok(file) => Ok((file, output_path_or_fb)),
+            Err(error) => Err(Error {
+                path: Some(output_path_or_fb),
+                kind: ErrorKind::IoError(error),
+            }),
         }
     }
 }
@@ -87,56 +109,74 @@ fn write_out_strings_to_translate(
     output_dir_path: &str,
     file_name: &str,
     translatable_default_strings: &mut Vec<AndroidString>,
-) -> Result<(), Error> {
+) -> Result<Option<String>, Error> {
     let mut foreign_strings =
-        xml_read_helper::read_foreign_strings(res_dir_path, lang_id).map_err(Error::from)?;
+        xml_read_helper::read_foreign_strings(res_dir_path, lang_id)?.into_strings();
     let strings_to_translate =
         filter::find_missing_strings(&mut foreign_strings, translatable_default_strings);
+
     if !strings_to_translate.is_empty() {
-        let mut sink = create_output_file(output_dir_path, file_name)?;
-        if let Err(error) = csv_writer::write(&mut sink, strings_to_translate) {
-            return Err(Error::CsvError(error));
-        }
+        let (mut sink, output_path_or_fb) = create_output_file(output_dir_path, file_name)?;
+        return match csv_writer::write(&mut sink, strings_to_translate) {
+            Ok(_) => Ok(Some(output_path_or_fb)),
+            Err(error) => Err(Error {
+                path: Some(String::from(output_path_or_fb)),
+                kind: ErrorKind::CsvError(error),
+            }),
+        };
     }
 
-    Ok(())
+    Ok(None)
 }
 
 #[derive(Debug)]
-pub enum Error {
+pub struct Error {
+    path: Option<String>,
+    kind: ErrorKind,
+}
+
+#[derive(Debug)]
+pub enum ErrorKind {
     ArgError(String),
     CsvError(csv_writer::Error),
     IoError(io::Error),
     XmlError(xml_reader::Error),
+    XmlReadHelperError(xml_read_helper::Error),
 }
 
 impl From<xml_read_helper::Error> for Error {
     fn from(error: xml_read_helper::Error) -> Self {
-        match error {
-            xml_read_helper::Error::IoError(e) => Error::IoError(e),
-            xml_read_helper::Error::XmlError(e) => Error::XmlError(e),
+        Error {
+            path: None,
+            kind: ErrorKind::XmlReadHelperError(error),
         }
     }
 }
 
 impl error::Error for Error {
     fn cause(&self) -> Option<&error::Error> {
-        match self {
-            Error::ArgError(_message) => None,
-            Error::CsvError(error) => Some(error),
-            Error::IoError(error) => Some(error),
-            Error::XmlError(error) => Some(error),
+        match &self.kind {
+            ErrorKind::ArgError(_message) => None,
+            ErrorKind::CsvError(error) => Some(error),
+            ErrorKind::IoError(error) => Some(error),
+            ErrorKind::XmlError(error) => Some(error),
+            ErrorKind::XmlReadHelperError(error) => Some(error),
         }
     }
 }
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Error::ArgError(message) => fmt::Display::fmt(message, f),
-            Error::CsvError(error) => fmt::Display::fmt(error, f),
-            Error::IoError(error) => fmt::Display::fmt(error, f),
-            Error::XmlError(error) => fmt::Display::fmt(error, f),
+        if let Some(path) = &self.path {
+            write!(f, "Path: {}; Error: ", path)?;
+        }
+
+        match &self.kind {
+            ErrorKind::ArgError(message) => fmt::Display::fmt(message, f),
+            ErrorKind::CsvError(error) => fmt::Display::fmt(error, f),
+            ErrorKind::IoError(error) => fmt::Display::fmt(error, f),
+            ErrorKind::XmlError(error) => fmt::Display::fmt(error, f),
+            ErrorKind::XmlReadHelperError(error) => fmt::Display::fmt(error, f),
         }
     }
 }
@@ -145,6 +185,7 @@ impl fmt::Display for Error {
 mod tests {
     extern crate tempfile;
 
+    use self::tempfile::TempDir;
     use android_string::AndroidString;
     use std::collections::HashMap;
     use std::fs;
@@ -154,9 +195,10 @@ mod tests {
 
     #[test]
     fn do_the_thing_errors_for_empty_lang_id_to_human_friendly_name_mapping() {
-        let error = super::do_the_thing("", "", HashMap::new());
+        let error = super::do_the_thing("", "", HashMap::new()).unwrap_err();
+        assert_eq!(error.path, None);
         assert_eq!(
-            error.unwrap_err().to_string(),
+            error.to_string(),
             "Language ID to human friendly name mapping can't be empty"
         )
     }
@@ -171,14 +213,13 @@ mod tests {
         File::create(&output_dir_path).unwrap();
         let output_dir_path = output_dir_path.to_str().unwrap();
 
-        let error = super::create_output_dir_if_required(output_dir_path);
-        assert_eq!(
-            error.unwrap_err().to_string(),
-            format!(
-                "Output directory path ({}) points to a file!",
-                output_dir_path
-            )
-        )
+        let error = super::create_output_dir_if_required(output_dir_path).unwrap_err();
+        assert!(
+            error
+                .to_string()
+                .ends_with("Output directory path points to a file!")
+        );
+        assert_eq!(error.path.unwrap(), output_dir_path);
     }
 
     #[test]
@@ -188,17 +229,15 @@ mod tests {
         let mut output_file_path = output_dir_path.to_path_buf();
         output_file_path.push("op_file.csv");
 
-        File::create(&output_file_path).unwrap();
+        File::create(&output_file_path.clone()).unwrap();
         let output_dir_path = output_dir_path.to_str().unwrap();
 
-        let error = super::create_output_file(output_dir_path, "op_file");
+        let error = super::create_output_file(output_dir_path, "op_file").unwrap_err();
+        assert!(error.to_string().ends_with("Output file already exists!"));
         assert_eq!(
-            error.unwrap_err().to_string(),
-            format!(
-                "File ({}) already exists!",
-                output_file_path.to_str().unwrap()
-            )
-        )
+            error.path.unwrap(),
+            String::from(output_file_path.to_str().unwrap())
+        );
     }
 
     #[test]
@@ -216,9 +255,12 @@ mod tests {
             true,
         )];
 
-        test_write_out_strings_to_translate(&contents, default_strings, |output_file_path| {
-            assert!(!Path::new(output_file_path).exists())
-        })
+        let temp_dir = tempfile::tempdir().unwrap();
+        let (method_output, possible_output_file) =
+            test_write_out_strings_to_translate(&temp_dir, &contents, default_strings);
+
+        assert_eq!(method_output, None);
+        assert!(!Path::new(&possible_output_file).exists())
     }
 
     #[test]
@@ -234,21 +276,25 @@ mod tests {
             AndroidString::new(String::from("string_2"), String::from("string value"), true),
         ];
 
-        test_write_out_strings_to_translate(&contents, default_strings, |output_file_path| {
-            let mut output_file = File::open(output_file_path).unwrap();
-            let mut output = String::new();
-            output_file.read_to_string(&mut output).unwrap();
-            assert_eq!(output, "string_1,string value\nstring_2,string value\n");
-        })
+        let temp_dir = tempfile::tempdir().unwrap();
+        let (method_output, possible_output_file) =
+            test_write_out_strings_to_translate(&temp_dir, &contents, default_strings);
+
+        assert_eq!(method_output.unwrap(), possible_output_file);
+
+        let mut output_file = File::open(possible_output_file).unwrap();
+        let mut output = String::new();
+        output_file.read_to_string(&mut output).unwrap();
+        assert_eq!(output, "string_1,string value\nstring_2,string value\n");
     }
 
-    fn test_write_out_strings_to_translate<A: Fn(&str)>(
+    /// Returns the output of the method call to `write_out_strings_to_translate`
+    /// & the possible output file (built by the test)
+    fn test_write_out_strings_to_translate(
+        temp_dir: &TempDir,
         values_file_content: &str,
         mut default_strings: Vec<AndroidString>,
-        asserter: A,
-    ) {
-        let temp_dir = tempfile::tempdir().unwrap();
-
+    ) -> (Option<String>, String) {
         // Build paths
         let mut values_dir_path = temp_dir.path().to_path_buf();
         values_dir_path.push("res");
@@ -268,7 +314,7 @@ mod tests {
         strings_file.seek(SeekFrom::Start(0)).unwrap();
 
         // Perform action
-        super::write_out_strings_to_translate(
+        let result = super::write_out_strings_to_translate(
             values_dir_path.parent().unwrap(),
             "fr",
             output_dir_path.to_str().unwrap(),
@@ -276,7 +322,9 @@ mod tests {
             &mut default_strings,
         ).unwrap();
 
-        // Assert appropriate output
-        asserter(output_file_path.clone().to_str().unwrap());
+        (
+            result,
+            String::from(output_file_path.clone().to_str().unwrap()),
+        )
     }
 }
