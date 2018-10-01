@@ -1,4 +1,5 @@
 use clap::ArgMatches;
+use console::style;
 use constants;
 use core;
 use std::collections::HashMap;
@@ -68,11 +69,13 @@ fn build_mappings(matches: &ArgMatches) -> HashMap<String, String> {
 fn exit_appropriately<E: fmt::Display>(success_prefix: String, result: Result<Vec<String>, E>) {
     match result {
         Ok(file_names) => {
-            println!("{} - \n\n{}", success_prefix, file_names.join("\n"));
+            let output = format!("{} - \n\n{}", success_prefix, file_names.join("\n"));
+            println!("{}", style(output).green());
             process::exit(0)
         }
+
         Err(error) => {
-            eprintln!("{}", error.to_string());
+            eprintln!("{}", style(error.to_string()).red());
             process::exit(1)
         }
     }
