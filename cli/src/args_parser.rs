@@ -56,7 +56,6 @@ fn build_mapping_arg() -> Arg<'static, 'static> {
         .takes_value(true)
         .validator(mapping_validator)
         .multiple(true)
-        .required(true)
 }
 
 fn mapping_validator(mapping: String) -> Result<(), String> {

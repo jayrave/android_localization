@@ -53,17 +53,17 @@ fn do_validations(matches: &ArgMatches) {
 }
 
 fn build_mappings(matches: &ArgMatches) -> HashMap<String, String> {
-    matches
-        .values_of(constants::arg::MAPPING)
-        .unwrap()
-        .into_iter()
-        .map(|mapping| {
-            let captures = constants::TEXT_TO_TEXT_REGEX.captures(mapping).unwrap();
-            (
-                String::from(captures.get(1).unwrap().as_str()),
-                String::from(captures.get(2).unwrap().as_str()),
-            )
-        }).collect()
+    match matches.values_of(constants::arg::MAPPING) {
+        None => HashMap::new(),
+        Some(values) => values
+            .map(|mapping| {
+                let captures = constants::TEXT_TO_TEXT_REGEX.captures(mapping).unwrap();
+                (
+                    String::from(captures.get(1).unwrap().as_str()),
+                    String::from(captures.get(2).unwrap().as_str()),
+                )
+            }).collect(),
+    }
 }
 
 fn exit_appropriately<E: fmt::Display>(success_prefix: String, result: Result<Vec<String>, E>) {
