@@ -1,16 +1,23 @@
 use regex::Regex;
 
 pub mod command {
-    pub const TO_CSV: &str = "to_csv";
-    pub const FROM_CSV: &str = "from_csv";
+    pub const TO_TRANSLATE: &str = "localize";
+    pub const FROM_TRANSLATE: &str = "localized";
     pub const VALIDATE: &str = "validate";
 }
 
 pub mod arg {
-    pub const RES_DIR: &str = "res_dir";
-    pub const TO_CSV_OUTPUT: &str = "translations_dir";
-    pub const FROM_CSV_INPUT: &str = "translations_dir";
+    pub const RES_DIR: &str = "res";
+    pub const TO_TRANSLATE_OUTPUT: &str = "output";
+    pub const FROM_TRANSLATE_INPUT: &str = "input";
     pub const MAPPING: &str = "mapping";
+
+    pub mod short {
+        pub const RES_DIR: &str = "r";
+        pub const TO_TRANSLATE_OUTPUT: &str = "o";
+        pub const FROM_TRANSLATE_INPUT: &str = "i";
+        pub const MAPPING: &str = "m";
+    }
 }
 
 lazy_static! {

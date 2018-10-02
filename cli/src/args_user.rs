@@ -10,11 +10,11 @@ use std::process;
 /// Please don't let that bother you as the requirements are correctly setup in
 /// `args_parser.rs` & unwrapped values are guaranteed to be present there
 pub fn do_the_thing(matches: &ArgMatches) {
-    if let Some(from_csv_command) = matches.subcommand_matches(constants::command::FROM_CSV) {
+    if let Some(from_csv_command) = matches.subcommand_matches(constants::command::FROM_TRANSLATE) {
         do_from_csv(&from_csv_command);
     }
 
-    if let Some(to_csv_command) = matches.subcommand_matches(constants::command::TO_CSV) {
+    if let Some(to_csv_command) = matches.subcommand_matches(constants::command::TO_TRANSLATE) {
         do_to_csv(&to_csv_command)
     }
 
@@ -25,10 +25,12 @@ pub fn do_the_thing(matches: &ArgMatches) {
 
 fn do_to_csv(matches: &ArgMatches) {
     exit_appropriately(
-        String::from("Texts to be translated written to"),
+        "Texts to be translated written to",
         core::to_translate::do_the_thing(
             matches.value_of(constants::arg::RES_DIR).unwrap(),
-            matches.value_of(constants::arg::TO_CSV_OUTPUT).unwrap(),
+            matches
+                .value_of(constants::arg::TO_TRANSLATE_OUTPUT)
+                .unwrap(),
             build_mappings(matches),
         ),
     );
@@ -36,10 +38,12 @@ fn do_to_csv(matches: &ArgMatches) {
 
 fn do_from_csv(matches: &ArgMatches) {
     exit_appropriately(
-        String::from("Translated texts written to"),
+        "Translated texts written to",
         core::from_translate::do_the_thing(
             matches.value_of(constants::arg::RES_DIR).unwrap(),
-            matches.value_of(constants::arg::FROM_CSV_INPUT).unwrap(),
+            matches
+                .value_of(constants::arg::FROM_TRANSLATE_INPUT)
+                .unwrap(),
             build_mappings(matches),
         ),
     );
@@ -47,7 +51,7 @@ fn do_from_csv(matches: &ArgMatches) {
 
 fn do_validations(matches: &ArgMatches) {
     exit_appropriately(
-        String::from("No issues found. Validated the following files"),
+        "No issues found. Validated the following files",
         core::validator::do_the_thing(matches.value_of(constants::arg::RES_DIR).unwrap()),
     )
 }
@@ -66,7 +70,7 @@ fn build_mappings(matches: &ArgMatches) -> HashMap<String, String> {
     }
 }
 
-fn exit_appropriately<E: fmt::Display>(success_prefix: String, result: Result<Vec<String>, E>) {
+fn exit_appropriately<E: fmt::Display>(success_prefix: &str, result: Result<Vec<String>, E>) {
     match result {
         Ok(file_names) => {
             let output = format!("{} - \n\n{}", success_prefix, file_names.join("\n"));
