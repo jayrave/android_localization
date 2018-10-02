@@ -1,5 +1,6 @@
 use constants;
 use regex::Regex;
+use std::collections::HashMap;
 use std::error;
 use std::fmt;
 use std::fs;
@@ -52,6 +53,20 @@ pub fn find(res_dir_path: &str) -> Result<Vec<String>, Error> {
     Ok(lang_ids)
 }
 
+/// Look @ `find`'s doc to figure out how the lang IDs are figured out
+pub fn find_and_build_mapping_if_empty_or_return<S: ::std::hash::BuildHasher>(
+    mut mapping: HashMap<String, String, S>,
+    res_dir_path: &str,
+) -> Result<HashMap<String, String, S>, Error> {
+    if mapping.is_empty() {
+        for lang_id in find(res_dir_path)? {
+            mapping.insert(lang_id.clone(), lang_id);
+        }
+    }
+
+    Ok(mapping)
+}
+
 #[derive(Debug)]
 pub struct Error {
     pub path: String,
@@ -60,7 +75,7 @@ pub struct Error {
 
 impl error::Error for Error {
     fn cause(&self) -> Option<&error::Error> {
-        return Some(&self.error);
+        Some(&self.error)
     }
 }
 
@@ -75,12 +90,13 @@ impl fmt::Display for Error {
 mod tests {
     extern crate tempfile;
 
+    use std::collections::HashMap;
     use std::fs;
     use std::fs::File;
     use std::path::PathBuf;
 
     #[test]
-    fn errors_if_res_dir_does_not_exist() {
+    fn find_errors_if_res_dir_does_not_exist() {
         let tempdir = tempfile::tempdir().unwrap();
         let mut res_dir_path = tempdir.path().to_path_buf();
         res_dir_path.push("res");
@@ -91,7 +107,7 @@ mod tests {
     }
 
     #[test]
-    fn finds_foreign_lang_ids() {
+    fn find_finds_foreign_lang_ids() {
         let tempdir = tempfile::tempdir().unwrap();
         let mut res_dir_path = tempdir.path().to_path_buf();
         res_dir_path.push("res");
@@ -124,6 +140,44 @@ mod tests {
         assert_eq!(lang_ids.next(), None);
         assert!(lang_id_1 == "fr" || lang_id_1 == "it");
         assert!(lang_id_2 == "fr" || lang_id_2 == "it");
+    }
+
+    #[test]
+    fn find_and_build_mapping_if_empty_or_return_returns_non_empty_map_as_is() {
+        let mut mapping = HashMap::new();
+        mapping.insert(String::from("a"), String::from("a"));
+        assert_eq!(
+            super::find_and_build_mapping_if_empty_or_return(mapping.clone(), "").unwrap(),
+            mapping
+        )
+    }
+
+    #[test]
+    fn find_and_build_mapping_if_empty_or_return_builds_mapping() {
+        let tempdir = tempfile::tempdir().unwrap();
+        let mut res_dir_path = tempdir.path().to_path_buf();
+        res_dir_path.push("res");
+
+        let mut french_values_dir_path = res_dir_path.clone();
+        french_values_dir_path.push("values-fr");
+        fs::create_dir_all(&french_values_dir_path).unwrap();
+        create_strings_file_in(&french_values_dir_path);
+
+        let mut italian_values_dir_path = res_dir_path.clone();
+        italian_values_dir_path.push("values-it");
+        fs::create_dir_all(&italian_values_dir_path).unwrap();
+        create_strings_file_in(&italian_values_dir_path);
+
+        let mut mapping = HashMap::new();
+        mapping.insert(String::from("fr"), String::from("fr"));
+        mapping.insert(String::from("it"), String::from("it"));
+        assert_eq!(
+            super::find_and_build_mapping_if_empty_or_return(
+                HashMap::new(),
+                res_dir_path.to_str().unwrap()
+            ).unwrap(),
+            mapping
+        )
     }
 
     fn create_strings_file_in(dir_path: &PathBuf) {

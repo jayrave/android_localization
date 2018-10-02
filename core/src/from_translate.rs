@@ -15,6 +15,7 @@ use std::io;
 use std::ops::Add;
 use std::path::Path;
 use std::path::PathBuf;
+use util::foreign_lang_ids_finder;
 use writer::xml_writer;
 
 /// Returns the list of output files created by this call. These aren't guaranteed
@@ -25,11 +26,17 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
     translated_text_input_dir_path: &str,
     human_friendly_name_to_lang_id_mapping: HashMap<String, String, S>,
 ) -> Result<Vec<String>, Error> {
+    let human_friendly_name_to_lang_id_mapping =
+        foreign_lang_ids_finder::find_and_build_mapping_if_empty_or_return(
+            human_friendly_name_to_lang_id_mapping,
+            res_dir_path,
+        )?;
+
     if human_friendly_name_to_lang_id_mapping.is_empty() {
         return Err(Error {
-            path: None,
+            path: Some(String::from(res_dir_path)),
             kind: ErrorKind::ArgError(String::from(
-                "Human friendly name to language ID mapping can't be empty",
+                "Res dir doesn't have any non-default values dir with strings file!",
             )),
         });
     }
@@ -125,7 +132,7 @@ fn writable_empty_foreign_strings_file(
             path: Some(output_path_or_fb.clone()),
             kind: ErrorKind::IoError(e),
         })?,
-        String::from(output_path_or_fb),
+        output_path_or_fb,
     ))
 }
 
@@ -139,9 +146,19 @@ pub struct Error {
 pub enum ErrorKind {
     ArgError(String),
     CsvError(csv_reader::Error),
+    ForeignLangIdsFinder(foreign_lang_ids_finder::Error),
     IoError(io::Error),
     XmlReadError(xml_reader::Error),
     XmlWriteError(xml_writer::Error),
+}
+
+impl From<foreign_lang_ids_finder::Error> for Error {
+    fn from(error: foreign_lang_ids_finder::Error) -> Self {
+        Error {
+            path: None,
+            kind: ErrorKind::ForeignLangIdsFinder(error),
+        }
+    }
 }
 
 impl From<xml_read_helper::Error> for Error {
@@ -161,6 +178,7 @@ impl error::Error for Error {
         match &self.kind {
             ErrorKind::ArgError(_message) => None,
             ErrorKind::CsvError(error) => Some(error),
+            ErrorKind::ForeignLangIdsFinder(error) => Some(error),
             ErrorKind::IoError(error) => Some(error),
             ErrorKind::XmlReadError(error) => Some(error),
             ErrorKind::XmlWriteError(error) => Some(error),
@@ -177,6 +195,7 @@ impl fmt::Display for Error {
         match &self.kind {
             ErrorKind::ArgError(message) => fmt::Display::fmt(message, f),
             ErrorKind::CsvError(error) => fmt::Display::fmt(error, f),
+            ErrorKind::ForeignLangIdsFinder(error) => fmt::Display::fmt(error, f),
             ErrorKind::IoError(error) => fmt::Display::fmt(error, f),
             ErrorKind::XmlReadError(error) => fmt::Display::fmt(error, f),
             ErrorKind::XmlWriteError(error) => fmt::Display::fmt(error, f),
@@ -199,11 +218,21 @@ mod tests {
 
     #[test]
     fn do_the_thing_errors_for_empty_human_friendly_name_to_lang_id_mapping() {
-        let error = super::do_the_thing("", "", HashMap::new()).unwrap_err();
-        assert_eq!(error.path, None);
+        let temp_dir = tempfile::tempdir().unwrap();
+        let mut res_dir_path = temp_dir.path().to_path_buf();
+        res_dir_path.push("res");
+        fs::create_dir(res_dir_path.clone()).unwrap();
+
+        let error =
+            super::do_the_thing(res_dir_path.to_str().unwrap(), "", HashMap::new()).unwrap_err();
         assert_eq!(
-            error.to_string(),
-            "Human friendly name to language ID mapping can't be empty"
+            error.path,
+            Some(String::from(res_dir_path.to_str().unwrap()))
+        );
+        assert!(
+            error
+                .to_string()
+                .ends_with("Res dir doesn't have any non-default values dir with strings file!")
         )
     }
 
