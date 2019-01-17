@@ -131,6 +131,8 @@ mod tests {
     extern crate tempfile;
 
     use android_string::AndroidString;
+    use std::cmp;
+    use std::fmt;
     use std::fs;
     use std::fs::File;
     use std::path::PathBuf;
@@ -186,9 +188,10 @@ mod tests {
             )],
         ).unwrap();
 
-        assert_eq!(
+        assert_eq(
             super::do_the_thing(res_dir_path.to_str().unwrap()).unwrap(),
-            vec!(spanish_strings_file_path, french_strings_file_path)
+            vec!(spanish_strings_file_path.clone(), french_strings_file_path.clone()),
+            vec!(french_strings_file_path, spanish_strings_file_path)
         );
     }
 
@@ -241,9 +244,12 @@ mod tests {
         ).unwrap();
 
         let error = super::do_the_thing(res_dir_path.to_str().unwrap()).unwrap_err();
-        assert_eq!(
+        let spanish_errors = format!("File path: {}; apostrophe errors: [(Translatable: true; Name: s1; Value: v'alue)]; format string errors: []\n", spanish_strings_file_path);
+        let french_errors = format!("File path: {}; apostrophe errors: [(Translatable: true; Name: s1; Value: val'ue %1$s)(Translatable: true; Name: s2; Value: v'alue %1$d)]; format string errors: [(Format string mismatch. Found format strings () in default (value) & found format strings (%1$s) in foreign (val'ue %1$s))(Format string mismatch. Found format strings () in default (v'alue) & found format strings (%1$d) in foreign (v'alue %1$d))]\n", french_strings_file_path);
+        assert_eq(
             error.to_string(),
-            format!("File path: {}; apostrophe errors: [(Translatable: true; Name: s1; Value: v'alue)]; format string errors: []\nFile path: {}; apostrophe errors: [(Translatable: true; Name: s1; Value: val'ue %1$s)(Translatable: true; Name: s2; Value: v'alue %1$d)]; format string errors: [(Format string mismatch. Found format strings () in default (value) & found format strings (%1$s) in foreign (val'ue %1$s))(Format string mismatch. Found format strings () in default (v'alue) & found format strings (%1$d) in foreign (v'alue %1$d))]\n", spanish_strings_file_path, french_strings_file_path)
+            format!("{}{}", spanish_errors, french_errors),
+            format!("{}{}", french_errors, spanish_errors)
         );
     }
 
@@ -254,5 +260,20 @@ mod tests {
             File::create(strings_file_path.clone()).unwrap(),
             String::from(strings_file_path.clone().to_str().unwrap()),
         )
+    }
+
+    fn assert_eq<T : fmt::Debug + cmp::PartialEq>(actual: T, potential_expected_1: T, potential_expected_2: T) {
+        let matches = (actual == potential_expected_1) || (actual == potential_expected_2);
+        if !matches {
+            panic!(
+                r#"assertion failed: `(left == right)`
+                actual              : `{:?}`,
+                potential expected 1: `{:?}`
+                potential expected 2: `{:?}`"#,
+                actual,
+                potential_expected_1,
+                potential_expected_2
+            )
+        }
     }
 }
