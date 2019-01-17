@@ -12,7 +12,7 @@ pub struct StringEventHandler {
 }
 
 impl StringEventHandler {
-    pub fn new(attributes: Vec<OwnedAttribute>) -> Result<StringEventHandler, Error> {
+    pub fn build(attributes: Vec<OwnedAttribute>) -> Result<StringEventHandler, Error> {
         let mut string_name = None;
         let mut is_translatable = true;
         for attribute in attributes {
