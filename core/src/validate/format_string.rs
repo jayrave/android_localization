@@ -76,7 +76,8 @@ pub fn parse_and_build_data(strings: &[AndroidString]) -> Vec<ParsedData> {
         .map(|s| ParsedData {
             android_string: s.clone(),
             sorted_format_strings: parse_and_sort_format_strings(s),
-        }).collect()
+        })
+        .collect()
 }
 
 fn parse_and_sort_format_strings(string: &AndroidString) -> Vec<String> {
@@ -261,13 +262,12 @@ mod tests {
 
     #[test]
     fn parse_returns_empty_list_in_case_of_no_format_strings() {
-        assert!(
-            super::parse_and_sort_format_strings(&AndroidString::new(
-                String::from("s1"),
-                String::from("value"),
-                true
-            )).is_empty()
-        )
+        assert!(super::parse_and_sort_format_strings(&AndroidString::new(
+            String::from("s1"),
+            String::from("value"),
+            true
+        ))
+        .is_empty())
     }
 
     #[test]

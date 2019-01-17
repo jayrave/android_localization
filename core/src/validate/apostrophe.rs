@@ -53,12 +53,11 @@ mod tests {
 
     #[test]
     fn passes_in_absence_of_unescaped_apostrophes() {
-        assert!(
-            super::validate(&vec![
-                AndroidString::new(String::from("s1"), String::from("value"), true),
-                AndroidString::new(String::from("s2"), String::from(r"val\'ue"), true),
-            ]).is_ok()
-        )
+        assert!(super::validate(&vec![
+            AndroidString::new(String::from("s1"), String::from("value"), true),
+            AndroidString::new(String::from("s2"), String::from(r"val\'ue"), true),
+        ])
+        .is_ok())
     }
 
     #[test]
@@ -69,7 +68,8 @@ mod tests {
             AndroidString::new(String::from("s3"), String::from(r"val\'ue"), true),
             AndroidString::new(String::from("s4"), String::from("value'"), true),
             AndroidString::new(String::from("s5"), String::from(r"\'va\l\ue\'"), true),
-        ]).unwrap_err();
+        ])
+        .unwrap_err();
 
         assert_eq!(
             error.invalid_strings,

@@ -1,7 +1,7 @@
 use csv;
 use csv::ReaderBuilder;
-use reader::translated_string::TranslatedString;
 use reader::csv_reader::error::Error;
+use reader::translated_string::TranslatedString;
 use std::io::Read;
 
 pub fn read<S: Read>(source: S) -> Result<Vec<TranslatedString>, Error> {

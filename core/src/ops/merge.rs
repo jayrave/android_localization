@@ -60,7 +60,8 @@ mod tests {
                     false,
                 ),
             ],
-        ).into_iter();
+        )
+        .into_iter();
 
         assert_eq!(
             strings.next().unwrap(),
@@ -95,7 +96,7 @@ mod tests {
 
     #[test]
     fn merged_and_grouped_with_list_1_strings_taking_precedence_over_list_2_strings_in_case_of_same_name(
-) {
+    ) {
         let mut strings = super::merge_and_group_strings(
             &mut vec![
                 AndroidString::new(String::from("string_1"), String::from("from list 1"), true),
@@ -110,7 +111,8 @@ mod tests {
                 AndroidString::new(String::from("string_1"), String::from("from list 2"), false),
                 AndroidString::new(String::from("string_2"), String::from("from list 2"), true),
             ],
-        ).into_iter();
+        )
+        .into_iter();
 
         assert_eq!(
             strings.next().unwrap(),

@@ -89,7 +89,8 @@ mod tests {
                 String::from("non translatable string value"),
                 false,
             ),
-        ]).into_iter();
+        ])
+        .into_iter();
 
         assert_eq!(
             deduplicated_items.next().unwrap(),
@@ -143,7 +144,8 @@ mod tests {
                 String::from("string 2 value 3"),
                 true,
             ),
-        ]).into_iter();
+        ])
+        .into_iter();
 
         assert_eq!(
             deduplicated_items.next().unwrap(),

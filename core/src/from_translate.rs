@@ -81,10 +81,13 @@ fn handle_translations(
         String::from(translated_text_file_path.to_str().unwrap_or(file_name));
 
     let mut new_translated_foreign_strings =
-        csv_reader::single_locale_read(File::open(translated_text_file_path).map_err(|e| Error {
-            path: Some(translated_file_path_string_or_fb.clone()),
-            kind: ErrorKind::IoError(e),
-        })?).map_err(|e| Error {
+        csv_reader::single_locale_read(File::open(translated_text_file_path).map_err(|e| {
+            Error {
+                path: Some(translated_file_path_string_or_fb.clone()),
+                kind: ErrorKind::IoError(e),
+            }
+        })?)
+        .map_err(|e| Error {
             path: Some(translated_file_path_string_or_fb),
             kind: ErrorKind::CsvError(e),
         })?;
@@ -229,11 +232,9 @@ mod tests {
             error.path,
             Some(String::from(res_dir_path.to_str().unwrap()))
         );
-        assert!(
-            error
-                .to_string()
-                .ends_with("Res dir doesn't have any non-default values dir with strings file!")
-        )
+        assert!(error
+            .to_string()
+            .ends_with("Res dir doesn't have any non-default values dir with strings file!"))
     }
 
     #[test]
@@ -273,7 +274,8 @@ mod tests {
                 AndroidString::new(String::from("s1"), String::from("english value 1"), true),
                 AndroidString::new(String::from("s2"), String::from("english value 2"), true),
             ],
-        ).unwrap();
+        )
+        .unwrap();
 
         xml_writer::write(
             &mut fr_strings_file,
@@ -281,7 +283,8 @@ mod tests {
                 AndroidString::new(String::from("s1"), String::from("french old value 1"), true),
                 AndroidString::new(String::from("s2"), String::from("french old value 2"), true),
             ],
-        ).unwrap();
+        )
+        .unwrap();
 
         fr_translations_file
             .write("s1, english value 1, french new value 1".as_bytes())
@@ -294,7 +297,8 @@ mod tests {
             res_dir_path.clone().to_str().unwrap(),
             translations_dir_path.to_str().unwrap(),
             map,
-        ).unwrap();
+        )
+        .unwrap();
 
         // Assert appropriate output
         assert_eq!(

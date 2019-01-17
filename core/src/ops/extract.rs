@@ -105,7 +105,8 @@ mod tests {
         let mut strings = super::extract_android_strings_from_translated(
             &mut translated_strings,
             &mut default_strings,
-        ).into_iter();
+        )
+        .into_iter();
 
         assert_eq!(
             strings.next().unwrap(),

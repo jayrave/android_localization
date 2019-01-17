@@ -121,7 +121,8 @@ impl fmt::Display for Error {
                         "File path: {}; apostrophe errors: [{}]; format string errors: [{}]",
                         e.file_path, apos_error_string, fs_error_string
                     )
-                }).collect(),
+                })
+                .collect(),
         }
     }
 }
@@ -168,7 +169,8 @@ mod tests {
                 String::from("value"),
                 true,
             )],
-        ).unwrap();
+        )
+        .unwrap();
 
         xml_writer::write(
             &mut french_strings_file,
@@ -177,7 +179,8 @@ mod tests {
                 String::from("value"),
                 true,
             )],
-        ).unwrap();
+        )
+        .unwrap();
 
         xml_writer::write(
             &mut spanish_strings_file,
@@ -186,12 +189,16 @@ mod tests {
                 String::from("value"),
                 true,
             )],
-        ).unwrap();
+        )
+        .unwrap();
 
         assert_eq(
             super::do_the_thing(res_dir_path.to_str().unwrap()).unwrap(),
-            vec!(spanish_strings_file_path.clone(), french_strings_file_path.clone()),
-            vec!(french_strings_file_path, spanish_strings_file_path)
+            vec![
+                spanish_strings_file_path.clone(),
+                french_strings_file_path.clone(),
+            ],
+            vec![french_strings_file_path, spanish_strings_file_path],
         );
     }
 
@@ -224,7 +231,8 @@ mod tests {
                 AndroidString::new(String::from("s1"), String::from("value"), true),
                 AndroidString::new(String::from("s2"), String::from("v'alue"), true),
             ],
-        ).unwrap();
+        )
+        .unwrap();
 
         xml_writer::write(
             &mut french_strings_file,
@@ -232,7 +240,8 @@ mod tests {
                 AndroidString::new(String::from("s1"), String::from("val'ue %1$s"), true),
                 AndroidString::new(String::from("s2"), String::from("v'alue %1$d"), true),
             ],
-        ).unwrap();
+        )
+        .unwrap();
 
         xml_writer::write(
             &mut spanish_strings_file,
@@ -241,7 +250,8 @@ mod tests {
                 String::from("v'alue"),
                 true,
             )],
-        ).unwrap();
+        )
+        .unwrap();
 
         let error = super::do_the_thing(res_dir_path.to_str().unwrap()).unwrap_err();
         let spanish_errors = format!("File path: {}; apostrophe errors: [(Translatable: true; Name: s1; Value: v'alue)]; format string errors: []\n", spanish_strings_file_path);
@@ -249,7 +259,7 @@ mod tests {
         assert_eq(
             error.to_string(),
             format!("{}{}", spanish_errors, french_errors),
-            format!("{}{}", french_errors, spanish_errors)
+            format!("{}{}", french_errors, spanish_errors),
         );
     }
 
@@ -262,7 +272,11 @@ mod tests {
         )
     }
 
-    fn assert_eq<T : fmt::Debug + cmp::PartialEq>(actual: T, potential_expected_1: T, potential_expected_2: T) {
+    fn assert_eq<T: fmt::Debug + cmp::PartialEq>(
+        actual: T,
+        potential_expected_1: T,
+        potential_expected_2: T,
+    ) {
         let matches = (actual == potential_expected_1) || (actual == potential_expected_2);
         if !matches {
             panic!(
@@ -270,9 +284,7 @@ mod tests {
                 actual              : `{:?}`,
                 potential expected 1: `{:?}`
                 potential expected 2: `{:?}`"#,
-                actual,
-                potential_expected_1,
-                potential_expected_2
+                actual, potential_expected_1, potential_expected_2
             )
         }
     }

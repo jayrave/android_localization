@@ -77,7 +77,8 @@ mod tests {
                 String::from("string value"),
                 true,
             ),
-        ]).into_iter();
+        ])
+        .into_iter();
 
         assert_eq!(
             translatable_strings.next().unwrap(),

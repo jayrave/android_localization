@@ -179,7 +179,8 @@ mod tests {
                 String::from(value),
                 true,
             )],
-        ).unwrap();
+        )
+        .unwrap();
 
         let written_content = String::from_utf8(sink).unwrap();
         let mut written_lines = written_content.lines();

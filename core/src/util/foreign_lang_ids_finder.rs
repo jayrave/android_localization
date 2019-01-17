@@ -26,29 +26,34 @@ pub fn find(res_dir_path: &str) -> Result<Vec<String>, Error> {
         .map_err(|e| Error {
             path: String::from(res_dir_path),
             error: e,
-        })?.filter_map(|dir_entry| match dir_entry {
+        })?
+        .filter_map(|dir_entry| match dir_entry {
             Err(_) => None,
             Ok(dir_entry) => match dir_entry.file_type() {
                 Err(_) => None,
-                Ok(file_type) => if !file_type.is_dir() {
-                    None
-                } else {
-                    let mut strings_file_path = dir_entry.path();
-                    strings_file_path.push(constants::fs::STRING_FILE_NAME);
-                    if !strings_file_path.is_file() {
+                Ok(file_type) => {
+                    if !file_type.is_dir() {
                         None
                     } else {
-                        dir_entry.file_name().to_str().map(String::from)
+                        let mut strings_file_path = dir_entry.path();
+                        strings_file_path.push(constants::fs::STRING_FILE_NAME);
+                        if !strings_file_path.is_file() {
+                            None
+                        } else {
+                            dir_entry.file_name().to_str().map(String::from)
+                        }
                     }
-                },
+                }
             },
-        }).filter_map(|file_name| match LANG_ID_REGEX.captures(&file_name) {
+        })
+        .filter_map(|file_name| match LANG_ID_REGEX.captures(&file_name) {
             None => None,
             Some(capture) => match capture.get(1) {
                 None => None,
                 Some(m) => Some(String::from(m.as_str())),
             },
-        }).collect();
+        })
+        .collect();
 
     Ok(lang_ids)
 }
@@ -175,7 +180,8 @@ mod tests {
             super::find_and_build_mapping_if_empty_or_return(
                 HashMap::new(),
                 res_dir_path.to_str().unwrap()
-            ).unwrap(),
+            )
+            .unwrap(),
             mapping
         )
     }
