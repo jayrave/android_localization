@@ -1,8 +1,7 @@
 use csv;
 use csv::ReaderBuilder;
 use reader::translated_string::TranslatedString;
-use std::error;
-use std::fmt;
+use reader::csv_reader::error::Error;
 use std::io::Read;
 
 pub fn read<S: Read>(source: S) -> Result<Vec<TranslatedString>, Error> {
@@ -60,30 +59,6 @@ fn extract_string_from_record(record: &csv::StringRecord) -> Result<TranslatedSt
         String::from(default_value.unwrap()),
         String::from(translated_value.unwrap()),
     ))
-}
-
-#[derive(Debug)]
-pub enum Error {
-    CsvError(csv::Error),
-    SyntaxError(String),
-}
-
-impl error::Error for Error {
-    fn cause(&self) -> Option<&error::Error> {
-        match self {
-            Error::CsvError(error) => Some(error),
-            Error::SyntaxError(_message) => None,
-        }
-    }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Error::CsvError(error) => fmt::Display::fmt(error, f),
-            Error::SyntaxError(message) => fmt::Display::fmt(message, f),
-        }
-    }
 }
 
 #[cfg(test)]
