@@ -1,4 +1,4 @@
-use helper::xml_read_helper;
+use helper::xml_helper;
 use std::error;
 use std::fmt;
 use std::path::Path;
@@ -11,7 +11,7 @@ use validate::format_string;
 pub fn do_the_thing(res_dir_path: &str) -> Result<Vec<String>, Error> {
     let res_dir_path_string = res_dir_path;
     let res_dir_path = Path::new(res_dir_path);
-    let default_strings = xml_read_helper::read_default_strings(res_dir_path)?;
+    let default_strings = xml_helper::read_default_strings(res_dir_path)?;
     let lang_ids = foreign_lang_ids_finder::find(res_dir_path_string)?;
 
     let mut path_of_validated_files = vec![];
@@ -19,7 +19,7 @@ pub fn do_the_thing(res_dir_path: &str) -> Result<Vec<String>, Error> {
     let mut default_parsed_data = format_string::parse_and_build_data(&default_strings);
 
     for lang_id in lang_ids {
-        let strings_with_path = xml_read_helper::read_foreign_strings(res_dir_path, &lang_id)?;
+        let strings_with_path = xml_helper::read_foreign_strings(res_dir_path, &lang_id)?;
         let foreign_strings_file_path = String::from(strings_with_path.path());
         let mut foreign_strings = strings_with_path.into_strings();
 
@@ -73,11 +73,11 @@ pub struct InvalidStringsFile {
 pub enum Error {
     ForeignLangIdFinderError(foreign_lang_ids_finder::Error),
     ValidationError(Vec<InvalidStringsFile>),
-    XmlReadError(xml_read_helper::Error),
+    XmlReadError(xml_helper::Error),
 }
 
-impl From<xml_read_helper::Error> for Error {
-    fn from(error: xml_read_helper::Error) -> Self {
+impl From<xml_helper::Error> for Error {
+    fn from(error: xml_helper::Error) -> Self {
         Error::XmlReadError(error)
     }
 }

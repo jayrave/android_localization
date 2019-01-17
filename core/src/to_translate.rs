@@ -1,6 +1,6 @@
 use android_string::AndroidString;
 use constants;
-use helper::xml_read_helper;
+use helper::xml_helper;
 use ops::filter;
 use reader::xml_reader;
 use std::collections::HashMap;
@@ -43,7 +43,7 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
     // Read default strings
     let res_dir_path = Path::new(res_dir_path);
     let mut translatable_default_strings =
-        filter::find_translatable_strings(xml_read_helper::read_default_strings(res_dir_path)?);
+        filter::find_translatable_strings(xml_helper::read_default_strings(res_dir_path)?);
 
     // For all languages, write out strings requiring translation
     for (lang_id, human_friendly_name) in lang_id_to_human_friendly_name_mapping {
@@ -117,8 +117,7 @@ fn write_out_strings_to_translate(
     file_name: &str,
     translatable_default_strings: &mut Vec<AndroidString>,
 ) -> Result<Option<String>, Error> {
-    let mut foreign_strings =
-        xml_read_helper::read_foreign_strings(res_dir_path, lang_id)?.into_strings();
+    let mut foreign_strings = xml_helper::read_foreign_strings(res_dir_path, lang_id)?.into_strings();
     let strings_to_translate =
         filter::find_missing_strings(&mut foreign_strings, translatable_default_strings);
 
@@ -149,7 +148,7 @@ pub enum ErrorKind {
     ForeignLangIdsFinder(foreign_lang_ids_finder::Error),
     IoError(io::Error),
     XmlError(xml_reader::Error),
-    XmlReadHelperError(xml_read_helper::Error),
+    XmlReadHelperError(xml_helper::Error),
 }
 
 impl From<foreign_lang_ids_finder::Error> for Error {
@@ -161,8 +160,8 @@ impl From<foreign_lang_ids_finder::Error> for Error {
     }
 }
 
-impl From<xml_read_helper::Error> for Error {
-    fn from(error: xml_read_helper::Error) -> Self {
+impl From<xml_helper::Error> for Error {
+    fn from(error: xml_helper::Error) -> Self {
         Error {
             path: None,
             kind: ErrorKind::XmlReadHelperError(error),

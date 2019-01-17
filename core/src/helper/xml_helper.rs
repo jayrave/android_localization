@@ -12,7 +12,7 @@ type FileWithPath = (File, String);
 
 pub fn read_default_strings(res_dir_path: &Path) -> Result<Vec<AndroidString>, Error> {
     let (file, path) = open_default_strings_file(res_dir_path)?;
-    match xml_reader::reader::read(file) {
+    match xml_reader::read(file) {
         Err(error) => Err(Error {
             path,
             kind: ErrorKind::XmlError(error),
@@ -23,7 +23,7 @@ pub fn read_default_strings(res_dir_path: &Path) -> Result<Vec<AndroidString>, E
 
 pub fn read_foreign_strings(res_dir_path: &Path, lang_id: &str) -> Result<StringsWithPath, Error> {
     let (file, path) = open_foreign_strings_file(res_dir_path, lang_id)?;
-    match xml_reader::reader::read(file) {
+    match xml_reader::read(file) {
         Err(error) => Err(Error {
             path,
             kind: ErrorKind::XmlError(error),

@@ -1,6 +1,6 @@
 use android_string::AndroidString;
 use constants;
-use helper::xml_read_helper;
+use helper::xml_helper;
 use ops::dedup;
 use ops::extract;
 use ops::filter;
@@ -44,7 +44,7 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
     // Read default strings
     let res_dir_path = Path::new(res_dir_path);
     let mut translatable_default_strings =
-        filter::find_translatable_strings(xml_read_helper::read_default_strings(res_dir_path)?);
+        filter::find_translatable_strings(xml_helper::read_default_strings(res_dir_path)?);
 
     // For all languages, handle translations
     let mut paths_of_created_file = vec![];
@@ -70,7 +70,7 @@ fn handle_translations(
 ) -> Result<String, Error> {
     // Read already translated foreign strings
     let mut already_translated_foreign_strings = filter::find_translatable_strings(
-        xml_read_helper::read_foreign_strings(res_dir_path, lang_id)?.into_strings(),
+        xml_helper::read_foreign_strings(res_dir_path, lang_id)?.into_strings(),
     );
 
     // Read newly translated foreign strings
@@ -164,13 +164,13 @@ impl From<foreign_lang_ids_finder::Error> for Error {
     }
 }
 
-impl From<xml_read_helper::Error> for Error {
-    fn from(error: xml_read_helper::Error) -> Self {
+impl From<xml_helper::Error> for Error {
+    fn from(error: xml_helper::Error) -> Self {
         Error {
             path: Some(String::from(error.path())),
             kind: match error.into_kind() {
-                xml_read_helper::ErrorKind::IoError(e) => ErrorKind::IoError(e),
-                xml_read_helper::ErrorKind::XmlError(e) => ErrorKind::XmlReadError(e),
+                xml_helper::ErrorKind::IoError(e) => ErrorKind::IoError(e),
+                xml_helper::ErrorKind::XmlError(e) => ErrorKind::XmlReadError(e),
             },
         }
     }
@@ -211,7 +211,7 @@ mod tests {
     extern crate tempfile;
 
     use android_string::AndroidString;
-    use helper::xml_read_helper;
+    use helper::xml_helper;
     use std::collections::HashMap;
     use std::fs;
     use std::fs::File;
@@ -307,7 +307,7 @@ mod tests {
         );
 
         assert_eq!(
-            xml_read_helper::read_foreign_strings(&res_dir_path, "fr")
+            xml_helper::read_foreign_strings(&res_dir_path, "fr")
                 .unwrap()
                 .into_strings(),
             vec![
