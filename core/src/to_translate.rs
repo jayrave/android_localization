@@ -124,7 +124,7 @@ fn write_out_strings_to_translate(
 
     if !strings_to_translate.is_empty() {
         let (mut sink, output_path_or_fb) = create_output_file(output_dir_path, file_name)?;
-        return match csv_writer::write(&mut sink, strings_to_translate) {
+        return match csv_writer::single_locale_write(&mut sink, strings_to_translate) {
             Ok(_) => Ok(Some(output_path_or_fb)),
             Err(error) => Err(Error {
                 path: Some(output_path_or_fb),
@@ -225,11 +225,9 @@ mod tests {
             error.path,
             Some(String::from(res_dir_path.to_str().unwrap()))
         );
-        assert!(
-            error
-                .to_string()
-                .ends_with("Res dir doesn't have any non-default values dir with strings file!")
-        )
+        assert!(error
+            .to_string()
+            .ends_with("Res dir doesn't have any non-default values dir with strings file!"))
     }
 
     #[test]
@@ -243,11 +241,9 @@ mod tests {
         let output_dir_path = output_dir_path.to_str().unwrap();
 
         let error = super::create_output_dir_if_required(output_dir_path).unwrap_err();
-        assert!(
-            error
-                .to_string()
-                .ends_with("Output directory path points to a file!")
-        );
+        assert!(error
+            .to_string()
+            .ends_with("Output directory path points to a file!"));
         assert_eq!(error.path.unwrap(), output_dir_path);
     }
 
@@ -349,7 +345,8 @@ mod tests {
             output_dir_path.to_str().unwrap(),
             output_file_path.file_stem().unwrap().to_str().unwrap(),
             &mut default_strings,
-        ).unwrap();
+        )
+        .unwrap();
 
         (
             result,

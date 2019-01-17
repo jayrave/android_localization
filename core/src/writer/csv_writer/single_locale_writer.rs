@@ -1,10 +1,7 @@
 use android_string::AndroidString;
-use csv;
 use csv::Writer;
-use std::error;
-use std::fmt;
-use std::io;
 use std::io::Write;
+use writer::csv_writer::error::Error;
 
 pub fn write<S: Write>(
     sink: &mut S,
@@ -20,30 +17,6 @@ pub fn write<S: Write>(
     match writer.flush() {
         Err(error) => Err(Error::IoError(error)),
         Ok(_) => Ok(()),
-    }
-}
-
-#[derive(Debug)]
-pub enum Error {
-    CsvError(csv::Error),
-    IoError(io::Error),
-}
-
-impl error::Error for Error {
-    fn cause(&self) -> Option<&error::Error> {
-        match self {
-            Error::CsvError(error) => Some(error),
-            Error::IoError(error) => Some(error),
-        }
-    }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Error::CsvError(error) => fmt::Display::fmt(error, f),
-            Error::IoError(error) => fmt::Display::fmt(error, f),
-        }
     }
 }
 
