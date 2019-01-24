@@ -7,9 +7,9 @@ use std::io::Read;
 pub fn read<S: Read>(source: S) -> Result<Vec<TranslatedString>, Error> {
     let mut strings = vec![];
     let mut reader = ReaderBuilder::new()
-        .has_headers(false)
-        .flexible(true)
-        .trim(csv::Trim::All)
+        .has_headers(false) // Since there are no special rows
+        .flexible(true) // Anyways we need to check for one row.. Why not every row then?
+        .trim(csv::Trim::All) // To skip whitespace around commas
         .from_reader(source); // Read is automatically buffered
 
     for record_or_error in reader.records() {
@@ -31,6 +31,12 @@ fn extract_string_from_record(record: &csv::StringRecord) -> Result<TranslatedSt
 
     if name.is_none() {
         return Err(Error::SyntaxError(String::from("Empty record!")));
+    }
+
+    if name.unwrap().is_empty() {
+        return Err(Error::SyntaxError(String::from(
+            "string_name can't be empty for any record",
+        )));
     }
 
     if default_value.is_none() {
@@ -122,6 +128,15 @@ mod tests {
         assert_eq!(
             error.unwrap_err().to_string(),
             "Too many values in record (exactly 3 required). 4th field => \"useless value\""
+        )
+    }
+
+    #[test]
+    fn errors_for_file_with_record_having_empty_string_name() {
+        let error = read_strings_from_file(", english 1, french 1");
+        assert_eq!(
+            error.unwrap_err().to_string(),
+            "string_name can't be empty for any record"
         )
     }
 
