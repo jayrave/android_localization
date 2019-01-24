@@ -8,6 +8,12 @@ pub enum Error {
     SyntaxError(String),
 }
 
+impl From<csv::Error> for Error {
+    fn from(error: csv::Error) -> Self {
+        Error::CsvError(error)
+    }
+}
+
 impl error::Error for Error {
     fn cause(&self) -> Option<&error::Error> {
         match self {

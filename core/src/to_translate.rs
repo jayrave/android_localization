@@ -117,7 +117,8 @@ fn write_out_strings_to_translate(
     file_name: &str,
     translatable_default_strings: &mut Vec<AndroidString>,
 ) -> Result<Option<String>, Error> {
-    let mut foreign_strings = xml_helper::read_foreign_strings(res_dir_path, lang_id)?.into_strings();
+    let mut foreign_strings =
+        xml_helper::read_foreign_strings(res_dir_path, lang_id)?.into_strings();
     let strings_to_translate =
         filter::find_missing_strings(&mut foreign_strings, translatable_default_strings);
 
