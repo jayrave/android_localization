@@ -1,21 +1,21 @@
 use csv;
 use csv::ReaderBuilder;
 use reader::csv_reader::error::Error;
+use reader::localized_strings::LocalizedStrings;
 use reader::translated_string::TranslatedString;
-use std::collections::HashMap;
 use std::io::Read;
 
-pub fn read<S: Read>(source: S) -> Result<HashMap<String, Vec<TranslatedString>>, Error> {
+pub fn read<S: Read>(source: S) -> Result<Vec<LocalizedStrings>, Error> {
     let mut reader = ReaderBuilder::new()
         .has_headers(true) // To treat first row specially
         .flexible(false) // Takes care of making sure that all records are of the same size
         .trim(csv::Trim::All) // To skip whitespace around commas
         .from_reader(source); // Read is automatically buffered
 
-    // Get foreign_lang_names
-    let foreign_lang_names = extract_foreign_lang_names(reader.headers())?;
+    // Get foreign_locales
+    let foreign_locales = extract_foreign_locales(reader.headers())?;
     let mut localized_strings_list: Vec<Vec<TranslatedString>> =
-        vec![Vec::new(); foreign_lang_names.len()];
+        vec![Vec::new(); foreign_locales.len()];
 
     // Extract localized record
     for record in reader.records() {
@@ -26,9 +26,12 @@ pub fn read<S: Read>(source: S) -> Result<HashMap<String, Vec<TranslatedString>>
         // Go through all localized values & add them to respective lists
         for (index, foreign_value) in localized_record.foreign_values.into_iter().enumerate() {
             if !foreign_value.is_empty() {
+                // Since we know all records should be of the same length
+                // the following `expect` is safe
                 let mut localized_strings = localized_strings_list
                     .get_mut(index)
                     .expect("Oops! Something is wrong");
+
                 localized_strings.push(TranslatedString::new(
                     string_name.clone(),
                     default_value.clone(),
@@ -38,15 +41,14 @@ pub fn read<S: Read>(source: S) -> Result<HashMap<String, Vec<TranslatedString>>
         }
     }
 
-    Ok(foreign_lang_names
+    Ok(foreign_locales
         .into_iter()
         .zip(localized_strings_list)
+        .map(|(locale, strings)| LocalizedStrings::new(locale, strings))
         .collect())
 }
 
-fn extract_foreign_lang_names(
-    record: csv::Result<&csv::StringRecord>,
-) -> Result<Vec<String>, Error> {
+fn extract_foreign_locales(record: csv::Result<&csv::StringRecord>) -> Result<Vec<String>, Error> {
     let record = record?;
     if record.len() < 3 {
         return Err(Error::SyntaxError(String::from(
@@ -57,7 +59,7 @@ fn extract_foreign_lang_names(
     let mut iterator = record.into_iter();
     let header1 = iterator.next().unwrap(); // Safe to unwrap since size is at least 3
     let header2 = iterator.next().unwrap(); // Safe to unwrap since size is at least 3
-    let foreign_lang_names: Vec<String> = iterator.map(String::from).collect();
+    let foreign_locales: Vec<String> = iterator.map(String::from).collect();
 
     if header1 != "string_name" {
         return Err(Error::SyntaxError(String::from(
@@ -71,13 +73,13 @@ fn extract_foreign_lang_names(
         )));
     }
 
-    if foreign_lang_names.iter().any(|header| header.is_empty()) {
+    if foreign_locales.iter().any(|header| header.is_empty()) {
         return Err(Error::SyntaxError(String::from(
             "Headers can't be empty strings",
         )));
     }
 
-    Ok(foreign_lang_names)
+    Ok(foreign_locales)
 }
 
 fn extract_localized_record(record: &csv::StringRecord) -> Result<LocalizedRecord, Error> {
@@ -113,57 +115,54 @@ mod tests {
     extern crate tempfile;
 
     use reader::csv_reader::Error;
+    use reader::localized_strings::LocalizedStrings;
     use reader::translated_string::TranslatedString;
-    use std::collections::HashMap;
     use std::fs::File;
     use std::io::{Seek, SeekFrom, Write};
 
     #[test]
     fn strings_are_read_from_valid_file() {
-        let mut strings = read_strings_from_file(
+        let mut strings_list = read_strings_from_file(
             r#"string_name, default_locale, french, spanish
             string_1, english 1, french 1, spanish 1
             string_2, english 2, , spanish 2"#,
         )
-        .unwrap();
+        .unwrap()
+        .into_iter();
 
-        let mut french_strings = strings.remove("french").unwrap().into_iter();
-        let mut spanish_strings = strings.remove("spanish").unwrap().into_iter();
-        assert!(
-            strings.is_empty(),
-            "Map was expected to be empty but isn't!"
-        );
+        let french_strings = strings_list.next().unwrap();
+        let spanish_strings = strings_list.next().unwrap();
+        assert_eq!(strings_list.next(), None);
 
+        let mut french_strings_iter = french_strings.strings().iter();
         assert_eq!(
-            french_strings.next(),
-            Some(TranslatedString::new(
+            french_strings_iter.next(),
+            Some(&TranslatedString::new(
                 String::from("string_1"),
                 String::from("english 1"),
                 String::from("french 1")
             ))
         );
+        assert_eq!(french_strings_iter.next(), None);
 
-        assert_eq!(french_strings.next(), None);
-
+        let mut spanish_strings_iter = spanish_strings.strings().iter();
         assert_eq!(
-            spanish_strings.next(),
-            Some(TranslatedString::new(
+            spanish_strings_iter.next(),
+            Some(&TranslatedString::new(
                 String::from("string_1"),
                 String::from("english 1"),
                 String::from("spanish 1")
             ))
         );
-
         assert_eq!(
-            spanish_strings.next(),
-            Some(TranslatedString::new(
+            spanish_strings_iter.next(),
+            Some(&TranslatedString::new(
                 String::from("string_2"),
                 String::from("english 2"),
                 String::from("spanish 2")
             ))
         );
-
-        assert_eq!(spanish_strings.next(), None);
+        assert_eq!(spanish_strings_iter.next(), None);
     }
 
     #[test]
@@ -200,9 +199,7 @@ mod tests {
         );
     }
 
-    fn read_strings_from_file(
-        file_content: &str,
-    ) -> Result<HashMap<String, Vec<TranslatedString>>, Error> {
+    fn read_strings_from_file(file_content: &str) -> Result<Vec<LocalizedStrings>, Error> {
         // Write content to file
         let mut tmpfile: File = tempfile::tempfile().unwrap();
         tmpfile.write(file_content.as_bytes()).unwrap();
