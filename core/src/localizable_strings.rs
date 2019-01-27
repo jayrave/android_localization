@@ -2,20 +2,26 @@ use android_string::AndroidString;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct LocalizableStrings {
-    locale: String,
-    strings: Vec<AndroidString>,
+    to_locale: String,
+    default_locale_strings: Vec<AndroidString>,
 }
 
 impl LocalizableStrings {
-    pub fn new(locale: String, strings: Vec<AndroidString>) -> LocalizableStrings {
-        LocalizableStrings { locale, strings }
+    pub fn new(
+        to_locale: String,
+        default_locale_strings: Vec<AndroidString>,
+    ) -> LocalizableStrings {
+        LocalizableStrings {
+            to_locale,
+            default_locale_strings,
+        }
     }
 
-    pub fn locale(&self) -> &str {
-        &self.locale
+    pub fn to_locale(&self) -> &str {
+        &self.to_locale
     }
 
-    pub fn strings(&self) -> &Vec<AndroidString> {
-        &self.strings
+    pub fn default_locale_strings(&self) -> &Vec<AndroidString> {
+        &self.default_locale_strings
     }
 }

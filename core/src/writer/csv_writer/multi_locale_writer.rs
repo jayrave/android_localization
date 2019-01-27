@@ -25,7 +25,7 @@ pub fn write<W: Write>(
     let mut all_sinks = Vec::with_capacity(grouped_strings_list.len());
     for (_, some_strings_list) in grouped_strings_list.into_iter() {
         let mut sink = sink_provider.new_sink();
-        write_to_sink(some_strings_list, &mut sink);
+        write_to_sink(some_strings_list, &mut sink)?;
         all_sinks.push(sink);
     }
 
@@ -40,21 +40,21 @@ pub fn write_to_sink<W: Write>(
     let mut writer = Writer::from_writer(sink);
     let locale_count = strings_list.len();
     let localizable_strings = strings_list.first().unwrap();
-    let value_count = localizable_strings.strings().len();
+    let value_count = localizable_strings.default_locale_strings().len();
 
     // Write header record
     let mut header = Vec::with_capacity(locale_count + 2);
     header.push("string_name");
     header.push("default_locale");
     for i in 0..locale_count {
-        header.push(strings_list[i].locale());
+        header.push(strings_list[i].to_locale());
     }
     writer.write_record(header)?;
 
     // Write values
     let mut record = vec![""; locale_count + 2];
     for i in 0..value_count {
-        let localizable_string = localizable_strings.strings().get(i).unwrap();
+        let localizable_string = localizable_strings.default_locale_strings().get(i).unwrap();
         record[0] = localizable_string.name();
         record[1] = localizable_string.value();
         writer.write_record(&record)?;
@@ -66,7 +66,7 @@ pub fn write_to_sink<W: Write>(
 
 fn find_grouping_hash_of(strings: &LocalizableStrings) -> u64 {
     let mut hasher = DefaultHasher::new();
-    strings.strings().hash(&mut hasher);
+    strings.default_locale_strings().hash(&mut hasher);
     hasher.finish()
 }
 
