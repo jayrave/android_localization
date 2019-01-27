@@ -9,6 +9,18 @@ pub enum Error {
     IoError(io::Error),
 }
 
+impl From<csv::Error> for Error {
+    fn from(error: csv::Error) -> Self {
+        Error::CsvError(error)
+    }
+}
+
+impl From<io::Error> for Error {
+    fn from(error: io::Error) -> Self {
+        Error::IoError(error)
+    }
+}
+
 impl error::Error for Error {
     fn cause(&self) -> Option<&error::Error> {
         match self {
