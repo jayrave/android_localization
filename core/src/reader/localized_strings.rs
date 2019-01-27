@@ -1,13 +1,13 @@
-use reader::translated_string::TranslatedString;
+use reader::localized_string::LocalizedString;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct LocalizedStrings {
     locale: String,
-    strings: Vec<TranslatedString>,
+    strings: Vec<LocalizedString>,
 }
 
 impl LocalizedStrings {
-    pub fn new(locale: String, strings: Vec<TranslatedString>) -> LocalizedStrings {
+    pub fn new(locale: String, strings: Vec<LocalizedString>) -> LocalizedStrings {
         LocalizedStrings { locale, strings }
     }
 
@@ -15,7 +15,7 @@ impl LocalizedStrings {
         &self.locale
     }
 
-    pub fn strings(&self) -> &Vec<TranslatedString> {
+    pub fn strings(&self) -> &Vec<LocalizedString> {
         &self.strings
     }
 }

@@ -23,7 +23,7 @@ use writer::xml_writer;
 /// `String` (in case it has non UTF-8 chars), it could just be the file's name
 pub fn do_the_thing<S: ::std::hash::BuildHasher>(
     res_dir_path: &str,
-    translated_text_input_dir_path: &str,
+    localized_text_input_dir_path: &str,
     human_friendly_name_to_lang_id_mapping: HashMap<String, String, S>,
 ) -> Result<Vec<String>, Error> {
     let human_friendly_name_to_lang_id_mapping =
@@ -52,7 +52,7 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
         paths_of_created_file.push(handle_translations(
             res_dir_path,
             &lang_id,
-            translated_text_input_dir_path,
+            localized_text_input_dir_path,
             &human_friendly_name,
             &mut translatable_default_strings,
         )?);
@@ -64,45 +64,45 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
 fn handle_translations(
     res_dir_path: &Path,
     lang_id: &str,
-    translated_text_input_dir_path: &str,
+    localized_text_input_dir_path: &str,
     file_name: &str,
     translatable_default_strings: &mut Vec<AndroidString>,
 ) -> Result<String, Error> {
-    // Read already translated foreign strings
-    let mut already_translated_foreign_strings = filter::find_translatable_strings(
+    // Read already localized foreign strings
+    let mut already_localized_foreign_strings = filter::find_translatable_strings(
         xml_helper::read_foreign_strings(res_dir_path, lang_id)?.into_strings(),
     );
 
-    // Read newly translated foreign strings
-    let mut translated_text_file_path = PathBuf::from(translated_text_input_dir_path);
-    translated_text_file_path.push(file_name);
-    translated_text_file_path.set_extension(constants::extn::CSV);
-    let translated_file_path_string_or_fb =
-        String::from(translated_text_file_path.to_str().unwrap_or(file_name));
+    // Read newly localized foreign strings
+    let mut localized_text_file_path = PathBuf::from(localized_text_input_dir_path);
+    localized_text_file_path.push(file_name);
+    localized_text_file_path.set_extension(constants::extn::CSV);
+    let localized_file_path_string_or_fb =
+        String::from(localized_text_file_path.to_str().unwrap_or(file_name));
 
-    let mut new_translated_foreign_strings =
-        csv_reader::single_locale_read(File::open(translated_text_file_path).map_err(|e| {
+    let mut new_localized_foreign_strings =
+        csv_reader::single_locale_read(File::open(localized_text_file_path).map_err(|e| {
             Error {
-                path: Some(translated_file_path_string_or_fb.clone()),
+                path: Some(localized_file_path_string_or_fb.clone()),
                 kind: ErrorKind::IoError(e),
             }
         })?)
         .map_err(|e| Error {
-            path: Some(translated_file_path_string_or_fb),
+            path: Some(localized_file_path_string_or_fb),
             kind: ErrorKind::CsvError(e),
         })?;
 
-    // Extract android strings out of the newly translated strings
-    let mut new_translated_foreign_strings = extract::extract_android_strings_from_translated(
-        &mut new_translated_foreign_strings,
+    // Extract android strings out of the newly localized strings
+    let mut new_localized_foreign_strings = extract::extract_android_strings_from_localized(
+        &mut new_localized_foreign_strings,
         translatable_default_strings,
     );
 
     // Merge & dedup foreign strings
     let to_be_written_foreign_strings =
         dedup::dedup_grouped_strings(merge::merge_and_group_strings(
-            &mut new_translated_foreign_strings,
-            &mut already_translated_foreign_strings,
+            &mut new_localized_foreign_strings,
+            &mut already_localized_foreign_strings,
         ));
 
     // Write out foreign strings back to file

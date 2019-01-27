@@ -1,8 +1,8 @@
 use csv;
 use csv::ReaderBuilder;
 use reader::csv_reader::error::Error;
+use reader::localized_string::LocalizedString;
 use reader::localized_strings::LocalizedStrings;
-use reader::translated_string::TranslatedString;
 use std::io::Read;
 
 pub fn read<S: Read>(source: S) -> Result<Vec<LocalizedStrings>, Error> {
@@ -14,7 +14,7 @@ pub fn read<S: Read>(source: S) -> Result<Vec<LocalizedStrings>, Error> {
 
     // Get foreign_locales
     let foreign_locales = extract_foreign_locales(reader.headers())?;
-    let mut localized_strings_list: Vec<Vec<TranslatedString>> =
+    let mut localized_strings_list: Vec<Vec<LocalizedString>> =
         vec![Vec::new(); foreign_locales.len()];
 
     // Extract localized record
@@ -32,7 +32,7 @@ pub fn read<S: Read>(source: S) -> Result<Vec<LocalizedStrings>, Error> {
                     .get_mut(index)
                     .expect("Oops! Something is wrong");
 
-                localized_strings.push(TranslatedString::new(
+                localized_strings.push(LocalizedString::new(
                     string_name.clone(),
                     default_value.clone(),
                     foreign_value,
@@ -115,8 +115,8 @@ mod tests {
     extern crate tempfile;
 
     use reader::csv_reader::Error;
+    use reader::localized_string::LocalizedString;
     use reader::localized_strings::LocalizedStrings;
-    use reader::translated_string::TranslatedString;
     use std::fs::File;
     use std::io::{Seek, SeekFrom, Write};
 
@@ -137,7 +137,7 @@ mod tests {
         let mut french_strings_iter = french_strings.strings().iter();
         assert_eq!(
             french_strings_iter.next(),
-            Some(&TranslatedString::new(
+            Some(&LocalizedString::new(
                 String::from("string_1"),
                 String::from("english 1"),
                 String::from("french 1")
@@ -148,7 +148,7 @@ mod tests {
         let mut spanish_strings_iter = spanish_strings.strings().iter();
         assert_eq!(
             spanish_strings_iter.next(),
-            Some(&TranslatedString::new(
+            Some(&LocalizedString::new(
                 String::from("string_1"),
                 String::from("english 1"),
                 String::from("spanish 1")
@@ -156,7 +156,7 @@ mod tests {
         );
         assert_eq!(
             spanish_strings_iter.next(),
-            Some(&TranslatedString::new(
+            Some(&LocalizedString::new(
                 String::from("string_2"),
                 String::from("english 2"),
                 String::from("spanish 2")

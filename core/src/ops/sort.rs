@@ -1,5 +1,5 @@
 use android_string::AndroidString;
-use reader::translated_string::TranslatedString;
+use reader::localized_string::LocalizedString;
 use std::cmp::Ordering;
 
 /// In place, stable sorting
@@ -10,7 +10,7 @@ pub fn sort_android_strings_by_name(strings: &mut Vec<AndroidString>) {
 }
 
 /// In place, stable sorting
-pub fn sort_translated_strings_by_name(strings: &mut Vec<TranslatedString>) {
+pub fn sort_localized_strings_by_name(strings: &mut Vec<LocalizedString>) {
     // Not using `sort_by_key` as I can't figure out how to specify
     // lifetime for closure's return :(
     strings.sort_by(|s1, s2| s1.name().cmp(s2.name()));
@@ -23,7 +23,7 @@ pub fn compare_android_strings(s1: &AndroidString, s2: &AndroidString) -> Orderi
 #[cfg(test)]
 mod tests {
     use android_string::AndroidString;
-    use reader::translated_string::TranslatedString;
+    use reader::localized_string::LocalizedString;
 
     #[test]
     fn android_sorted_by_name() {
@@ -77,36 +77,36 @@ mod tests {
     }
 
     #[test]
-    fn translated_sorted_by_name() {
+    fn localized_sorted_by_name() {
         let mut strings = vec![
-            TranslatedString::new(
+            LocalizedString::new(
                 String::from("string_2"),
                 String::from("string value"),
                 String::from("string value"),
             ),
-            TranslatedString::new(
+            LocalizedString::new(
                 String::from("string_3"),
                 String::from("string 3 value 1"),
                 String::from("string 3 value 1"),
             ),
-            TranslatedString::new(
+            LocalizedString::new(
                 String::from("string_3"),
                 String::from("string 3 value 2"),
                 String::from("string 3 value 2"),
             ),
-            TranslatedString::new(
+            LocalizedString::new(
                 String::from("string_1"),
                 String::from("string value"),
                 String::from("string value"),
             ),
         ];
 
-        super::sort_translated_strings_by_name(&mut strings);
+        super::sort_localized_strings_by_name(&mut strings);
         let mut strings = strings.into_iter();
 
         assert_eq!(
             strings.next().unwrap(),
-            TranslatedString::new(
+            LocalizedString::new(
                 String::from("string_1"),
                 String::from("string value"),
                 String::from("string value")
@@ -115,7 +115,7 @@ mod tests {
 
         assert_eq!(
             strings.next().unwrap(),
-            TranslatedString::new(
+            LocalizedString::new(
                 String::from("string_2"),
                 String::from("string value"),
                 String::from("string value")
@@ -124,7 +124,7 @@ mod tests {
 
         assert_eq!(
             strings.next().unwrap(),
-            TranslatedString::new(
+            LocalizedString::new(
                 String::from("string_3"),
                 String::from("string 3 value 1"),
                 String::from("string 3 value 1")
@@ -133,7 +133,7 @@ mod tests {
 
         assert_eq!(
             strings.next().unwrap(),
-            TranslatedString::new(
+            LocalizedString::new(
                 String::from("string_3"),
                 String::from("string 3 value 2"),
                 String::from("string 3 value 2")

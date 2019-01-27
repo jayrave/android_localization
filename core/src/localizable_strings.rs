@@ -3,15 +3,12 @@ use android_string::AndroidString;
 #[derive(Clone, Debug, PartialEq)]
 pub struct LocalizableStrings {
     locale: String,
-    strings: Vec<AndroidString>
+    strings: Vec<AndroidString>,
 }
 
 impl LocalizableStrings {
     pub fn new(locale: String, strings: Vec<AndroidString>) -> LocalizableStrings {
-        LocalizableStrings {
-            locale,
-            strings
-        }
+        LocalizableStrings { locale, strings }
     }
 
     pub fn locale(&self) -> &str {
