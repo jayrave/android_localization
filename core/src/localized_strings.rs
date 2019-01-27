@@ -1,4 +1,4 @@
-use reader::localized_string::LocalizedString;
+use localized_string::LocalizedString;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct LocalizedStrings {

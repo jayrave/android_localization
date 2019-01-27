@@ -1,6 +1,6 @@
 use android_string::AndroidString;
+use localized_string::LocalizedString;
 use ops::sort;
-use reader::localized_string::LocalizedString;
 use std::cmp::Ordering;
 
 /// Localized strings will be converted into `AndroidString` only if both the name
@@ -57,7 +57,7 @@ pub fn extract_android_strings_from_localized(
 #[cfg(test)]
 mod tests {
     use android_string::AndroidString;
-    use reader::localized_string::LocalizedString;
+    use localized_string::LocalizedString;
 
     #[test]
     fn extracted() {

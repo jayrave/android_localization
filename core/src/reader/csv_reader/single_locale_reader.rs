@@ -1,7 +1,7 @@
 use csv;
 use csv::ReaderBuilder;
+use localized_string::LocalizedString;
 use reader::csv_reader::error::Error;
-use reader::localized_string::LocalizedString;
 use std::io::Read;
 
 pub fn read<S: Read>(source: S) -> Result<Vec<LocalizedString>, Error> {
@@ -71,8 +71,8 @@ fn extract_string_from_record(record: &csv::StringRecord) -> Result<LocalizedStr
 mod tests {
     extern crate tempfile;
 
+    use localized_string::LocalizedString;
     use reader::csv_reader::Error;
-    use reader::localized_string::LocalizedString;
     use std::fs::File;
     use std::io::{Seek, SeekFrom, Write};
 

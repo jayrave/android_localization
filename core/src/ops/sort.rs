@@ -1,5 +1,5 @@
 use android_string::AndroidString;
-use reader::localized_string::LocalizedString;
+use localized_string::LocalizedString;
 use std::cmp::Ordering;
 
 /// In place, stable sorting
@@ -23,7 +23,7 @@ pub fn compare_android_strings(s1: &AndroidString, s2: &AndroidString) -> Orderi
 #[cfg(test)]
 mod tests {
     use android_string::AndroidString;
-    use reader::localized_string::LocalizedString;
+    use localized_string::LocalizedString;
 
     #[test]
     fn android_sorted_by_name() {

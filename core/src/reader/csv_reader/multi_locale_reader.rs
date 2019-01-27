@@ -1,8 +1,8 @@
 use csv;
 use csv::ReaderBuilder;
+use localized_string::LocalizedString;
+use localized_strings::LocalizedStrings;
 use reader::csv_reader::error::Error;
-use reader::localized_string::LocalizedString;
-use reader::localized_strings::LocalizedStrings;
 use std::io::Read;
 
 pub fn read<S: Read>(source: S) -> Result<Vec<LocalizedStrings>, Error> {
@@ -114,9 +114,9 @@ struct LocalizedRecord {
 mod tests {
     extern crate tempfile;
 
+    use localized_string::LocalizedString;
+    use localized_strings::LocalizedStrings;
     use reader::csv_reader::Error;
-    use reader::localized_string::LocalizedString;
-    use reader::localized_strings::LocalizedStrings;
     use std::fs::File;
     use std::io::{Seek, SeekFrom, Write};
 
