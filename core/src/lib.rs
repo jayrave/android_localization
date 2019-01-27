@@ -6,6 +6,7 @@ extern crate xml;
 extern crate lazy_static;
 
 mod android_string;
+mod localizable_strings;
 mod constants;
 pub mod from_translate;
 mod helper;
