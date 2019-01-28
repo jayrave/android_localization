@@ -9,7 +9,7 @@ use writer::csv_writer::error::Error;
 
 pub fn write<W: Write>(
     strings_list: Vec<LocalizableStrings>,
-    sink_provider: &SinkProvider<W>,
+    sink_provider: &mut SinkProvider<W>,
 ) -> Result<Vec<Box<W>>, Error> {
     // Split strings into groups requiring localization for the same strings
     let mut grouped_strings_list: HashMap<u64, Vec<LocalizableStrings>> = HashMap::new();
@@ -24,7 +24,13 @@ pub fn write<W: Write>(
     // different strings to be localized
     let mut all_sinks = Vec::with_capacity(grouped_strings_list.len());
     for (_, some_strings_list) in grouped_strings_list.into_iter() {
-        let mut sink = sink_provider.new_sink();
+        let mut sink = sink_provider.new_sink(
+            some_strings_list
+                .iter()
+                .map(|s| String::from(s.to_locale()))
+                .collect(),
+        );
+
         write_to_sink(some_strings_list, &mut sink)?;
         all_sinks.push(sink);
     }
@@ -71,7 +77,7 @@ fn find_grouping_hash_of(strings: &LocalizableStrings) -> u64 {
 }
 
 pub trait SinkProvider<W: Write> {
-    fn new_sink(&self) -> Box<W>;
+    fn new_sink(&mut self, for_locales: Vec<String>) -> Box<W>;
 }
 
 #[cfg(test)]
@@ -80,9 +86,13 @@ mod tests {
     use android_string::AndroidString;
     use localizable_strings::LocalizableStrings;
 
-    struct ByteSinkProvider;
+    struct ByteSinkProvider {
+        for_locales_list: Vec<Vec<String>>,
+    }
+
     impl SinkProvider<Vec<u8>> for ByteSinkProvider {
-        fn new_sink(&self) -> Box<Vec<u8>> {
+        fn new_sink(&mut self, for_locales: Vec<String>) -> Box<Vec<u8>> {
+            self.for_locales_list.push(for_locales);
             Box::new(vec![])
         }
     }
@@ -125,8 +135,11 @@ mod tests {
         ));
 
         // Convert all the written bytes into strings for the different sinks
-        let sink_provider = ByteSinkProvider {};
-        let mut written_contents = super::write(strings_list, &sink_provider)
+        let mut sink_provider = ByteSinkProvider {
+            for_locales_list: vec![],
+        };
+
+        let mut written_contents = super::write(strings_list, &mut sink_provider)
             .unwrap()
             .into_iter()
             .map(|s| String::from_utf8(s.to_vec()).unwrap())
@@ -134,6 +147,7 @@ mod tests {
 
         // Since a map is used, sort the contents to be sure of the order
         written_contents.sort();
+        sink_provider.for_locales_list.sort();
 
         // Time to assert
         assert_eq!(
@@ -142,6 +156,15 @@ mod tests {
                 String::from("string_name,default_locale,french\nstring_1,english 1,\n"),
                 String::from("string_name,default_locale,german,dutch\nstring_1,english 1,,\nstring_2,english 2,,\n"),
                 String::from("string_name,default_locale,spanish\nstring_2,english 2,\n")
+            ]
+        );
+
+        assert_eq!(
+            sink_provider.for_locales_list,
+            vec![
+                vec![String::from("french")],
+                vec![String::from("german"), String::from("dutch")],
+                vec![String::from("spanish")]
             ]
         );
     }
