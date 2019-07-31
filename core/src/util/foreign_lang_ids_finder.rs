@@ -7,7 +7,7 @@ use std::fs;
 use std::io;
 use std::path::Path;
 
-lazy_static! {
+lazy_static::lazy_static! {
     static ref LANG_ID_REGEX: Regex = Regex::new("-([a-zA-z]+)$").unwrap();
 }
 
@@ -93,8 +93,6 @@ impl fmt::Display for Error {
 
 #[cfg(test)]
 mod tests {
-    extern crate tempfile;
-
     use std::collections::HashMap;
     use std::fs;
     use std::fs::File;

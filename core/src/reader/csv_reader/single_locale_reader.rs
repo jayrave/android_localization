@@ -69,8 +69,6 @@ fn extract_string_from_record(record: &csv::StringRecord) -> Result<LocalizedStr
 
 #[cfg(test)]
 mod tests {
-    extern crate tempfile;
-
     use localized_string::LocalizedString;
     use reader::csv_reader::Error;
     use std::fs::File;

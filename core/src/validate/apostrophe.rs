@@ -3,7 +3,7 @@ use regex::Regex;
 use std::error;
 use std::fmt;
 
-lazy_static! {
+lazy_static::lazy_static! {
     static ref APOSTROPHE: Regex = Regex::new("(')").unwrap();
     static ref ESCAPED_APOSTROPHE: Regex = Regex::new(r"(\\')").unwrap();
 }

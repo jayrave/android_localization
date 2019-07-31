@@ -115,8 +115,6 @@ impl fmt::Display for Error {
 
 #[cfg(test)]
 mod tests {
-    extern crate tempfile;
-
     use std::fs;
     use std::fs::File;
     use std::io::{Read, Write};

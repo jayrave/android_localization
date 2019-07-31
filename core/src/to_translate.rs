@@ -202,8 +202,6 @@ impl fmt::Display for Error {
 
 #[cfg(test)]
 mod tests {
-    extern crate tempfile;
-
     use self::tempfile::TempDir;
     use android_string::AndroidString;
     use std::collections::HashMap;

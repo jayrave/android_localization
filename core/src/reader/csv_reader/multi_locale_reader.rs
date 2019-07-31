@@ -112,8 +112,6 @@ struct LocalizedRecord {
 
 #[cfg(test)]
 mod tests {
-    extern crate tempfile;
-
     use localized_string::LocalizedString;
     use localized_strings::LocalizedStrings;
     use reader::csv_reader::Error;

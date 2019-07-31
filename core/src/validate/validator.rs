@@ -129,8 +129,6 @@ impl fmt::Display for Error {
 
 #[cfg(test)]
 mod tests {
-    extern crate tempfile;
-
     use android_string::AndroidString;
     use std::cmp;
     use std::fmt;

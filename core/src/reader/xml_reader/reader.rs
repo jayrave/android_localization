@@ -30,8 +30,6 @@ pub fn read<S: Read>(source: S) -> Result<Vec<AndroidString>, Error> {
 
 #[cfg(test)]
 mod tests {
-    extern crate tempfile;
-
     use android_string::AndroidString;
     use std::fs::File;
     use std::io::{Seek, SeekFrom, Write};

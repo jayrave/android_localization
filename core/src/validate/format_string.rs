@@ -5,7 +5,7 @@ use std::cmp::Ordering;
 use std::error;
 use std::fmt;
 
-lazy_static! {
+lazy_static::lazy_static! {
     static ref FORMAT_STRING: Regex = Regex::new(r"(%\d+\$[ds])").unwrap();
 }
 

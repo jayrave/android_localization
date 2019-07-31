@@ -20,6 +20,6 @@ pub mod arg {
     }
 }
 
-lazy_static! {
+lazy_static::lazy_static! {
     pub static ref TEXT_TO_TEXT_REGEX: Regex = Regex::new("^([a-zA-Z]+)=([a-zA-Z]+)$").unwrap();
 }
