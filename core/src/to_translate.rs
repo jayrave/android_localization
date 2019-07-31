@@ -1,8 +1,8 @@
-use android_string::AndroidString;
-use constants;
-use helper::xml_helper;
-use ops::filter;
-use reader::xml_reader;
+use crate::android_string::AndroidString;
+use crate::constants;
+use crate::helper::xml_helper;
+use crate::ops::filter;
+use crate::reader::xml_reader;
 use std::collections::HashMap;
 use std::error;
 use std::fmt;
@@ -11,8 +11,8 @@ use std::fs::File;
 use std::io;
 use std::path::Path;
 use std::path::PathBuf;
-use util::foreign_lang_ids_finder;
-use writer::csv_writer;
+use crate::util::foreign_lang_ids_finder;
+use crate::writer::csv_writer;
 
 /// Returns the list of output files created by this call. These aren't guaranteed
 /// to be valid paths to files. Sometimes, if a file's path can't be expressed by
@@ -202,8 +202,8 @@ impl fmt::Display for Error {
 
 #[cfg(test)]
 mod tests {
-    use self::tempfile::TempDir;
-    use android_string::AndroidString;
+    use tempfile::TempDir;
+    use crate::android_string::AndroidString;
     use std::collections::HashMap;
     use std::fs;
     use std::fs::File;

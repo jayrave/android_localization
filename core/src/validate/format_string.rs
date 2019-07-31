@@ -1,5 +1,5 @@
-use android_string::AndroidString;
-use ops::sort;
+use crate::android_string::AndroidString;
+use crate::ops::sort;
 use regex::Regex;
 use std::cmp::Ordering;
 use std::error;
@@ -139,7 +139,7 @@ impl fmt::Display for Error {
 mod tests {
     use super::Mismatch;
     use super::ParsedData;
-    use android_string::AndroidString;
+    use crate::android_string::AndroidString;
 
     #[test]
     fn passes_in_absence_of_mismatches() {

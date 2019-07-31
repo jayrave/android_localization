@@ -1,10 +1,10 @@
-use helper::xml_helper;
+use crate::helper::xml_helper;
 use std::error;
 use std::fmt;
 use std::path::Path;
-use util::foreign_lang_ids_finder;
-use validate::apostrophe;
-use validate::format_string;
+use crate::util::foreign_lang_ids_finder;
+use crate::validate::apostrophe;
+use crate::validate::format_string;
 
 /// Runs all validations for all foreign strings & returns a collection
 /// of file names on which the validations were run
@@ -129,13 +129,13 @@ impl fmt::Display for Error {
 
 #[cfg(test)]
 mod tests {
-    use android_string::AndroidString;
+    use crate::android_string::AndroidString;
     use std::cmp;
     use std::fmt;
     use std::fs;
     use std::fs::File;
     use std::path::PathBuf;
-    use writer::xml_writer;
+    use crate::writer::xml_writer;
 
     #[test]
     fn returns_list_of_file_names() {

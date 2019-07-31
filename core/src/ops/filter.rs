@@ -1,5 +1,5 @@
-use android_string::AndroidString;
-use ops::sort;
+use crate::android_string::AndroidString;
+use crate::ops::sort;
 use std::cmp::Ordering;
 
 pub fn find_translatable_strings(strings: Vec<AndroidString>) -> Vec<AndroidString> {
@@ -57,7 +57,7 @@ pub fn find_missing_strings(
 
 #[cfg(test)]
 mod tests {
-    use android_string::AndroidString;
+    use crate::android_string::AndroidString;
 
     #[test]
     fn finds_translatable_strings() {

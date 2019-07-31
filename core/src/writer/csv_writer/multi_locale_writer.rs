@@ -1,11 +1,11 @@
 use csv;
-use localizable_strings::LocalizableStrings;
+use crate::localizable_strings::LocalizableStrings;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::hash::Hash;
 use std::hash::Hasher;
 use std::io::Write;
-use writer::csv_writer::error::Error;
+use crate::writer::csv_writer::error::Error;
 
 pub fn write(
     strings_list: Vec<LocalizableStrings>,
@@ -88,8 +88,8 @@ pub trait SinkProvider {
 mod tests {
     use super::Error;
     use super::SinkProvider;
-    use android_string::AndroidString;
-    use localizable_strings::LocalizableStrings;
+    use crate::android_string::AndroidString;
+    use crate::localizable_strings::LocalizableStrings;
     use std::cell::RefCell;
     use super::Writer;
     use std::io::Write;

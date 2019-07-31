@@ -1,4 +1,4 @@
-use android_string::AndroidString;
+use crate::android_string::AndroidString;
 
 /// This methods assumes that all the strings that have the same name are grouped
 /// together. If such groups are present, only the first string from those groups
@@ -35,7 +35,7 @@ pub fn dedup_grouped_strings(mut android_strings: Vec<AndroidString>) -> Vec<And
 
 #[cfg(test)]
 mod tests {
-    use android_string::AndroidString;
+    use crate::android_string::AndroidString;
 
     #[test]
     fn list_with_uniq_items_returned_as_is() {

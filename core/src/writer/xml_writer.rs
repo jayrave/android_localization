@@ -1,5 +1,5 @@
-use android_string::AndroidString;
-use constants;
+use crate::android_string::AndroidString;
+use crate::constants;
 use std::error;
 use std::fmt;
 use std::io::BufWriter;
@@ -112,7 +112,7 @@ impl fmt::Display for Error {
 
 #[cfg(test)]
 mod tests {
-    use android_string::AndroidString;
+    use crate::android_string::AndroidString;
 
     #[test]
     fn strings_are_written_to_file() {

@@ -1,4 +1,4 @@
-use android_string::AndroidString;
+use crate::android_string::AndroidString;
 use regex::Regex;
 use std::error;
 use std::fmt;
@@ -49,7 +49,7 @@ impl fmt::Display for Error {
 
 #[cfg(test)]
 mod tests {
-    use android_string::AndroidString;
+    use crate::android_string::AndroidString;
 
     #[test]
     fn passes_in_absence_of_unescaped_apostrophes() {

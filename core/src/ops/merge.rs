@@ -1,5 +1,5 @@
-use android_string::AndroidString;
-use ops::sort;
+use crate::android_string::AndroidString;
+use crate::ops::sort;
 
 /// While grouping strings, strings from `strings_1` take precedence over `strings_2` in case both
 /// strings have the same name
@@ -39,7 +39,7 @@ pub fn merge_and_group_strings(
 
 #[cfg(test)]
 mod tests {
-    use android_string::AndroidString;
+    use crate::android_string::AndroidString;
 
     #[test]
     fn merged_and_grouped() {

@@ -1,8 +1,8 @@
-use android_string::AndroidString;
-use constants;
-use reader::xml_reader::error::Error;
-use reader::xml_reader::event_handler::EventHandler;
-use reader::xml_reader::sinking_event_handler::SinkingEventHandler;
+use crate::android_string::AndroidString;
+use crate::constants;
+use crate::reader::xml_reader::error::Error;
+use crate::reader::xml_reader::event_handler::EventHandler;
+use crate::reader::xml_reader::sinking_event_handler::SinkingEventHandler;
 use xml::attribute::OwnedAttribute;
 
 pub struct StringEventHandler {
@@ -78,7 +78,7 @@ impl EventHandler for StringEventHandler {
 #[cfg(test)]
 mod tests {
     use super::StringEventHandler;
-    use reader::xml_reader::event_handler::EventHandler;
+    use crate::reader::xml_reader::event_handler::EventHandler;
 
     #[test]
     fn builds_string_with_one_character_event() {

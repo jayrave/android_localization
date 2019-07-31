@@ -1,12 +1,12 @@
-use android_string::AndroidString;
-use constants;
-use helper::xml_helper;
-use ops::dedup;
-use ops::extract;
-use ops::filter;
-use ops::merge;
-use reader::csv_reader;
-use reader::xml_reader;
+use crate::android_string::AndroidString;
+use crate::constants;
+use crate::helper::xml_helper;
+use crate::ops::dedup;
+use crate::ops::extract;
+use crate::ops::filter;
+use crate::ops::merge;
+use crate::reader::csv_reader;
+use crate::reader::xml_reader;
 use std::collections::HashMap;
 use std::error;
 use std::fmt;
@@ -15,8 +15,8 @@ use std::io;
 use std::ops::Add;
 use std::path::Path;
 use std::path::PathBuf;
-use util::foreign_lang_ids_finder;
-use writer::xml_writer;
+use crate::util::foreign_lang_ids_finder;
+use crate::writer::xml_writer;
 
 /// Returns the list of output files created by this call. These aren't guaranteed
 /// to be valid paths to files. Sometimes, if a file's path can't be expressed by
@@ -208,14 +208,14 @@ impl fmt::Display for Error {
 
 #[cfg(test)]
 mod tests {
-    use android_string::AndroidString;
-    use helper::xml_helper;
+    use crate::android_string::AndroidString;
+    use crate::helper::xml_helper;
     use std::collections::HashMap;
     use std::fs;
     use std::fs::File;
     use std::io::Read;
     use std::io::Write;
-    use writer::xml_writer;
+    use crate::writer::xml_writer;
 
     #[test]
     fn do_the_thing_errors_for_empty_human_friendly_name_to_lang_id_mapping() {

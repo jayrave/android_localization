@@ -1,7 +1,7 @@
-use android_string::AndroidString;
+use crate::android_string::AndroidString;
 use csv::Writer;
 use std::io::Write;
-use writer::csv_writer::error::Error;
+use crate::writer::csv_writer::error::Error;
 
 pub fn write<S: Write>(
     sink: &mut S,
@@ -22,7 +22,7 @@ pub fn write<S: Write>(
 
 #[cfg(test)]
 mod tests {
-    use android_string::AndroidString;
+    use crate::android_string::AndroidString;
 
     #[test]
     fn strings_are_written_to_file() {

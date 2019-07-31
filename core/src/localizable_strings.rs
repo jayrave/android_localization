@@ -1,4 +1,4 @@
-use android_string::AndroidString;
+use crate::android_string::AndroidString;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct LocalizableStrings {

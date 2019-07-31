@@ -1,6 +1,6 @@
-use android_string::AndroidString;
-use reader::xml_reader::error::Error;
-use reader::xml_reader::events_handler::EventsHandler;
+use crate::android_string::AndroidString;
+use crate::reader::xml_reader::error::Error;
+use crate::reader::xml_reader::events_handler::EventsHandler;
 use std::io::BufReader;
 use std::io::Read;
 use xml::reader::XmlEvent;
@@ -30,7 +30,7 @@ pub fn read<S: Read>(source: S) -> Result<Vec<AndroidString>, Error> {
 
 #[cfg(test)]
 mod tests {
-    use android_string::AndroidString;
+    use crate::android_string::AndroidString;
     use std::fs::File;
     use std::io::{Seek, SeekFrom, Write};
 
