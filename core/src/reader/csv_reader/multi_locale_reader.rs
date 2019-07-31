@@ -28,7 +28,7 @@ pub fn read<S: Read>(source: S) -> Result<Vec<LocalizedStrings>, Error> {
             if !foreign_value.is_empty() {
                 // Since we know all records should be of the same length
                 // the following `expect` is safe
-                let mut localized_strings = localized_strings_list
+                let localized_strings = localized_strings_list
                     .get_mut(index)
                     .expect("Oops! Something is wrong");
 

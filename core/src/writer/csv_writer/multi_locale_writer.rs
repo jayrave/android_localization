@@ -90,7 +90,7 @@ mod tests {
     use super::SinkProvider;
     use crate::android_string::AndroidString;
     use crate::localizable_strings::LocalizableStrings;
-    use std::cell::RefCell;
+    
     use super::Writer;
     use std::io::Write;
 
