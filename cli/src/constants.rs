@@ -1,21 +1,21 @@
 use regex::Regex;
 
 pub mod command {
-    pub const TO_TRANSLATE: &str = "localize";
-    pub const FROM_TRANSLATE: &str = "localized";
+    pub const LOCALIZE: &str = "localize";
+    pub const LOCALIZED: &str = "localized";
     pub const VALIDATE: &str = "validate";
 }
 
 pub mod arg {
     pub const RES_DIR: &str = "res";
-    pub const TO_TRANSLATE_OUTPUT: &str = "output";
-    pub const FROM_TRANSLATE_INPUT: &str = "input";
+    pub const LOCALIZE_OUTPUT: &str = "output";
+    pub const LOCALIZED_INPUT: &str = "input";
     pub const MAPPING: &str = "mapping";
 
     pub mod short {
         pub const RES_DIR: &str = "r";
-        pub const TO_TRANSLATE_OUTPUT: &str = "o";
-        pub const FROM_TRANSLATE_INPUT: &str = "i";
+        pub const LOCALIZE_OUTPUT: &str = "o";
+        pub const LOCALIZED_INPUT: &str = "i";
         pub const MAPPING: &str = "m";
     }
 }

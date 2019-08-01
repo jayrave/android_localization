@@ -47,7 +47,7 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
 
     // For all languages, write out strings requiring translation
     for (lang_id, human_friendly_name) in lang_id_to_human_friendly_name_mapping {
-        let possible_output_file_path = write_out_strings_to_translate(
+        let possible_output_file_path = write_out_strings_to_localize(
             res_dir_path,
             &lang_id,
             output_dir_path,
@@ -110,7 +110,7 @@ fn create_output_file(
     }
 }
 
-fn write_out_strings_to_translate(
+fn write_out_strings_to_localize(
     res_dir_path: &Path,
     lang_id: &str,
     output_dir_path: &str,
@@ -119,12 +119,12 @@ fn write_out_strings_to_translate(
 ) -> Result<Option<String>, Error> {
     let mut foreign_strings =
         xml_helper::read_foreign_strings(res_dir_path, lang_id)?.into_strings();
-    let strings_to_translate =
+    let strings_to_localize =
         filter::find_missing_strings(&mut foreign_strings, translatable_default_strings);
 
-    if !strings_to_translate.is_empty() {
+    if !strings_to_localize.is_empty() {
         let (mut sink, output_path_or_fb) = create_output_file(output_dir_path, file_name)?;
-        return match csv_writer::single_locale_write(&mut sink, strings_to_translate) {
+        return match csv_writer::single_locale_write(&mut sink, strings_to_localize) {
             Ok(_) => Ok(Some(output_path_or_fb)),
             Err(error) => Err(Error {
                 path: Some(output_path_or_fb),
@@ -264,7 +264,7 @@ mod tests {
     }
 
     #[test]
-    fn write_out_strings_to_translate_does_not_write_out_if_there_is_no_strings_to_translate() {
+    fn write_out_strings_to_localize_does_not_write_out_if_there_is_no_strings_to_localize() {
         let contents = r##"
 			<?xml version="1.0" encoding="utf-8"?>
 			<resources>
@@ -280,14 +280,14 @@ mod tests {
 
         let temp_dir = tempfile::tempdir().unwrap();
         let (method_output, possible_output_file) =
-            test_write_out_strings_to_translate(&temp_dir, &contents, default_strings);
+            test_write_out_strings_to_localize(&temp_dir, &contents, default_strings);
 
         assert_eq!(method_output, None);
         assert!(!Path::new(&possible_output_file).exists())
     }
 
     #[test]
-    fn write_out_strings_to_translate_writes_out_if_there_are_strings_to_translate() {
+    fn write_out_strings_to_localize_writes_out_if_there_are_strings_to_localize() {
         let contents = r##"
 			<?xml version="1.0" encoding="utf-8"?>
 			<resources>
@@ -301,7 +301,7 @@ mod tests {
 
         let temp_dir = tempfile::tempdir().unwrap();
         let (method_output, possible_output_file) =
-            test_write_out_strings_to_translate(&temp_dir, &contents, default_strings);
+            test_write_out_strings_to_localize(&temp_dir, &contents, default_strings);
 
         assert_eq!(method_output.unwrap(), possible_output_file);
 
@@ -311,9 +311,9 @@ mod tests {
         assert_eq!(output, "string_1,string value\nstring_2,string value\n");
     }
 
-    /// Returns the output of the method call to `write_out_strings_to_translate`
+    /// Returns the output of the method call to `write_out_strings_to_localize`
     /// & the possible output file (built by the test)
-    fn test_write_out_strings_to_translate(
+    fn test_write_out_strings_to_localize(
         temp_dir: &TempDir,
         values_file_content: &str,
         mut default_strings: Vec<AndroidString>,
@@ -337,7 +337,7 @@ mod tests {
         strings_file.seek(SeekFrom::Start(0)).unwrap();
 
         // Perform action
-        let result = super::write_out_strings_to_translate(
+        let result = super::write_out_strings_to_localize(
             values_dir_path.parent().unwrap(),
             "fr",
             output_dir_path.to_str().unwrap(),

@@ -6,38 +6,38 @@ use crate::constants;
 pub fn build() -> App<'static, 'static> {
     App::new("Android Strings")
         .about("To help with translations & common validations")
-        .subcommand(build_to_translate_sub_command())
-        .subcommand(build_from_translate_sub_command())
+        .subcommand(build_localize_sub_command())
+        .subcommand(build_localized_sub_command())
         .subcommand(build_validate_sub_command())
 }
 
-fn build_to_translate_sub_command() -> App<'static, 'static> {
-    SubCommand::with_name(constants::command::TO_TRANSLATE)
-        .about("Creates CSVs of text that need to be translated")
+fn build_localize_sub_command() -> App<'static, 'static> {
+    SubCommand::with_name(constants::command::LOCALIZE)
+        .about("Creates CSVs of text that need to be localized")
         .arg(build_res_dir_arg())
         .arg(build_mapping_arg(
             "Values qualifier (eg., fr) to CSV file name (eg., french)",
         )).arg(
-            Arg::with_name(constants::arg::TO_TRANSLATE_OUTPUT)
+            Arg::with_name(constants::arg::LOCALIZE_OUTPUT)
                 .help("Specifies output dir to write CSV files into")
-                .long(constants::arg::TO_TRANSLATE_OUTPUT)
-                .short(constants::arg::short::TO_TRANSLATE_OUTPUT)
+                .long(constants::arg::LOCALIZE_OUTPUT)
+                .short(constants::arg::short::LOCALIZE_OUTPUT)
                 .takes_value(true)
                 .required(true),
         )
 }
 
-fn build_from_translate_sub_command() -> App<'static, 'static> {
-    SubCommand::with_name(constants::command::FROM_TRANSLATE)
+fn build_localized_sub_command() -> App<'static, 'static> {
+    SubCommand::with_name(constants::command::LOCALIZED)
         .about("Populates strings XML files from translations in CSVs")
         .arg(build_res_dir_arg())
         .arg(build_mapping_arg(
             "CSV file name (eg., french) to values qualifier (eg., fr)",
         )).arg(
-            Arg::with_name(constants::arg::FROM_TRANSLATE_INPUT)
+            Arg::with_name(constants::arg::LOCALIZED_INPUT)
                 .help("Specifies input dir to read CSV files from")
-                .long(constants::arg::FROM_TRANSLATE_INPUT)
-                .short(constants::arg::short::FROM_TRANSLATE_INPUT)
+                .long(constants::arg::LOCALIZED_INPUT)
+                .short(constants::arg::short::LOCALIZED_INPUT)
                 .takes_value(true)
                 .required(true),
         )
