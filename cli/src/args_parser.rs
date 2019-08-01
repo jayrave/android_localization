@@ -1,7 +1,7 @@
 use clap::App;
 use clap::Arg;
 use clap::SubCommand;
-use constants;
+use crate::constants;
 
 pub fn build() -> App<'static, 'static> {
     App::new("Android Strings")
