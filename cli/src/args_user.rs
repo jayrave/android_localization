@@ -26,7 +26,7 @@ pub fn do_the_thing(matches: &ArgMatches) {
 fn do_to_csv(matches: &ArgMatches) {
     exit_appropriately(
         "Texts to be translated written to",
-        android_strings_core::to_translate::do_the_thing(
+        android_strings_core::localize::do_the_thing(
             matches.value_of(constants::arg::RES_DIR).unwrap(),
             matches
                 .value_of(constants::arg::TO_TRANSLATE_OUTPUT)
@@ -39,7 +39,7 @@ fn do_to_csv(matches: &ArgMatches) {
 fn do_from_csv(matches: &ArgMatches) {
     exit_appropriately(
         "Translated texts written to",
-        android_strings_core::from_translate::do_the_thing(
+        android_strings_core::localized::do_the_thing(
             matches.value_of(constants::arg::RES_DIR).unwrap(),
             matches
                 .value_of(constants::arg::FROM_TRANSLATE_INPUT)

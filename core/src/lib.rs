@@ -1,13 +1,13 @@
 mod android_string;
 mod constants;
-pub mod from_translate;
+pub mod localized;
 mod helper;
 mod localizable_strings;
 mod localized_string;
 mod localized_strings;
 mod ops;
 mod reader;
-pub mod to_translate;
+pub mod localize;
 mod util;
 mod validate;
 mod writer;
