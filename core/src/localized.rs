@@ -83,7 +83,7 @@ fn handle_translations(
         String::from(localized_text_file_path.to_str().unwrap_or(file_name));
 
     let mut new_localized_foreign_strings =
-        csv_reader::multi_locale_read(File::open(localized_text_file_path).map_err(|e| {
+        csv_reader::reader::read(File::open(localized_text_file_path).map_err(|e| {
             Error {
                 path: Some(localized_file_path_string_or_fb.clone()),
                 kind: ErrorKind::IoError(e),
