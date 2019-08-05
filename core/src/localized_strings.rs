@@ -18,4 +18,8 @@ impl LocalizedStrings {
     pub fn strings(&self) -> &Vec<LocalizedString> {
         &self.strings
     }
+
+    pub fn into_strings(self) -> Vec<LocalizedString> {
+        self.strings
+    }
 }

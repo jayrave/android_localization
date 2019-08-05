@@ -1,4 +1,6 @@
 use crate::android_string::AndroidString;
+use crate::localized_strings::LocalizedStrings;
+use crate::localized_string::LocalizedString;
 use crate::constants;
 use crate::helper::xml_helper;
 use crate::ops::dedup;
@@ -81,7 +83,7 @@ fn handle_translations(
         String::from(localized_text_file_path.to_str().unwrap_or(file_name));
 
     let mut new_localized_foreign_strings =
-        csv_reader::single_locale_read(File::open(localized_text_file_path).map_err(|e| {
+        csv_reader::multi_locale_read(File::open(localized_text_file_path).map_err(|e| {
             Error {
                 path: Some(localized_file_path_string_or_fb.clone()),
                 kind: ErrorKind::IoError(e),
@@ -91,6 +93,8 @@ fn handle_translations(
             path: Some(localized_file_path_string_or_fb),
             kind: ErrorKind::CsvError(e),
         })?;
+
+    let mut new_localized_foreign_strings: Vec<LocalizedString> = new_localized_foreign_strings.into_iter().next().expect("There should be at least one locale").into_strings();
 
     // Extract android strings out of the newly localized strings
     let mut new_localized_foreign_strings = extract::extract_android_strings_from_localized(
@@ -285,7 +289,7 @@ mod tests {
         .unwrap();
 
         fr_translations_file
-            .write("s1, english value 1, french new value 1".as_bytes())
+            .write("string_name, default_locale, french\ns1, english value 1, french new value 1".as_bytes())
             .unwrap();
 
         // Perform action
