@@ -41,12 +41,12 @@ fn find_grouping_hash_of(strings: &LocalizableStrings) -> u64 {
     hasher.finish()
 }
 
-struct Writer {
+pub struct Writer {
     strings_list: Vec<LocalizableStrings>
 }
 
 impl Writer {
-    fn write(self, sink: &mut Write) -> Result<(), Error> {
+    pub fn write(self, sink: &mut Write) -> Result<(), Error> {
         // Sink is automatically buffered
         let mut csv_writer = csv::Writer::from_writer(sink);
         let locale_count = self.strings_list.len();

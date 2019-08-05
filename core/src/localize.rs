@@ -1,4 +1,5 @@
 use crate::android_string::AndroidString;
+use crate::localizable_strings::LocalizableStrings;
 use crate::constants;
 use crate::helper::xml_helper;
 use crate::ops::filter;
@@ -83,33 +84,6 @@ fn create_output_dir_if_required(output_dir_path: &str) -> Result<(), Error> {
     }
 }
 
-/// Returns the created output file along with its path (if path computation
-/// is possible; if not, it passes out a fallback value)
-fn create_output_file(
-    output_dir_path: &str,
-    output_file_name: &str,
-) -> Result<(File, String), Error> {
-    let mut output_path = PathBuf::from(output_dir_path);
-    output_path.push(output_file_name);
-    output_path.set_extension(constants::extn::CSV);
-    let output_path_or_fb = String::from(output_path.to_str().unwrap_or(output_file_name));
-
-    if output_path.exists() {
-        Err(Error {
-            path: Some(output_path_or_fb),
-            kind: ErrorKind::ArgError(String::from("Output file already exists!")),
-        })
-    } else {
-        match File::create(output_path) {
-            Ok(file) => Ok((file, output_path_or_fb)),
-            Err(error) => Err(Error {
-                path: Some(output_path_or_fb),
-                kind: ErrorKind::IoError(error),
-            }),
-        }
-    }
-}
-
 fn write_out_strings_to_localize(
     res_dir_path: &Path,
     lang_id: &str,
@@ -123,17 +97,85 @@ fn write_out_strings_to_localize(
         filter::find_missing_strings(&mut foreign_strings, translatable_default_strings);
 
     if !strings_to_localize.is_empty() {
-        let (mut sink, output_path_or_fb) = create_output_file(output_dir_path, file_name)?;
-        return match csv_writer::single_locale_write(&mut sink, strings_to_localize) {
-            Ok(_) => Ok(Some(output_path_or_fb)),
+        let mut sink_provider = FileProvider::new(String::from(output_dir_path));
+        let strings_to_localize = vec![LocalizableStrings::new(
+            String::from(file_name),
+            filter::find_missing_strings(&mut foreign_strings, translatable_default_strings)
+        )];
+
+        let result = csv_writer::multi_locale_write(strings_to_localize, &mut sink_provider);
+        let created_file_name = String::from(sink_provider.created_files().first().unwrap_or(&String::from("no files created by sink")));
+        return match result {
+            Ok(_) => Ok(Some(created_file_name)),
             Err(error) => Err(Error {
-                path: Some(output_path_or_fb),
+                path: Some(created_file_name),
                 kind: ErrorKind::CsvError(error),
             }),
         };
     }
 
     Ok(None)
+}
+
+struct FileProvider {
+    sink_dir: String,
+    created_files: Vec<String>
+}
+
+impl FileProvider {
+    fn new(sink_dir: String) -> FileProvider {
+        FileProvider {
+            sink_dir,
+            created_files: Vec::new()
+        }
+    }
+
+    fn created_files(self) -> Vec<String> {
+        self.created_files
+    }
+
+    /// Returns the created output file along with its path (if path computation
+    /// is possible; if not, it passes out a fallback value)
+    fn create_output_file(
+        &mut self,
+        output_file_name: &str,
+    ) -> Result<(File, String), Error> {
+        let mut output_path = PathBuf::from(&self.sink_dir);
+        output_path.push(output_file_name);
+        output_path.set_extension(constants::extn::CSV);
+        let output_path_or_fb = String::from(output_path.to_str().unwrap_or(output_file_name));
+
+        if output_path.exists() {
+            Err(Error {
+                path: Some(output_path_or_fb),
+                kind: ErrorKind::ArgError(String::from("Output file already exists!")),
+            })
+        } else {
+            match File::create(output_path) {
+                Ok(file) => {
+                    self.created_files.push(output_path_or_fb.clone());
+                    Ok((file, output_path_or_fb))
+                },
+
+                Err(error) => Err(Error {
+                    path: Some(output_path_or_fb),
+                    kind: ErrorKind::IoError(error),
+                }),
+            }
+        }
+    }
+}
+
+impl csv_writer::SinkProvider for FileProvider {
+    fn execute_with_new_sink(
+        &mut self,
+        for_locales: Vec<String>,
+        writer: csv_writer::multi_locale_writer::Writer
+    ) -> Result<(), csv_writer::Error> {
+        let filename = for_locales.join("_");
+        let (mut sink, output_path_or_fb) = self.create_output_file(&filename).unwrap();
+        writer.write(&mut sink)
+    }
 }
 
 #[derive(Debug)]
@@ -255,7 +297,9 @@ mod tests {
         File::create(&output_file_path.clone()).unwrap();
         let output_dir_path = output_dir_path.to_str().unwrap();
 
-        let error = super::create_output_file(output_dir_path, "op_file").unwrap_err();
+        let mut file_provider = super::FileProvider::new(String::from(output_dir_path));
+        let error = file_provider.create_output_file("op_file").unwrap_err();
+
         assert!(error.to_string().ends_with("Output file already exists!"));
         assert_eq!(
             error.path.unwrap(),
@@ -308,7 +352,7 @@ mod tests {
         let mut output_file = File::open(possible_output_file).unwrap();
         let mut output = String::new();
         output_file.read_to_string(&mut output).unwrap();
-        assert_eq!(output, "string_1,string value\nstring_2,string value\n");
+        assert_eq!(output, "string_name,default_locale,french\nstring_1,string value,\nstring_2,string value,\n");
     }
 
     /// Returns the output of the method call to `write_out_strings_to_localize`
