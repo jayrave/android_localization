@@ -1,7 +1,7 @@
 use crate::android_string::AndroidString;
 use crate::localizable_strings::LocalizableStrings;
 use crate::constants;
-use crate::helper::xml_helper;
+use crate::util::xml_helper;
 use crate::ops::filter;
 use crate::reader::xml_reader;
 use std::collections::HashMap;

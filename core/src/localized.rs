@@ -2,7 +2,7 @@ use crate::android_string::AndroidString;
 use crate::localized_strings::LocalizedStrings;
 use crate::localized_string::LocalizedString;
 use crate::constants;
-use crate::helper::xml_helper;
+use crate::util::xml_helper;
 use crate::ops::dedup;
 use crate::ops::extract;
 use crate::ops::filter;
@@ -213,7 +213,7 @@ impl fmt::Display for Error {
 #[cfg(test)]
 mod tests {
     use crate::android_string::AndroidString;
-    use crate::helper::xml_helper;
+    use crate::util::xml_helper;
     use std::collections::HashMap;
     use std::fs;
     use std::fs::File;
