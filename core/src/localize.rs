@@ -103,7 +103,7 @@ fn write_out_strings_to_localize(
             filter::find_missing_strings(&mut foreign_strings, translatable_default_strings)
         )];
 
-        let result = csv_writer::multi_locale_write(strings_to_localize, &mut sink_provider);
+        let result = csv_writer::writer::write(strings_to_localize, &mut sink_provider);
         let created_file_name = String::from(sink_provider.created_files().first().unwrap_or(&String::from("no files created by sink")));
         return match result {
             Ok(_) => Ok(Some(created_file_name)),
@@ -170,7 +170,7 @@ impl csv_writer::SinkProvider for FileProvider {
     fn execute_with_new_sink(
         &mut self,
         for_locales: Vec<String>,
-        writer: csv_writer::multi_locale_writer::Writer
+        writer: csv_writer::writer::Writer
     ) -> Result<(), csv_writer::Error> {
         let filename = for_locales.join("_");
         let (mut sink, output_path_or_fb) = self.create_output_file(&filename).unwrap();
