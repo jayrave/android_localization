@@ -24,7 +24,7 @@ pub fn do_the_thing(matches: &ArgMatches) {
 }
 
 fn do_to_csv(matches: &ArgMatches) {
-    exit_appropriately(
+    exit_based_on_result(
         "Texts to be localized written to",
         android_strings_core::localize::do_the_thing(
             matches.value_of(constants::arg::RES_DIR).unwrap(),
@@ -37,7 +37,7 @@ fn do_to_csv(matches: &ArgMatches) {
 }
 
 fn do_from_csv(matches: &ArgMatches) {
-    exit_appropriately(
+    exit_based_on_result(
         "Localized texts written to",
         android_strings_core::localized::do_the_thing(
             matches.value_of(constants::arg::RES_DIR).unwrap(),
@@ -50,10 +50,24 @@ fn do_from_csv(matches: &ArgMatches) {
 }
 
 fn do_validations(matches: &ArgMatches) {
-    exit_appropriately(
-        "No issues found. Validated the following files",
-        android_strings_core::validator::do_the_thing(matches.value_of(constants::arg::RES_DIR).unwrap()),
-    )
+    let result = android_strings_core::validator::do_the_thing(matches.value_of(constants::arg::RES_DIR).unwrap());
+    match result {
+        Err(error) => {
+            exit_based_on_result("", Err(error))
+        }
+
+        Ok(validation_result) => match validation_result {
+            Ok(file_names) => {
+                let result: Result<Vec<String>, String> = Ok(file_names);
+                exit_based_on_result("No issues found. Validated the following files", result)
+            },
+
+            Err(_error) => {
+                exit_on_failure(String::from("There are some validation issues! TODO => format"))
+            }
+        }
+    }
+
 }
 
 fn build_mappings(matches: &ArgMatches) -> HashMap<String, String> {
@@ -70,17 +84,24 @@ fn build_mappings(matches: &ArgMatches) -> HashMap<String, String> {
     }
 }
 
-fn exit_appropriately<E: fmt::Display>(success_prefix: &str, result: Result<Vec<String>, E>) {
+fn exit_based_on_result<E: fmt::Display>(success_prefix: &str, result: Result<Vec<String>, E>) {
     match result {
         Ok(file_names) => {
-            let output = format!("{} - \n\n{}", success_prefix, file_names.join("\n"));
-            println!("{}", style(output).green());
-            process::exit(0)
+            exit_on_success(format!("{} - \n\n{}", success_prefix, file_names.join("\n")))
         }
 
         Err(error) => {
-            eprintln!("{}", style(error.to_string()).red());
-            process::exit(1)
+            exit_on_failure(error.to_string())
         }
     }
+}
+
+fn exit_on_success(output: String) {
+    println!("{}", style(output).green());
+    process::exit(0)
+}
+
+fn exit_on_failure(error: String) {
+    eprintln!("{}", style(error).red());
+    process::exit(1)
 }
