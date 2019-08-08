@@ -8,7 +8,7 @@ use crate::validate::format_string;
 
 /// Runs all validations for all foreign strings & returns a collection
 /// of file names on which the validations were run
-pub fn do_the_thing(res_dir_path: &str) -> Result<Vec<String>, Error> {
+pub fn do_the_thing(res_dir_path: &str) -> Result<Result<Vec<String>, Vec<InvalidStringsFile>>, Error> {
     let res_dir_path_string = res_dir_path;
     let res_dir_path = Path::new(res_dir_path);
     let default_strings = xml_helper::read_default_strings(res_dir_path)?;
@@ -56,23 +56,22 @@ pub fn do_the_thing(res_dir_path: &str) -> Result<Vec<String>, Error> {
     }
 
     if invalid_strings_files.is_empty() {
-        Ok(path_of_validated_files)
+        Ok(Ok(path_of_validated_files))
     } else {
-        Err(Error::ValidationError(invalid_strings_files))
+        Ok(Err(invalid_strings_files))
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct InvalidStringsFile {
     file_path: String,
-    apostrophe_error: Option<apostrophe::Error>,
-    format_string_error: Option<format_string::Error>,
+    apostrophe_error: Option<apostrophe::InvalidStrings>,
+    format_string_error: Option<format_string::Mismatches>,
 }
 
 #[derive(Debug)]
 pub enum Error {
     ForeignLangIdFinderError(foreign_lang_ids_finder::Error),
-    ValidationError(Vec<InvalidStringsFile>),
     XmlReadError(xml_helper::Error),
 }
 
@@ -92,7 +91,6 @@ impl error::Error for Error {
     fn cause(&self) -> Option<&error::Error> {
         match self {
             Error::ForeignLangIdFinderError(error) => Some(error),
-            Error::ValidationError(_) => None,
             Error::XmlReadError(error) => Some(error),
         }
     }
@@ -102,27 +100,7 @@ impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Error::ForeignLangIdFinderError(error) => fmt::Display::fmt(error, f),
-            Error::XmlReadError(error) => fmt::Display::fmt(error, f),
-            Error::ValidationError(invalid_strings_files) => invalid_strings_files
-                .iter()
-                .map(|e| {
-                    let apos_error_string = match e.apostrophe_error {
-                        Some(ref e) => e.to_string(),
-                        None => String::from(""),
-                    };
-
-                    let fs_error_string = match e.format_string_error {
-                        Some(ref e) => e.to_string(),
-                        None => String::from(""),
-                    };
-
-                    writeln!(
-                        f,
-                        "File path: {}; apostrophe errors: [{}]; format string errors: [{}]",
-                        e.file_path, apos_error_string, fs_error_string
-                    )
-                })
-                .collect(),
+            Error::XmlReadError(error) => fmt::Display::fmt(error, f)
         }
     }
 }
@@ -136,6 +114,9 @@ mod tests {
     use std::fs::File;
     use std::path::PathBuf;
     use crate::writer::xml_writer;
+    use crate::validate::apostrophe;
+    use crate::validate::format_string;
+    use crate::validate::validator::InvalidStringsFile;
 
     #[test]
     fn returns_list_of_file_names() {
@@ -190,12 +171,8 @@ mod tests {
         )
         .unwrap();
 
-        assert_eq(
-            super::do_the_thing(res_dir_path.to_str().unwrap()).unwrap(),
-            vec![
-                spanish_strings_file_path.clone(),
-                french_strings_file_path.clone(),
-            ],
+        assert_eq!(
+            super::do_the_thing(res_dir_path.to_str().unwrap()).unwrap().unwrap(),
             vec![french_strings_file_path, spanish_strings_file_path],
         );
     }
@@ -223,41 +200,60 @@ mod tests {
         let (mut spanish_strings_file, spanish_strings_file_path) =
             create_strings_file_in(&spanish_values_dir_path);
 
+        let default_s1 = AndroidString::new(String::from("s1"), String::from("value"), true);
+        let default_s2 = AndroidString::new(String::from("s2"), String::from("v'alue"), true);
         xml_writer::write(
             &mut default_strings_file,
-            vec![
-                AndroidString::new(String::from("s1"), String::from("value"), true),
-                AndroidString::new(String::from("s2"), String::from("v'alue"), true),
-            ],
+            vec![default_s1.clone(), default_s2.clone()]
         )
         .unwrap();
 
+        let french_s1 = AndroidString::new(String::from("s1"), String::from("v'alue"), true);
         xml_writer::write(
             &mut french_strings_file,
-            vec![
-                AndroidString::new(String::from("s1"), String::from("val'ue %1$s"), true),
-                AndroidString::new(String::from("s2"), String::from("v'alue %1$d"), true),
-            ],
+            vec![french_s1.clone()],
         )
         .unwrap();
 
+        let spanish_s2 = AndroidString::new(String::from("s2"), String::from("v'alue %1$d"), true);
         xml_writer::write(
             &mut spanish_strings_file,
-            vec![AndroidString::new(
-                String::from("s1"),
-                String::from("v'alue"),
-                true,
-            )],
+            vec![spanish_s2.clone()],
         )
         .unwrap();
 
-        let error = super::do_the_thing(res_dir_path.to_str().unwrap()).unwrap_err();
+        let invalid_strings_file = super::do_the_thing(res_dir_path.to_str().unwrap()).unwrap().unwrap_err();
         let spanish_errors = format!("File path: {}; apostrophe errors: [(Translatable: true; Name: s1; Value: v'alue)]; format string errors: []\n", spanish_strings_file_path);
         let french_errors = format!("File path: {}; apostrophe errors: [(Translatable: true; Name: s1; Value: val'ue %1$s)(Translatable: true; Name: s2; Value: v'alue %1$d)]; format string errors: [(Format string mismatch. Found format strings () in default (value) & found format strings (%1$s) in foreign (val'ue %1$s))(Format string mismatch. Found format strings () in default (v'alue) & found format strings (%1$d) in foreign (v'alue %1$d))]\n", french_strings_file_path);
-        assert_eq(
-            error.to_string(),
-            format!("{}{}", spanish_errors, french_errors),
-            format!("{}{}", french_errors, spanish_errors),
+        assert_eq!(
+            invalid_strings_file,
+            vec![
+                InvalidStringsFile {
+                    file_path: french_strings_file_path,
+                    apostrophe_error: Some(apostrophe::InvalidStrings {
+                        invalid_strings: vec![french_s1]
+                    }),
+                    format_string_error: None
+                },
+                InvalidStringsFile {
+                    file_path: spanish_strings_file_path,
+                    apostrophe_error: Some(apostrophe::InvalidStrings {
+                        invalid_strings: vec![spanish_s2.clone()]
+                    }),
+                    format_string_error: Some(format_string::Mismatches {
+                        mismatches: vec![format_string::Mismatch {
+                            default_parsed_data: format_string::ParsedData {
+                                android_string: default_s2,
+                                sorted_format_strings: vec![]
+                            },
+                            foreign_parsed_data: format_string::ParsedData {
+                                android_string: spanish_s2,
+                                sorted_format_strings: vec![String::from("%1$d")]
+                            }
+                        }]
+                    })
+                }
+            ]
         );
     }
 
@@ -268,22 +264,5 @@ mod tests {
             File::create(strings_file_path.clone()).unwrap(),
             String::from(strings_file_path.clone().to_str().unwrap()),
         )
-    }
-
-    fn assert_eq<T: fmt::Debug + cmp::PartialEq>(
-        actual: T,
-        potential_expected_1: T,
-        potential_expected_2: T,
-    ) {
-        let matches = (actual == potential_expected_1) || (actual == potential_expected_2);
-        if !matches {
-            panic!(
-                r#"assertion failed: `(left == right)`
-                actual              : `{:?}`,
-                potential expected 1: `{:?}`
-                potential expected 2: `{:?}`"#,
-                actual, potential_expected_1, potential_expected_2
-            )
-        }
     }
 }
