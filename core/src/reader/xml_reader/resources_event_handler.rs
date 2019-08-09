@@ -1,5 +1,5 @@
 use crate::constants;
-use crate::reader::xml_reader::error::Error;
+use crate::error::Error;
 use crate::reader::xml_reader::event_handler::EventHandler;
 use crate::reader::xml_reader::sinking_event_handler::SinkingEventHandler;
 use crate::reader::xml_reader::string_event_handler::StringEventHandler;

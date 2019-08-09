@@ -1,6 +1,7 @@
 use crate::android_string::AndroidString;
 use crate::constants;
 use std::error;
+use crate::error::Error;
 use std::fmt;
 use std::io::BufWriter;
 use std::io::Write;
@@ -10,7 +11,6 @@ use xml::writer;
 use xml::writer::XmlEvent as WriteXmlEvent;
 use xml::EmitterConfig;
 use xml::ParserConfig;
-use crate::writer::xml_writer::error::Error;
 
 pub fn write<S: Write>(sink: &mut S, android_strings: Vec<AndroidString>) -> Result<(), Error> {
     let mut writer = EmitterConfig::new()
@@ -56,17 +56,19 @@ fn write_string<W: Write>(writer: &mut writer::EventWriter<W>, value: &str) -> R
     let reader = ParserConfig::new().create_reader(value.as_bytes());
     for element_or_error in reader {
         match element_or_error {
-            Err(error) => return Err(Error::XmlReadError(error)),
+            Err(error) => return Err::<_, Error>(From::from(error)),
             Ok(ref element) => match element {
                 ReadXmlEvent::Characters(_) => {
                     writer.write(element.as_writer_event().ok_or_else(|| {
-                        Error::LogicError(format!("Can't build writer event from {}", &value))
+                        let error: Error = From::from(format!("Can't build writer event from {}", &value));
+                        error
                     })?)
                 }
 
                 ReadXmlEvent::CData(_) => {
                     writer.write(element.as_writer_event().ok_or_else(|| {
-                        Error::LogicError(format!("Can't build writer event from {}", &value))
+                        let error: Error = From::from(format!("Can't build writer event from {}", &value));
+                        error
                     })?)
                 }
 

@@ -2,7 +2,7 @@ use csv;
 use csv::ReaderBuilder;
 use crate::localized_string::LocalizedString;
 use crate::localized_strings::LocalizedStrings;
-use crate::reader::csv_reader::error::Error;
+use crate::error::Error;
 use std::io::Read;
 
 pub fn read<S: Read>(source: S) -> Result<Vec<LocalizedStrings>, Error> {
@@ -51,9 +51,7 @@ pub fn read<S: Read>(source: S) -> Result<Vec<LocalizedStrings>, Error> {
 fn extract_foreign_locales(record: csv::Result<&csv::StringRecord>) -> Result<Vec<String>, Error> {
     let record = record?;
     if record.len() < 3 {
-        return Err(Error::SyntaxError(String::from(
-            "Too few values in header (at least 3 required)",
-        )));
+        Err(String::from("Too few values in header (at least 3 required)"))?;
     }
 
     let mut iterator = record.into_iter();
@@ -62,21 +60,15 @@ fn extract_foreign_locales(record: csv::Result<&csv::StringRecord>) -> Result<Ve
     let foreign_locales: Vec<String> = iterator.map(String::from).collect();
 
     if header1 != "string_name" {
-        return Err(Error::SyntaxError(String::from(
-            "First header should be named string_name",
-        )));
+        Err(String::from("First header should be named string_name"))?;
     }
 
     if header2 != "default_locale" {
-        return Err(Error::SyntaxError(String::from(
-            "Second header should be named default_locale",
-        )));
+        Err(String::from("Second header should be named default_locale"))?;
     }
 
     if foreign_locales.iter().any(|header| header.is_empty()) {
-        return Err(Error::SyntaxError(String::from(
-            "Headers can't be empty strings",
-        )));
+        Err(String::from("Headers can't be empty strings"))?;
     }
 
     Ok(foreign_locales)
@@ -91,9 +83,7 @@ fn extract_localized_record(record: &csv::StringRecord) -> Result<LocalizedRecor
     let foreign_values = iterator.map(String::from).collect();
 
     if string_name.is_empty() {
-        return Err(Error::SyntaxError(String::from(
-            "string_name can't be empty for any record",
-        )));
+        Err(String::from("string_name can't be empty for any record"))?;
     }
 
     Ok(LocalizedRecord {
@@ -112,9 +102,9 @@ struct LocalizedRecord {
 
 #[cfg(test)]
 mod tests {
+    use crate::error::Error;
     use crate::localized_string::LocalizedString;
     use crate::localized_strings::LocalizedStrings;
-    use crate::reader::csv_reader::Error;
     use std::fs::File;
     use std::io::{Seek, SeekFrom, Write};
 

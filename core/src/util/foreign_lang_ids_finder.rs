@@ -1,4 +1,6 @@
 use crate::constants;
+use crate::error::Error;
+use crate::error::ResultExt;
 use regex::Regex;
 use std::collections::HashMap;
 use std::error;
@@ -16,17 +18,10 @@ lazy_static::lazy_static! {
 /// What is after the last `-` in the folder name is returned as the lang id
 pub fn find(res_dir_path: &str) -> Result<Vec<String>, Error> {
     if !Path::new(res_dir_path).is_dir() {
-        return Err(Error {
-            path: String::from(res_dir_path),
-            error: io::Error::new(io::ErrorKind::NotFound, "res dir doesn't exist!"),
-        });
+        return Err(From::from(format!("Res dir({}) doesn't exist", res_dir_path)));
     }
 
-    let lang_ids = fs::read_dir(res_dir_path)
-        .map_err(|e| Error {
-            path: String::from(res_dir_path),
-            error: e,
-        })?
+    let lang_ids = fs::read_dir(res_dir_path).with_context(String::from(res_dir_path))?
         .filter_map(|dir_entry| match dir_entry {
             Err(_) => None,
             Ok(dir_entry) => match dir_entry.file_type() {
@@ -72,25 +67,6 @@ pub fn find_and_build_mapping_if_empty_or_return<S: ::std::hash::BuildHasher>(
     Ok(mapping)
 }
 
-#[derive(Debug)]
-pub struct Error {
-    pub path: String,
-    pub error: io::Error,
-}
-
-impl error::Error for Error {
-    fn cause(&self) -> Option<&error::Error> {
-        Some(&self.error)
-    }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Path: {}; Error: ", &self.path)?;
-        fmt::Display::fmt(&self.error, f)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
@@ -105,8 +81,7 @@ mod tests {
         res_dir_path.push("res");
 
         let error = super::find(res_dir_path.to_str().unwrap()).unwrap_err();
-        assert_eq!(error.path, res_dir_path.to_str().unwrap());
-        assert_eq!(error.error.to_string(), format!("res dir doesn't exist!"))
+        assert_eq!(error.to_string(), format!("Res dir({}) doesn't exist", res_dir_path.to_str().unwrap()))
     }
 
     #[test]

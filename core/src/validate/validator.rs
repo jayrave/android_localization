@@ -1,5 +1,5 @@
 use crate::util::xml_helper;
-use std::error;
+use crate::error::Error;
 use std::fmt;
 use std::path::Path;
 use crate::util::foreign_lang_ids_finder;
@@ -67,42 +67,6 @@ pub struct InvalidStringsFile {
     file_path: String,
     apostrophe_error: Option<apostrophe::InvalidStrings>,
     format_string_error: Option<format_string::Mismatches>,
-}
-
-#[derive(Debug)]
-pub enum Error {
-    ForeignLangIdFinderError(foreign_lang_ids_finder::Error),
-    XmlReadError(xml_helper::Error),
-}
-
-impl From<xml_helper::Error> for Error {
-    fn from(error: xml_helper::Error) -> Self {
-        Error::XmlReadError(error)
-    }
-}
-
-impl From<foreign_lang_ids_finder::Error> for Error {
-    fn from(error: foreign_lang_ids_finder::Error) -> Self {
-        Error::ForeignLangIdFinderError(error)
-    }
-}
-
-impl error::Error for Error {
-    fn cause(&self) -> Option<&error::Error> {
-        match self {
-            Error::ForeignLangIdFinderError(error) => Some(error),
-            Error::XmlReadError(error) => Some(error),
-        }
-    }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Error::ForeignLangIdFinderError(error) => fmt::Display::fmt(error, f),
-            Error::XmlReadError(error) => fmt::Display::fmt(error, f)
-        }
-    }
 }
 
 #[cfg(test)]

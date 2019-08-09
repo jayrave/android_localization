@@ -1,6 +1,6 @@
 use crate::android_string::AndroidString;
 use crate::constants;
-use crate::reader::xml_reader::error::Error;
+use crate::error::Error;
 use crate::reader::xml_reader::event_handler::EventHandler;
 use crate::reader::xml_reader::sinking_event_handler::SinkingEventHandler;
 use xml::attribute::OwnedAttribute;
@@ -28,9 +28,7 @@ impl StringEventHandler {
         }
 
         match string_name {
-            None => Err(Error::SyntaxError(String::from(
-                "string element is missing required name attribute",
-            ))),
+            None => Err(String::from("string element is missing required name attribute"))?,
             Some(name) => Ok(StringEventHandler {
                 name,
                 is_translatable,

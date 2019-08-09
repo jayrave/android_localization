@@ -1,11 +1,11 @@
 use csv;
+use crate::error::Error;
 use crate::localizable_strings::LocalizableStrings;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::hash::Hash;
 use std::hash::Hasher;
 use std::io::Write;
-use crate::writer::csv_writer::error::Error;
 
 pub fn write(
     strings_list: Vec<LocalizableStrings>,

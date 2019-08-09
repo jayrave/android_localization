@@ -1,5 +1,5 @@
 use crate::android_string::AndroidString;
-use crate::reader::xml_reader::error::Error;
+use crate::error::Error;
 use crate::reader::xml_reader::events_handler::EventsHandler;
 use std::io::BufReader;
 use std::io::Read;
@@ -12,7 +12,7 @@ pub fn read<S: Read>(source: S) -> Result<Vec<AndroidString>, Error> {
 
     for element_or_error in reader {
         match element_or_error {
-            Err(error) => return Err(Error::XmlError(error)),
+            Err(error) => return Err(error)?,
             Ok(element) => match element {
                 XmlEvent::StartElement {
                     name, attributes, ..

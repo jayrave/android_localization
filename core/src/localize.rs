@@ -14,6 +14,7 @@ use std::path::Path;
 use std::path::PathBuf;
 use crate::util::foreign_lang_ids_finder;
 use crate::writer::csv_writer;
+use crate::error::{Error, ResultExt};
 
 /// Returns the list of output files created by this call. These aren't guaranteed
 /// to be valid paths to files. Sometimes, if a file's path can't be expressed by
@@ -30,12 +31,9 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
         )?;
 
     if lang_id_to_human_friendly_name_mapping.is_empty() {
-        return Err(Error {
-            path: Some(String::from(res_dir_path)),
-            kind: ErrorKind::ArgError(String::from(
-                "Res dir doesn't have any non-default values dir with strings file!",
-            )),
-        });
+        return Err::<_, Error>(From::from(String::from(
+            "Res dir doesn't have any non-default values dir with strings file!",
+        ))).with_context(String::from(res_dir_path));
     }
 
     let mut paths_of_created_file = vec![];
@@ -67,20 +65,13 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
 fn create_output_dir_if_required(output_dir_path: &str) -> Result<(), Error> {
     let output_path = PathBuf::from(output_dir_path);
     if output_path.is_file() {
-        Err(Error {
-            path: Some(String::from(output_dir_path)),
-            kind: ErrorKind::ArgError(String::from("Output directory path points to a file!")),
-        })
+        return Err::<_, Error>(From::from(String::from(
+            "Output directory path points to a file!",
+        ))).with_context(String::from(output_dir_path));
     } else if output_path.exists() {
         Ok(())
     } else {
-        match fs::create_dir_all(PathBuf::from(output_dir_path)) {
-            Ok(()) => Ok(()),
-            Err(error) => Err(Error {
-                path: Some(String::from(output_dir_path)),
-                kind: ErrorKind::IoError(error),
-            }),
-        }
+        fs::create_dir_all(PathBuf::from(output_dir_path)).with_context(String::from(output_dir_path))
     }
 }
 
@@ -105,13 +96,8 @@ fn write_out_strings_to_localize(
 
         let result = csv_writer::writer::write(strings_to_localize, &mut sink_provider);
         let created_file_name = String::from(sink_provider.created_files().first().unwrap_or(&String::from("no files created by sink")));
-        return match result {
-            Ok(_) => Ok(Some(created_file_name)),
-            Err(error) => Err(Error {
-                path: Some(created_file_name),
-                kind: ErrorKind::CsvError(error),
-            }),
-        };
+
+        return result.map(|_| Some(created_file_name.clone())).with_context(created_file_name);
     }
 
     Ok(None)
@@ -146,10 +132,9 @@ impl FileProvider {
         let output_path_or_fb = String::from(output_path.to_str().unwrap_or(output_file_name));
 
         if output_path.exists() {
-            Err(Error {
-                path: Some(output_path_or_fb),
-                kind: ErrorKind::ArgError(String::from("Output file already exists!")),
-            })
+            return Err::<_, Error>(From::from(String::from(
+                "Output file already exists!",
+            ))).with_context(output_path_or_fb);
         } else {
             match File::create(output_path) {
                 Ok(file) => {
@@ -157,10 +142,7 @@ impl FileProvider {
                     Ok((file, output_path_or_fb))
                 },
 
-                Err(error) => Err(Error {
-                    path: Some(output_path_or_fb),
-                    kind: ErrorKind::IoError(error),
-                }),
+                Err(error) => Err::<_, Error>(From::from(error)).with_context(output_path_or_fb),
             }
         }
     }
@@ -171,74 +153,10 @@ impl csv_writer::SinkProvider for FileProvider {
         &mut self,
         for_locales: Vec<String>,
         writer: csv_writer::writer::Writer
-    ) -> Result<(), csv_writer::Error> {
+    ) -> Result<(), Error> {
         let filename = for_locales.join("_");
         let (mut sink, output_path_or_fb) = self.create_output_file(&filename).unwrap();
         writer.write(&mut sink)
-    }
-}
-
-#[derive(Debug)]
-pub struct Error {
-    path: Option<String>,
-    kind: ErrorKind,
-}
-
-#[derive(Debug)]
-pub enum ErrorKind {
-    ArgError(String),
-    CsvError(csv_writer::Error),
-    ForeignLangIdsFinder(foreign_lang_ids_finder::Error),
-    IoError(io::Error),
-    XmlError(xml_reader::Error),
-    XmlReadHelperError(xml_helper::Error),
-}
-
-impl From<foreign_lang_ids_finder::Error> for Error {
-    fn from(error: foreign_lang_ids_finder::Error) -> Self {
-        Error {
-            path: None,
-            kind: ErrorKind::ForeignLangIdsFinder(error),
-        }
-    }
-}
-
-impl From<xml_helper::Error> for Error {
-    fn from(error: xml_helper::Error) -> Self {
-        Error {
-            path: None,
-            kind: ErrorKind::XmlReadHelperError(error),
-        }
-    }
-}
-
-impl error::Error for Error {
-    fn cause(&self) -> Option<&error::Error> {
-        match &self.kind {
-            ErrorKind::ArgError(_message) => None,
-            ErrorKind::CsvError(error) => Some(error),
-            ErrorKind::ForeignLangIdsFinder(error) => Some(error),
-            ErrorKind::IoError(error) => Some(error),
-            ErrorKind::XmlError(error) => Some(error),
-            ErrorKind::XmlReadHelperError(error) => Some(error),
-        }
-    }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if let Some(path) = &self.path {
-            write!(f, "Path: {}; Error: ", path)?;
-        }
-
-        match &self.kind {
-            ErrorKind::ArgError(message) => fmt::Display::fmt(message, f),
-            ErrorKind::CsvError(error) => fmt::Display::fmt(error, f),
-            ErrorKind::ForeignLangIdsFinder(error) => fmt::Display::fmt(error, f),
-            ErrorKind::IoError(error) => fmt::Display::fmt(error, f),
-            ErrorKind::XmlError(error) => fmt::Display::fmt(error, f),
-            ErrorKind::XmlReadHelperError(error) => fmt::Display::fmt(error, f),
-        }
     }
 }
 
@@ -262,8 +180,8 @@ mod tests {
         let error =
             super::do_the_thing(res_dir_path.to_str().unwrap(), "", HashMap::new()).unwrap_err();
         assert_eq!(
-            error.path,
-            Some(String::from(res_dir_path.to_str().unwrap()))
+            error.context(),
+            &Some(String::from(res_dir_path.to_str().unwrap()))
         );
         assert!(error
             .to_string()
@@ -284,7 +202,7 @@ mod tests {
         assert!(error
             .to_string()
             .ends_with("Output directory path points to a file!"));
-        assert_eq!(error.path.unwrap(), output_dir_path);
+        assert_eq!(error.context(), &Some(String::from(output_dir_path)));
     }
 
     #[test]
@@ -302,8 +220,8 @@ mod tests {
 
         assert!(error.to_string().ends_with("Output file already exists!"));
         assert_eq!(
-            error.path.unwrap(),
-            String::from(output_file_path.to_str().unwrap())
+            error.context(),
+            &Some(String::from(output_file_path.to_str().unwrap()))
         );
     }
 

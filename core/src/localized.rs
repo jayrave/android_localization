@@ -19,6 +19,7 @@ use std::path::Path;
 use std::path::PathBuf;
 use crate::util::foreign_lang_ids_finder;
 use crate::writer::xml_writer;
+use crate::error::{Error, ResultExt};
 
 /// Returns the list of output files created by this call. These aren't guaranteed
 /// to be valid paths to files. Sometimes, if a file's path can't be expressed by
@@ -35,12 +36,9 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
         )?;
 
     if human_friendly_name_to_lang_id_mapping.is_empty() {
-        return Err(Error {
-            path: Some(String::from(res_dir_path)),
-            kind: ErrorKind::ArgError(String::from(
-                "Res dir doesn't have any non-default values dir with strings file!",
-            )),
-        });
+        return Err::<_, Error>(From::from(String::from(
+            "Res dir doesn't have any non-default values dir with strings file!",
+        ))).with_context(String::from(res_dir_path));
     }
 
     // Read default strings
@@ -83,16 +81,7 @@ fn handle_translations(
         String::from(localized_text_file_path.to_str().unwrap_or(file_name));
 
     let mut new_localized_foreign_strings =
-        csv_reader::reader::read(File::open(localized_text_file_path).map_err(|e| {
-            Error {
-                path: Some(localized_file_path_string_or_fb.clone()),
-                kind: ErrorKind::IoError(e),
-            }
-        })?)
-        .map_err(|e| Error {
-            path: Some(localized_file_path_string_or_fb),
-            kind: ErrorKind::CsvError(e),
-        })?;
+        csv_reader::reader::read(File::open(localized_text_file_path).with_context(localized_file_path_string_or_fb.clone())?).with_context(localized_file_path_string_or_fb)?;
 
     let mut new_localized_foreign_strings: Vec<LocalizedString> = new_localized_foreign_strings.into_iter().next().expect("There should be at least one locale").into_strings();
 
@@ -111,10 +100,7 @@ fn handle_translations(
 
     // Write out foreign strings back to file
     let (mut file, output_file_path) = writable_empty_foreign_strings_file(res_dir_path, lang_id)?;
-    xml_writer::write(&mut file, to_be_written_foreign_strings).map_err(|e| Error {
-        path: Some(output_file_path.clone()),
-        kind: ErrorKind::XmlWriteError(e),
-    })?;
+    xml_writer::write(&mut file, to_be_written_foreign_strings).with_context(output_file_path.clone())?;
 
     Ok(output_file_path)
 }
@@ -135,79 +121,9 @@ fn writable_empty_foreign_strings_file(
 
     // empties out the file if it has any content
     Ok((
-        File::create(strings_file_path).map_err(|e| Error {
-            path: Some(output_path_or_fb.clone()),
-            kind: ErrorKind::IoError(e),
-        })?,
+        File::create(strings_file_path).with_context(output_path_or_fb.clone())?,
         output_path_or_fb,
     ))
-}
-
-#[derive(Debug)]
-pub struct Error {
-    path: Option<String>,
-    kind: ErrorKind,
-}
-
-#[derive(Debug)]
-pub enum ErrorKind {
-    ArgError(String),
-    CsvError(csv_reader::Error),
-    ForeignLangIdsFinder(foreign_lang_ids_finder::Error),
-    IoError(io::Error),
-    XmlReadError(xml_reader::Error),
-    XmlWriteError(xml_writer::Error),
-}
-
-impl From<foreign_lang_ids_finder::Error> for Error {
-    fn from(error: foreign_lang_ids_finder::Error) -> Self {
-        Error {
-            path: None,
-            kind: ErrorKind::ForeignLangIdsFinder(error),
-        }
-    }
-}
-
-impl From<xml_helper::Error> for Error {
-    fn from(error: xml_helper::Error) -> Self {
-        Error {
-            path: Some(String::from(error.path())),
-            kind: match error.into_kind() {
-                xml_helper::ErrorKind::IoError(e) => ErrorKind::IoError(e),
-                xml_helper::ErrorKind::XmlError(e) => ErrorKind::XmlReadError(e),
-            },
-        }
-    }
-}
-
-impl error::Error for Error {
-    fn cause(&self) -> Option<&error::Error> {
-        match &self.kind {
-            ErrorKind::ArgError(_message) => None,
-            ErrorKind::CsvError(error) => Some(error),
-            ErrorKind::ForeignLangIdsFinder(error) => Some(error),
-            ErrorKind::IoError(error) => Some(error),
-            ErrorKind::XmlReadError(error) => Some(error),
-            ErrorKind::XmlWriteError(error) => Some(error),
-        }
-    }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if let Some(path) = &self.path {
-            write!(f, "Path: {}; Error: ", path)?;
-        }
-
-        match &self.kind {
-            ErrorKind::ArgError(message) => fmt::Display::fmt(message, f),
-            ErrorKind::CsvError(error) => fmt::Display::fmt(error, f),
-            ErrorKind::ForeignLangIdsFinder(error) => fmt::Display::fmt(error, f),
-            ErrorKind::IoError(error) => fmt::Display::fmt(error, f),
-            ErrorKind::XmlReadError(error) => fmt::Display::fmt(error, f),
-            ErrorKind::XmlWriteError(error) => fmt::Display::fmt(error, f),
-        }
-    }
 }
 
 #[cfg(test)]
@@ -231,8 +147,8 @@ mod tests {
         let error =
             super::do_the_thing(res_dir_path.to_str().unwrap(), "", HashMap::new()).unwrap_err();
         assert_eq!(
-            error.path,
-            Some(String::from(res_dir_path.to_str().unwrap()))
+            error.context(),
+            &Some(String::from(res_dir_path.to_str().unwrap()))
         );
         assert!(error
             .to_string()
