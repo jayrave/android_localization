@@ -1,13 +1,12 @@
+use std::collections::HashMap;
+use std::fs;
+use std::path::Path;
+
+use regex::Regex;
+
 use crate::constants;
 use crate::error::Error;
 use crate::error::ResultExt;
-use regex::Regex;
-use std::collections::HashMap;
-use std::error;
-use std::fmt;
-use std::fs;
-use std::io;
-use std::path::Path;
 
 lazy_static::lazy_static! {
     static ref LANG_ID_REGEX: Regex = Regex::new("-([a-zA-z]+)$").unwrap();

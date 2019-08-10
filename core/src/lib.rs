@@ -1,3 +1,5 @@
+pub use validate::validator;
+
 mod android_string;
 mod constants;
 mod error;
@@ -11,5 +13,3 @@ mod reader;
 mod util;
 mod validate;
 mod writer;
-
-pub use validate::validator;

@@ -1,7 +1,6 @@
-use crate::android_string::AndroidString;
 use regex::Regex;
-use std::error;
-use std::fmt;
+
+use crate::android_string::AndroidString;
 
 lazy_static::lazy_static! {
     static ref APOSTROPHE: Regex = Regex::new("(')").unwrap();

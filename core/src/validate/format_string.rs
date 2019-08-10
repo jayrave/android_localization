@@ -1,9 +1,9 @@
+use std::cmp::Ordering;
+
+use regex::Regex;
+
 use crate::android_string::AndroidString;
 use crate::ops::sort;
-use regex::Regex;
-use std::cmp::Ordering;
-use std::error;
-use std::fmt;
 
 lazy_static::lazy_static! {
     static ref FORMAT_STRING: Regex = Regex::new(r"(%\d+\$[ds])").unwrap();
@@ -109,9 +109,10 @@ pub struct Mismatches {
 
 #[cfg(test)]
 mod tests {
+    use crate::android_string::AndroidString;
+
     use super::Mismatch;
     use super::ParsedData;
-    use crate::android_string::AndroidString;
 
     #[test]
     fn passes_in_absence_of_mismatches() {

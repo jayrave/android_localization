@@ -1,6 +1,7 @@
+use std::cmp::Ordering;
+
 use crate::android_string::AndroidString;
 use crate::localized_string::LocalizedString;
-use std::cmp::Ordering;
 
 /// In place, stable sorting
 pub fn sort_android_strings_by_name(strings: &mut Vec<AndroidString>) {

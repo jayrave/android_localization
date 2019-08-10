@@ -1,11 +1,13 @@
-use crate::error::Error;
-use crate::localizable_strings::LocalizableStrings;
-use csv;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::hash::Hash;
 use std::hash::Hasher;
 use std::io::Write;
+
+use csv;
+
+use crate::error::Error;
+use crate::localizable_strings::LocalizableStrings;
 
 pub fn write(
     strings_list: Vec<LocalizableStrings>,
@@ -88,13 +90,12 @@ pub trait SinkProvider {
 
 #[cfg(test)]
 mod tests {
-    use super::Error;
-    use super::SinkProvider;
     use crate::android_string::AndroidString;
     use crate::localizable_strings::LocalizableStrings;
 
+    use super::Error;
+    use super::SinkProvider;
     use super::Writer;
-    use std::io::Write;
 
     struct ByteSinkProvider {
         data: Vec<(Vec<String>, String)>,
@@ -155,7 +156,7 @@ mod tests {
         // Convert all the written bytes into strings for the different sinks
         let mut sink_provider = ByteSinkProvider { data: vec![] };
 
-        super::write(strings_list, &mut sink_provider);
+        super::write(strings_list, &mut sink_provider).unwrap();
 
         // Since a map is used, sort the contents to be sure of the order
         sink_provider.data.sort();

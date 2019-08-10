@@ -1,25 +1,21 @@
+use std::collections::HashMap;
+use std::fs::File;
+use std::ops::Add;
+use std::path::Path;
+use std::path::PathBuf;
+
 use crate::android_string::AndroidString;
 use crate::constants;
 use crate::error::{Error, ResultExt};
 use crate::localized_string::LocalizedString;
-use crate::localized_strings::LocalizedStrings;
 use crate::ops::dedup;
 use crate::ops::extract;
 use crate::ops::filter;
 use crate::ops::merge;
 use crate::reader::csv_reader;
-use crate::reader::xml_reader;
 use crate::util::foreign_lang_ids_finder;
 use crate::util::xml_helper;
 use crate::writer::xml_writer;
-use std::collections::HashMap;
-use std::error;
-use std::fmt;
-use std::fs::File;
-use std::io;
-use std::ops::Add;
-use std::path::Path;
-use std::path::PathBuf;
 
 /// Returns the list of output files created by this call. These aren't guaranteed
 /// to be valid paths to files. Sometimes, if a file's path can't be expressed by
@@ -81,7 +77,7 @@ fn handle_localized(
     let localized_file_path_string_or_fb =
         String::from(localized_text_file_path.to_str().unwrap_or(file_name));
 
-    let mut new_localized_foreign_strings = csv_reader::read(
+    let new_localized_foreign_strings = csv_reader::read(
         File::open(localized_text_file_path)
             .with_context(localized_file_path_string_or_fb.clone())?,
     )
@@ -137,14 +133,15 @@ fn writable_empty_foreign_strings_file(
 
 #[cfg(test)]
 mod tests {
-    use crate::android_string::AndroidString;
-    use crate::util::xml_helper;
-    use crate::writer::xml_writer;
     use std::collections::HashMap;
     use std::fs;
     use std::fs::File;
     use std::io::Read;
     use std::io::Write;
+
+    use crate::android_string::AndroidString;
+    use crate::util::xml_helper;
+    use crate::writer::xml_writer;
 
     #[test]
     fn do_the_thing_errors_for_empty_human_friendly_name_to_lang_id_mapping() {

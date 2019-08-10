@@ -1,5 +1,3 @@
-use crate::reader::xml_reader;
-use crate::util::xml_helper;
 use std::error;
 use std::fmt;
 use std::io;
@@ -32,7 +30,7 @@ pub trait ResultExt<T> {
 
 impl<T, E: Into<Error>> ResultExt<T> for Result<T, E> {
     fn with_context(self, context: String) -> Result<T, Error> {
-        self.map_err(|err| Into::into(err)).map_err(|err| Error {
+        self.map_err(Into::into).map_err(|err| Error {
             context: Some(context),
             ..err
         })

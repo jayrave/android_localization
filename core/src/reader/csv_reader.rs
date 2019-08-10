@@ -1,9 +1,11 @@
+use std::io::Read;
+
+use csv;
+use csv::ReaderBuilder;
+
 use crate::error::Error;
 use crate::localized_string::LocalizedString;
 use crate::localized_strings::LocalizedStrings;
-use csv;
-use csv::ReaderBuilder;
-use std::io::Read;
 
 pub fn read<S: Read>(source: S) -> Result<Vec<LocalizedStrings>, Error> {
     let mut reader = ReaderBuilder::new()
@@ -104,11 +106,12 @@ struct LocalizedRecord {
 
 #[cfg(test)]
 mod tests {
+    use std::fs::File;
+    use std::io::{Seek, SeekFrom, Write};
+
     use crate::error::Error;
     use crate::localized_string::LocalizedString;
     use crate::localized_strings::LocalizedStrings;
-    use std::fs::File;
-    use std::io::{Seek, SeekFrom, Write};
 
     #[test]
     fn strings_are_read_from_valid_file() {

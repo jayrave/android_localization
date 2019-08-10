@@ -1,20 +1,17 @@
+use std::collections::HashMap;
+use std::fs;
+use std::fs::File;
+use std::path::Path;
+use std::path::PathBuf;
+
 use crate::android_string::AndroidString;
 use crate::constants;
 use crate::error::{Error, ResultExt};
 use crate::localizable_strings::LocalizableStrings;
 use crate::ops::filter;
-use crate::reader::xml_reader;
 use crate::util::foreign_lang_ids_finder;
 use crate::util::xml_helper;
 use crate::writer::csv_writer;
-use std::collections::HashMap;
-use std::error;
-use std::fmt;
-use std::fs;
-use std::fs::File;
-use std::io;
-use std::path::Path;
-use std::path::PathBuf;
 
 /// Returns the list of output files created by this call. These aren't guaranteed
 /// to be valid paths to files. Sometimes, if a file's path can't be expressed by
@@ -66,10 +63,10 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
 fn create_output_dir_if_required(output_dir_path: &str) -> Result<(), Error> {
     let output_path = PathBuf::from(output_dir_path);
     if output_path.is_file() {
-        return Err::<_, Error>(From::from(String::from(
+        Err::<_, Error>(From::from(String::from(
             "Output directory path points to a file!",
         )))
-        .with_context(String::from(output_dir_path));
+        .with_context(String::from(output_dir_path))
     } else if output_path.exists() {
         Ok(())
     } else {
@@ -132,20 +129,20 @@ impl FileProvider {
 
     /// Returns the created output file along with its path (if path computation
     /// is possible; if not, it passes out a fallback value)
-    fn create_output_file(&mut self, output_file_name: &str) -> Result<(File, String), Error> {
+    fn create_output_file(&mut self, output_file_name: &str) -> Result<File, Error> {
         let mut output_path = PathBuf::from(&self.sink_dir);
         output_path.push(output_file_name);
         output_path.set_extension(constants::extn::CSV);
         let output_path_or_fb = String::from(output_path.to_str().unwrap_or(output_file_name));
 
         if output_path.exists() {
-            return Err::<_, Error>(From::from(String::from("Output file already exists!")))
-                .with_context(output_path_or_fb);
+            Err::<_, Error>(From::from(String::from("Output file already exists!")))
+                .with_context(output_path_or_fb)
         } else {
             match File::create(output_path) {
                 Ok(file) => {
-                    self.created_files.push(output_path_or_fb.clone());
-                    Ok((file, output_path_or_fb))
+                    self.created_files.push(output_path_or_fb);
+                    Ok(file)
                 }
 
                 Err(error) => Err::<_, Error>(From::from(error)).with_context(output_path_or_fb),
@@ -161,20 +158,22 @@ impl csv_writer::SinkProvider for FileProvider {
         writer: csv_writer::Writer,
     ) -> Result<(), Error> {
         let filename = for_locales.join("_");
-        let (mut sink, output_path_or_fb) = self.create_output_file(&filename).unwrap();
+        let mut sink = self.create_output_file(&filename).unwrap();
         writer.write(&mut sink)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::android_string::AndroidString;
     use std::collections::HashMap;
     use std::fs;
     use std::fs::File;
     use std::io::{Read, Seek, SeekFrom, Write};
     use std::path::Path;
+
     use tempfile::TempDir;
+
+    use crate::android_string::AndroidString;
 
     #[test]
     fn do_the_thing_errors_for_empty_lang_id_to_human_friendly_name_mapping() {

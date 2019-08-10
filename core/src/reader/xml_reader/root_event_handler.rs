@@ -1,9 +1,10 @@
+use xml::attribute::OwnedAttribute;
+
 use crate::constants;
 use crate::error::Error;
 use crate::reader::xml_reader::event_handler::EventHandler;
 use crate::reader::xml_reader::resources_event_handler::ResourcesEventHandler;
 use crate::reader::xml_reader::sinking_event_handler::SinkingEventHandler;
-use xml::attribute::OwnedAttribute;
 
 pub struct RootEventHandler {}
 

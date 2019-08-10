@@ -1,7 +1,8 @@
+use std::cmp::Ordering;
+
 use crate::android_string::AndroidString;
 use crate::localized_string::LocalizedString;
 use crate::ops::sort;
-use std::cmp::Ordering;
 
 /// Localized strings will be converted into `AndroidString` only if both the name
 /// & the default value from `LocalizedString` match up with whatever is in the

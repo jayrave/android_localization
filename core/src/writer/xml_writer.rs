@@ -1,16 +1,15 @@
-use crate::android_string::AndroidString;
-use crate::constants;
-use crate::error::Error;
-use std::error;
-use std::fmt;
 use std::io::BufWriter;
 use std::io::Write;
-use xml::reader;
+
 use xml::reader::XmlEvent as ReadXmlEvent;
 use xml::writer;
 use xml::writer::XmlEvent as WriteXmlEvent;
 use xml::EmitterConfig;
 use xml::ParserConfig;
+
+use crate::android_string::AndroidString;
+use crate::constants;
+use crate::error::Error;
 
 pub fn write<S: Write>(sink: &mut S, android_strings: Vec<AndroidString>) -> Result<(), Error> {
     let mut writer = EmitterConfig::new()

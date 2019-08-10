@@ -1,10 +1,12 @@
+use std::io::BufReader;
+use std::io::Read;
+
+use xml::reader::XmlEvent;
+use xml::ParserConfig;
+
 use crate::android_string::AndroidString;
 use crate::error::Error;
 use crate::reader::xml_reader::events_handler::EventsHandler;
-use std::io::BufReader;
-use std::io::Read;
-use xml::reader::XmlEvent;
-use xml::ParserConfig;
 
 pub fn read<S: Read>(source: S) -> Result<Vec<AndroidString>, Error> {
     let mut events_handler = EventsHandler::new();
@@ -30,9 +32,10 @@ pub fn read<S: Read>(source: S) -> Result<Vec<AndroidString>, Error> {
 
 #[cfg(test)]
 mod tests {
-    use crate::android_string::AndroidString;
     use std::fs::File;
     use std::io::{Seek, SeekFrom, Write};
+
+    use crate::android_string::AndroidString;
 
     #[test]
     fn strings_are_read_from_valid_clean_file() {

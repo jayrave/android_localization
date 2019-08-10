@@ -1,14 +1,12 @@
+use std::fs::File;
+use std::ops::Add;
+use std::path::Path;
+
 use crate::android_string::AndroidString;
 use crate::constants;
 use crate::error::Error;
 use crate::error::ResultExt;
 use crate::reader::xml_reader;
-use std::error;
-use std::fmt;
-use std::fs::File;
-use std::io;
-use std::ops::Add;
-use std::path::Path;
 
 type FileWithPath = (File, String);
 

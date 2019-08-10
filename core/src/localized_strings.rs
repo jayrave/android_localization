@@ -11,10 +11,6 @@ impl LocalizedStrings {
         LocalizedStrings { locale, strings }
     }
 
-    pub fn locale(&self) -> &str {
-        &self.locale
-    }
-
     pub fn strings(&self) -> &Vec<LocalizedString> {
         &self.strings
     }

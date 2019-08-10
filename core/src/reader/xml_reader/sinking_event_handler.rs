@@ -1,6 +1,7 @@
+use xml::attribute::OwnedAttribute;
+
 use crate::error::Error;
 use crate::reader::xml_reader::event_handler::EventHandler;
-use xml::attribute::OwnedAttribute;
 
 pub struct SinkingEventHandler {}
 

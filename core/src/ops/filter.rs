@@ -1,6 +1,7 @@
+use std::cmp::Ordering;
+
 use crate::android_string::AndroidString;
 use crate::ops::sort;
-use std::cmp::Ordering;
 
 pub fn find_localizable_strings(strings: Vec<AndroidString>) -> Vec<AndroidString> {
     strings.into_iter().filter(|s| s.is_localizable()).collect()

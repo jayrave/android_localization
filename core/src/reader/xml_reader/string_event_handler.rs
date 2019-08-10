@@ -1,9 +1,10 @@
+use xml::attribute::OwnedAttribute;
+
 use crate::android_string::AndroidString;
 use crate::constants;
 use crate::error::Error;
 use crate::reader::xml_reader::event_handler::EventHandler;
 use crate::reader::xml_reader::sinking_event_handler::SinkingEventHandler;
-use xml::attribute::OwnedAttribute;
 
 pub struct StringEventHandler {
     name: String,
@@ -33,7 +34,7 @@ impl StringEventHandler {
             ))?,
             Some(name) => Ok(StringEventHandler {
                 name,
-                is_localizable: is_localizable,
+                is_localizable,
                 built_android_string: None,
             }),
         }
@@ -77,8 +78,9 @@ impl EventHandler for StringEventHandler {
 
 #[cfg(test)]
 mod tests {
-    use super::StringEventHandler;
     use crate::reader::xml_reader::event_handler::EventHandler;
+
+    use super::StringEventHandler;
 
     #[test]
     fn builds_string_with_one_character_event() {
