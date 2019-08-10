@@ -81,7 +81,7 @@ fn handle_translations(
         String::from(localized_text_file_path.to_str().unwrap_or(file_name));
 
     let mut new_localized_foreign_strings =
-        csv_reader::reader::read(File::open(localized_text_file_path).with_context(localized_file_path_string_or_fb.clone())?).with_context(localized_file_path_string_or_fb)?;
+        csv_reader::read(File::open(localized_text_file_path).with_context(localized_file_path_string_or_fb.clone())?).with_context(localized_file_path_string_or_fb)?;
 
     let mut new_localized_foreign_strings: Vec<LocalizedString> = new_localized_foreign_strings.into_iter().next().expect("There should be at least one locale").into_strings();
 
