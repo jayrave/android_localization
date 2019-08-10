@@ -1,3 +1,3 @@
 fn main() {
-    android_strings_cli::do_the_thing()
+    android_localization_cli::do_the_thing()
 }

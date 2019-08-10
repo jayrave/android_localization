@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 use console::style;
 use crate::constants;
-use android_strings_core;
+use android_localization_core;
 use std::collections::HashMap;
 use std::fmt;
 use std::process;
@@ -26,7 +26,7 @@ pub fn do_the_thing(matches: &ArgMatches) {
 fn do_to_csv(matches: &ArgMatches) {
     exit_based_on_result(
         "Texts to be localized written to",
-        android_strings_core::localize::do_the_thing(
+        android_localization_core::localize::do_the_thing(
             matches.value_of(constants::arg::RES_DIR).unwrap(),
             matches
                 .value_of(constants::arg::LOCALIZE_OUTPUT)
@@ -39,7 +39,7 @@ fn do_to_csv(matches: &ArgMatches) {
 fn do_from_csv(matches: &ArgMatches) {
     exit_based_on_result(
         "Localized texts written to",
-        android_strings_core::localized::do_the_thing(
+        android_localization_core::localized::do_the_thing(
             matches.value_of(constants::arg::RES_DIR).unwrap(),
             matches
                 .value_of(constants::arg::LOCALIZED_INPUT)
@@ -50,7 +50,7 @@ fn do_from_csv(matches: &ArgMatches) {
 }
 
 fn do_validations(matches: &ArgMatches) {
-    let result = android_strings_core::validator::do_the_thing(matches.value_of(constants::arg::RES_DIR).unwrap());
+    let result = android_localization_core::validator::do_the_thing(matches.value_of(constants::arg::RES_DIR).unwrap());
     match result {
         Err(error) => {
             exit_based_on_result("", Err(error))

@@ -1,5 +1,5 @@
 [package]
-name = "android_strings_core"
+name = "android_localization_core"
 version = "0.1.0"
 authors = ["jayrave <jayanthan.raveendiran@gmail.com>"]
 edition = '2018'
