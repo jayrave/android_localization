@@ -3,10 +3,7 @@ use crate::ops::sort;
 use std::cmp::Ordering;
 
 pub fn find_localizable_strings(strings: Vec<AndroidString>) -> Vec<AndroidString> {
-    strings
-        .into_iter()
-        .filter(|s| s.is_localizable())
-        .collect()
+    strings.into_iter().filter(|s| s.is_localizable()).collect()
 }
 
 /// It is assumed that neither lists have strings with the same names. If they

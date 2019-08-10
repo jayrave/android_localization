@@ -1,8 +1,8 @@
 use crate::android_string::AndroidString;
 use crate::constants;
-use crate::reader::xml_reader;
 use crate::error::Error;
 use crate::error::ResultExt;
+use crate::reader::xml_reader;
 use std::error;
 use std::fmt;
 use std::fs::File;
@@ -19,7 +19,9 @@ pub fn read_default_strings(res_dir_path: &Path) -> Result<Vec<AndroidString>, E
 
 pub fn read_foreign_strings(res_dir_path: &Path, lang_id: &str) -> Result<StringsWithPath, Error> {
     let (file, path) = open_foreign_strings_file(res_dir_path, lang_id)?;
-    xml_reader::read(file).with_context(path.clone()).map(|strings| StringsWithPath { path, strings } )
+    xml_reader::read(file)
+        .with_context(path.clone())
+        .map(|strings| StringsWithPath { path, strings })
 }
 
 fn open_default_strings_file(res_dir_path: &Path) -> Result<FileWithPath, Error> {
@@ -38,7 +40,9 @@ fn open_strings_file(res_dir_path: &Path, values_dir_name: &str) -> Result<FileW
     strings_file_path.push(constants::fs::STRING_FILE_NAME);
 
     let path = String::from(strings_file_path.to_string_lossy());
-    File::open(strings_file_path).with_context(path.clone()).map(|file| (file, path) )
+    File::open(strings_file_path)
+        .with_context(path.clone())
+        .map(|file| (file, path))
 }
 
 pub struct StringsWithPath {

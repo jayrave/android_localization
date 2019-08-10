@@ -28,7 +28,9 @@ impl StringEventHandler {
         }
 
         match string_name {
-            None => Err(String::from("string element is missing required name attribute"))?,
+            None => Err(String::from(
+                "string element is missing required name attribute",
+            ))?,
             Some(name) => Ok(StringEventHandler {
                 name,
                 is_localizable: is_localizable,

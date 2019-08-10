@@ -1,7 +1,7 @@
+use crate::constants;
 use clap::App;
 use clap::Arg;
 use clap::SubCommand;
-use crate::constants;
 
 pub fn build() -> App<'static, 'static> {
     App::new("Android Strings")
@@ -17,7 +17,8 @@ fn build_localize_sub_command() -> App<'static, 'static> {
         .arg(build_res_dir_arg())
         .arg(build_mapping_arg(
             "Values qualifier (eg., fr) to CSV file name (eg., french)",
-        )).arg(
+        ))
+        .arg(
             Arg::with_name(constants::arg::LOCALIZE_OUTPUT)
                 .help("Specifies output dir to write CSV files into")
                 .long(constants::arg::LOCALIZE_OUTPUT)
@@ -33,7 +34,8 @@ fn build_localized_sub_command() -> App<'static, 'static> {
         .arg(build_res_dir_arg())
         .arg(build_mapping_arg(
             "CSV file name (eg., french) to values qualifier (eg., fr)",
-        )).arg(
+        ))
+        .arg(
             Arg::with_name(constants::arg::LOCALIZED_INPUT)
                 .help("Specifies input dir to read CSV files from")
                 .long(constants::arg::LOCALIZED_INPUT)

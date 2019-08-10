@@ -1,8 +1,8 @@
-use csv;
-use csv::ReaderBuilder;
+use crate::error::Error;
 use crate::localized_string::LocalizedString;
 use crate::localized_strings::LocalizedStrings;
-use crate::error::Error;
+use csv;
+use csv::ReaderBuilder;
 use std::io::Read;
 
 pub fn read<S: Read>(source: S) -> Result<Vec<LocalizedStrings>, Error> {
@@ -51,7 +51,9 @@ pub fn read<S: Read>(source: S) -> Result<Vec<LocalizedStrings>, Error> {
 fn extract_foreign_locales(record: csv::Result<&csv::StringRecord>) -> Result<Vec<String>, Error> {
     let record = record?;
     if record.len() < 3 {
-        Err(String::from("Too few values in header (at least 3 required)"))?;
+        Err(String::from(
+            "Too few values in header (at least 3 required)",
+        ))?;
     }
 
     let mut iterator = record.into_iter();
@@ -115,8 +117,8 @@ mod tests {
             string_1, english 1, french 1, spanish 1
             string_2, english 2, , spanish 2"#,
         )
-            .unwrap()
-            .into_iter();
+        .unwrap()
+        .into_iter();
 
         let french_strings = strings_list.next().unwrap();
         let spanish_strings = strings_list.next().unwrap();

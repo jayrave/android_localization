@@ -1,14 +1,17 @@
 use crate::android_string::AndroidString;
-use crate::localized_strings::LocalizedStrings;
-use crate::localized_string::LocalizedString;
 use crate::constants;
-use crate::util::xml_helper;
+use crate::error::{Error, ResultExt};
+use crate::localized_string::LocalizedString;
+use crate::localized_strings::LocalizedStrings;
 use crate::ops::dedup;
 use crate::ops::extract;
 use crate::ops::filter;
 use crate::ops::merge;
 use crate::reader::csv_reader;
 use crate::reader::xml_reader;
+use crate::util::foreign_lang_ids_finder;
+use crate::util::xml_helper;
+use crate::writer::xml_writer;
 use std::collections::HashMap;
 use std::error;
 use std::fmt;
@@ -17,9 +20,6 @@ use std::io;
 use std::ops::Add;
 use std::path::Path;
 use std::path::PathBuf;
-use crate::util::foreign_lang_ids_finder;
-use crate::writer::xml_writer;
-use crate::error::{Error, ResultExt};
 
 /// Returns the list of output files created by this call. These aren't guaranteed
 /// to be valid paths to files. Sometimes, if a file's path can't be expressed by
@@ -38,7 +38,8 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
     if human_friendly_name_to_lang_id_mapping.is_empty() {
         return Err::<_, Error>(From::from(String::from(
             "Res dir doesn't have any non-default values dir with strings file!",
-        ))).with_context(String::from(res_dir_path));
+        )))
+        .with_context(String::from(res_dir_path));
     }
 
     // Read default strings
@@ -80,10 +81,17 @@ fn handle_localized(
     let localized_file_path_string_or_fb =
         String::from(localized_text_file_path.to_str().unwrap_or(file_name));
 
-    let mut new_localized_foreign_strings =
-        csv_reader::read(File::open(localized_text_file_path).with_context(localized_file_path_string_or_fb.clone())?).with_context(localized_file_path_string_or_fb)?;
+    let mut new_localized_foreign_strings = csv_reader::read(
+        File::open(localized_text_file_path)
+            .with_context(localized_file_path_string_or_fb.clone())?,
+    )
+    .with_context(localized_file_path_string_or_fb)?;
 
-    let mut new_localized_foreign_strings: Vec<LocalizedString> = new_localized_foreign_strings.into_iter().next().expect("There should be at least one locale").into_strings();
+    let mut new_localized_foreign_strings: Vec<LocalizedString> = new_localized_foreign_strings
+        .into_iter()
+        .next()
+        .expect("There should be at least one locale")
+        .into_strings();
 
     // Extract android strings out of the newly localized strings
     let mut new_localized_foreign_strings = extract::extract_android_strings_from_localized(
@@ -100,7 +108,8 @@ fn handle_localized(
 
     // Write out foreign strings back to file
     let (mut file, output_file_path) = writable_empty_foreign_strings_file(res_dir_path, lang_id)?;
-    xml_writer::write(&mut file, to_be_written_foreign_strings).with_context(output_file_path.clone())?;
+    xml_writer::write(&mut file, to_be_written_foreign_strings)
+        .with_context(output_file_path.clone())?;
 
     Ok(output_file_path)
 }
@@ -130,12 +139,12 @@ fn writable_empty_foreign_strings_file(
 mod tests {
     use crate::android_string::AndroidString;
     use crate::util::xml_helper;
+    use crate::writer::xml_writer;
     use std::collections::HashMap;
     use std::fs;
     use std::fs::File;
     use std::io::Read;
     use std::io::Write;
-    use crate::writer::xml_writer;
 
     #[test]
     fn do_the_thing_errors_for_empty_human_friendly_name_to_lang_id_mapping() {
@@ -205,7 +214,10 @@ mod tests {
         .unwrap();
 
         fr_localized_file
-            .write("string_name, default_locale, french\ns1, english value 1, french new value 1".as_bytes())
+            .write(
+                "string_name, default_locale, french\ns1, english value 1, french new value 1"
+                    .as_bytes(),
+            )
             .unwrap();
 
         // Perform action

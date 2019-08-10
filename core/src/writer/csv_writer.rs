@@ -1,6 +1,6 @@
-use csv;
 use crate::error::Error;
 use crate::localizable_strings::LocalizableStrings;
+use csv;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::hash::Hash;
@@ -28,7 +28,9 @@ pub fn write(
             .map(|s| String::from(s.to_locale()))
             .collect();
 
-        let writer = Writer { strings_list: some_strings_list };
+        let writer = Writer {
+            strings_list: some_strings_list,
+        };
         sink_provider.execute_with_new_sink(for_locales, writer)?;
     }
 
@@ -42,7 +44,7 @@ fn find_grouping_hash_of(strings: &LocalizableStrings) -> u64 {
 }
 
 pub struct Writer {
-    strings_list: Vec<LocalizableStrings>
+    strings_list: Vec<LocalizableStrings>,
 }
 
 impl Writer {
@@ -80,7 +82,7 @@ pub trait SinkProvider {
     fn execute_with_new_sink(
         &mut self,
         for_locales: Vec<String>,
-        writer: Writer
+        writer: Writer,
     ) -> Result<(), Error>;
 }
 
@@ -95,14 +97,19 @@ mod tests {
     use std::io::Write;
 
     struct ByteSinkProvider {
-        data: Vec<(Vec<String>, String)>
+        data: Vec<(Vec<String>, String)>,
     }
 
     impl SinkProvider for ByteSinkProvider {
-        fn execute_with_new_sink(&mut self, for_locales: Vec<String>, writer: Writer) -> Result<(), Error> {
+        fn execute_with_new_sink(
+            &mut self,
+            for_locales: Vec<String>,
+            writer: Writer,
+        ) -> Result<(), Error> {
             let mut contents = vec![];
             let result = writer.write(&mut contents);
-            self.data.push((for_locales, String::from_utf8(contents).unwrap()));
+            self.data
+                .push((for_locales, String::from_utf8(contents).unwrap()));
 
             result
         }
@@ -146,9 +153,7 @@ mod tests {
         ));
 
         // Convert all the written bytes into strings for the different sinks
-        let mut sink_provider = ByteSinkProvider {
-            data: vec![],
-        };
+        let mut sink_provider = ByteSinkProvider { data: vec![] };
 
         super::write(strings_list, &mut sink_provider);
 

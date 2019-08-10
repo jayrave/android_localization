@@ -12,7 +12,7 @@ impl AndroidString {
         AndroidString {
             name,
             value,
-            is_localizable: is_localizable,
+            is_localizable,
         }
     }
 

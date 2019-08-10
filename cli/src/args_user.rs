@@ -1,7 +1,7 @@
-use clap::ArgMatches;
-use console::style;
 use crate::constants;
 use android_localization_core;
+use clap::ArgMatches;
+use console::style;
 use std::collections::HashMap;
 use std::fmt;
 use std::process;
@@ -28,9 +28,7 @@ fn do_to_csv(matches: &ArgMatches) {
         "Texts to be localized written to",
         android_localization_core::localize::do_the_thing(
             matches.value_of(constants::arg::RES_DIR).unwrap(),
-            matches
-                .value_of(constants::arg::LOCALIZE_OUTPUT)
-                .unwrap(),
+            matches.value_of(constants::arg::LOCALIZE_OUTPUT).unwrap(),
             build_mappings(matches),
         ),
     );
@@ -41,33 +39,30 @@ fn do_from_csv(matches: &ArgMatches) {
         "Localized texts written to",
         android_localization_core::localized::do_the_thing(
             matches.value_of(constants::arg::RES_DIR).unwrap(),
-            matches
-                .value_of(constants::arg::LOCALIZED_INPUT)
-                .unwrap(),
+            matches.value_of(constants::arg::LOCALIZED_INPUT).unwrap(),
             build_mappings(matches),
         ),
     );
 }
 
 fn do_validations(matches: &ArgMatches) {
-    let result = android_localization_core::validator::do_the_thing(matches.value_of(constants::arg::RES_DIR).unwrap());
+    let result = android_localization_core::validator::do_the_thing(
+        matches.value_of(constants::arg::RES_DIR).unwrap(),
+    );
     match result {
-        Err(error) => {
-            exit_based_on_result("", Err(error))
-        }
+        Err(error) => exit_based_on_result("", Err(error)),
 
         Ok(validation_result) => match validation_result {
             Ok(file_names) => {
                 let result: Result<Vec<String>, String> = Ok(file_names);
                 exit_based_on_result("No issues found. Validated the following files", result)
-            },
-
-            Err(_error) => {
-                exit_on_failure(String::from("There are some validation issues! TODO => format"))
             }
-        }
-    }
 
+            Err(_error) => exit_on_failure(String::from(
+                "There are some validation issues! TODO => format",
+            )),
+        },
+    }
 }
 
 fn build_mappings(matches: &ArgMatches) -> HashMap<String, String> {
@@ -80,19 +75,20 @@ fn build_mappings(matches: &ArgMatches) -> HashMap<String, String> {
                     String::from(captures.get(1).unwrap().as_str()),
                     String::from(captures.get(2).unwrap().as_str()),
                 )
-            }).collect(),
+            })
+            .collect(),
     }
 }
 
 fn exit_based_on_result<E: fmt::Display>(success_prefix: &str, result: Result<Vec<String>, E>) {
     match result {
-        Ok(file_names) => {
-            exit_on_success(format!("{} - \n\n{}", success_prefix, file_names.join("\n")))
-        }
+        Ok(file_names) => exit_on_success(format!(
+            "{} - \n\n{}",
+            success_prefix,
+            file_names.join("\n")
+        )),
 
-        Err(error) => {
-            exit_on_failure(error.to_string())
-        }
+        Err(error) => exit_on_failure(error.to_string()),
     }
 }
 

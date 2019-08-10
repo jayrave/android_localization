@@ -1,5 +1,5 @@
-use crate::error::Error;
 use crate::android_string::AndroidString;
+use crate::error::Error;
 use xml::attribute::OwnedAttribute;
 
 /// One instance of `EventHandler` is only expected to ever build one `AndroidString`

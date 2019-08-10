@@ -18,10 +18,14 @@ lazy_static::lazy_static! {
 /// What is after the last `-` in the folder name is returned as the lang id
 pub fn find(res_dir_path: &str) -> Result<Vec<String>, Error> {
     if !Path::new(res_dir_path).is_dir() {
-        return Err(From::from(format!("Res dir({}) doesn't exist", res_dir_path)));
+        return Err(From::from(format!(
+            "Res dir({}) doesn't exist",
+            res_dir_path
+        )));
     }
 
-    let lang_ids = fs::read_dir(res_dir_path).with_context(String::from(res_dir_path))?
+    let lang_ids = fs::read_dir(res_dir_path)
+        .with_context(String::from(res_dir_path))?
         .filter_map(|dir_entry| match dir_entry {
             Err(_) => None,
             Ok(dir_entry) => match dir_entry.file_type() {
@@ -81,7 +85,10 @@ mod tests {
         res_dir_path.push("res");
 
         let error = super::find(res_dir_path.to_str().unwrap()).unwrap_err();
-        assert_eq!(error.to_string(), format!("Res dir({}) doesn't exist", res_dir_path.to_str().unwrap()))
+        assert_eq!(
+            error.to_string(),
+            format!("Res dir({}) doesn't exist", res_dir_path.to_str().unwrap())
+        )
     }
 
     #[test]

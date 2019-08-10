@@ -1,7 +1,7 @@
 use crate::android_string::AndroidString;
 use crate::constants;
-use std::error;
 use crate::error::Error;
+use std::error;
 use std::fmt;
 use std::io::BufWriter;
 use std::io::Write;
@@ -60,14 +60,16 @@ fn write_string<W: Write>(writer: &mut writer::EventWriter<W>, value: &str) -> R
             Ok(ref element) => match element {
                 ReadXmlEvent::Characters(_) => {
                     writer.write(element.as_writer_event().ok_or_else(|| {
-                        let error: Error = From::from(format!("Can't build writer event from {}", &value));
+                        let error: Error =
+                            From::from(format!("Can't build writer event from {}", &value));
                         error
                     })?)
                 }
 
                 ReadXmlEvent::CData(_) => {
                     writer.write(element.as_writer_event().ok_or_else(|| {
-                        let error: Error = From::from(format!("Can't build writer event from {}", &value));
+                        let error: Error =
+                            From::from(format!("Can't build writer event from {}", &value));
                         error
                     })?)
                 }
@@ -150,7 +152,7 @@ mod tests {
                 true,
             )],
         )
-            .unwrap();
+        .unwrap();
 
         let written_content = String::from_utf8(sink).unwrap();
         let mut written_lines = written_content.lines();

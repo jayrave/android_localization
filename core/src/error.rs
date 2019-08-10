@@ -1,5 +1,5 @@
-use crate::util::xml_helper;
 use crate::reader::xml_reader;
+use crate::util::xml_helper;
 use std::error;
 use std::fmt;
 use std::io;
@@ -30,7 +30,7 @@ pub trait ResultExt<T> {
     fn with_context(self, context: String) -> Result<T, Error>;
 }
 
-impl<T, E : Into<Error>> ResultExt<T> for Result<T, E> {
+impl<T, E: Into<Error>> ResultExt<T> for Result<T, E> {
     fn with_context(self, context: String) -> Result<T, Error> {
         self.map_err(|err| Into::into(err)).map_err(|err| Error {
             context: Some(context),
@@ -43,7 +43,7 @@ impl From<csv::Error> for Error {
     fn from(error: csv::Error) -> Self {
         Error {
             context: None,
-            kind: ErrorKind::Csv(error)
+            kind: ErrorKind::Csv(error),
         }
     }
 }
@@ -52,7 +52,7 @@ impl From<io::Error> for Error {
     fn from(error: io::Error) -> Self {
         Error {
             context: None,
-            kind: ErrorKind::Io(error)
+            kind: ErrorKind::Io(error),
         }
     }
 }
@@ -61,7 +61,7 @@ impl From<String> for Error {
     fn from(message: String) -> Self {
         Error {
             context: None,
-            kind: ErrorKind::Message(message)
+            kind: ErrorKind::Message(message),
         }
     }
 }
@@ -70,7 +70,7 @@ impl From<xml::reader::Error> for Error {
     fn from(error: xml::reader::Error) -> Self {
         Error {
             context: None,
-            kind: ErrorKind::XmlRead(error)
+            kind: ErrorKind::XmlRead(error),
         }
     }
 }
@@ -79,7 +79,7 @@ impl From<xml::writer::Error> for Error {
     fn from(error: xml::writer::Error) -> Self {
         Error {
             context: None,
-            kind: ErrorKind::XmlWrite(error)
+            kind: ErrorKind::XmlWrite(error),
         }
     }
 }
@@ -91,7 +91,7 @@ impl error::Error for Error {
             ErrorKind::Io(error) => Some(error),
             ErrorKind::Message(_message) => None,
             ErrorKind::XmlRead(error) => Some(error),
-            ErrorKind::XmlWrite(error) => Some(error)
+            ErrorKind::XmlWrite(error) => Some(error),
         }
     }
 }

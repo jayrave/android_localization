@@ -36,14 +36,17 @@ mod tests {
 
     #[test]
     fn strings_are_read_from_valid_clean_file() {
-        let mut strings = write_to_file_and_read_strings_out(r##"
+        let mut strings = write_to_file_and_read_strings_out(
+            r##"
 			<?xml version="1.0" encoding="utf-8"?>
 			<resources>
 			    <string name="string_1">string 1 value</string>
 			    <string name="string_2" translatable="true">string 2 value</string>
 				<string name="non_localizable_string" translatable="false">non localizable string value</string>
 			</resources>
-		"##).into_iter();
+		"##,
+        )
+        .into_iter();
 
         assert_eq!(
             strings.next(),
@@ -77,7 +80,8 @@ mod tests {
 
     #[test]
     fn strings_are_read_from_valid_dirty_file() {
-        let mut strings = write_to_file_and_read_strings_out(r##"
+        let mut strings = write_to_file_and_read_strings_out(
+            r##"
 			<?xml version="1.0" encoding="utf-8"?>
 			<string name="dont_care_string_1">value</string>
 			<string name="dont_care_string_2" translatable="false">value</string>
@@ -94,7 +98,9 @@ mod tests {
 				<string name="dont_care_string_5">value</string>
 				<string name="dont_care_string_6" translatable="false">value</string>
 			</outside_container>
-		"##).into_iter();
+		"##,
+        )
+        .into_iter();
 
         assert_eq!(
             strings.next(),

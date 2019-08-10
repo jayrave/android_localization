@@ -1,9 +1,12 @@
 use crate::android_string::AndroidString;
-use crate::localizable_strings::LocalizableStrings;
 use crate::constants;
-use crate::util::xml_helper;
+use crate::error::{Error, ResultExt};
+use crate::localizable_strings::LocalizableStrings;
 use crate::ops::filter;
 use crate::reader::xml_reader;
+use crate::util::foreign_lang_ids_finder;
+use crate::util::xml_helper;
+use crate::writer::csv_writer;
 use std::collections::HashMap;
 use std::error;
 use std::fmt;
@@ -12,9 +15,6 @@ use std::fs::File;
 use std::io;
 use std::path::Path;
 use std::path::PathBuf;
-use crate::util::foreign_lang_ids_finder;
-use crate::writer::csv_writer;
-use crate::error::{Error, ResultExt};
 
 /// Returns the list of output files created by this call. These aren't guaranteed
 /// to be valid paths to files. Sometimes, if a file's path can't be expressed by
@@ -33,7 +33,8 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
     if lang_id_to_human_friendly_name_mapping.is_empty() {
         return Err::<_, Error>(From::from(String::from(
             "Res dir doesn't have any non-default values dir with strings file!",
-        ))).with_context(String::from(res_dir_path));
+        )))
+        .with_context(String::from(res_dir_path));
     }
 
     let mut paths_of_created_file = vec![];
@@ -67,11 +68,13 @@ fn create_output_dir_if_required(output_dir_path: &str) -> Result<(), Error> {
     if output_path.is_file() {
         return Err::<_, Error>(From::from(String::from(
             "Output directory path points to a file!",
-        ))).with_context(String::from(output_dir_path));
+        )))
+        .with_context(String::from(output_dir_path));
     } else if output_path.exists() {
         Ok(())
     } else {
-        fs::create_dir_all(PathBuf::from(output_dir_path)).with_context(String::from(output_dir_path))
+        fs::create_dir_all(PathBuf::from(output_dir_path))
+            .with_context(String::from(output_dir_path))
     }
 }
 
@@ -91,13 +94,20 @@ fn write_out_strings_to_localize(
         let mut sink_provider = FileProvider::new(String::from(output_dir_path));
         let strings_to_localize = vec![LocalizableStrings::new(
             String::from(file_name),
-            filter::find_missing_strings(&mut foreign_strings, localizable_default_strings)
+            filter::find_missing_strings(&mut foreign_strings, localizable_default_strings),
         )];
 
         let result = csv_writer::write(strings_to_localize, &mut sink_provider);
-        let created_file_name = String::from(sink_provider.created_files().first().unwrap_or(&String::from("no files created by sink")));
+        let created_file_name = String::from(
+            sink_provider
+                .created_files()
+                .first()
+                .unwrap_or(&String::from("no files created by sink")),
+        );
 
-        return result.map(|_| Some(created_file_name.clone())).with_context(created_file_name);
+        return result
+            .map(|_| Some(created_file_name.clone()))
+            .with_context(created_file_name);
     }
 
     Ok(None)
@@ -105,14 +115,14 @@ fn write_out_strings_to_localize(
 
 struct FileProvider {
     sink_dir: String,
-    created_files: Vec<String>
+    created_files: Vec<String>,
 }
 
 impl FileProvider {
     fn new(sink_dir: String) -> FileProvider {
         FileProvider {
             sink_dir,
-            created_files: Vec::new()
+            created_files: Vec::new(),
         }
     }
 
@@ -122,25 +132,21 @@ impl FileProvider {
 
     /// Returns the created output file along with its path (if path computation
     /// is possible; if not, it passes out a fallback value)
-    fn create_output_file(
-        &mut self,
-        output_file_name: &str,
-    ) -> Result<(File, String), Error> {
+    fn create_output_file(&mut self, output_file_name: &str) -> Result<(File, String), Error> {
         let mut output_path = PathBuf::from(&self.sink_dir);
         output_path.push(output_file_name);
         output_path.set_extension(constants::extn::CSV);
         let output_path_or_fb = String::from(output_path.to_str().unwrap_or(output_file_name));
 
         if output_path.exists() {
-            return Err::<_, Error>(From::from(String::from(
-                "Output file already exists!",
-            ))).with_context(output_path_or_fb);
+            return Err::<_, Error>(From::from(String::from("Output file already exists!")))
+                .with_context(output_path_or_fb);
         } else {
             match File::create(output_path) {
                 Ok(file) => {
                     self.created_files.push(output_path_or_fb.clone());
                     Ok((file, output_path_or_fb))
-                },
+                }
 
                 Err(error) => Err::<_, Error>(From::from(error)).with_context(output_path_or_fb),
             }
@@ -152,7 +158,7 @@ impl csv_writer::SinkProvider for FileProvider {
     fn execute_with_new_sink(
         &mut self,
         for_locales: Vec<String>,
-        writer: csv_writer::Writer
+        writer: csv_writer::Writer,
     ) -> Result<(), Error> {
         let filename = for_locales.join("_");
         let (mut sink, output_path_or_fb) = self.create_output_file(&filename).unwrap();
@@ -162,13 +168,13 @@ impl csv_writer::SinkProvider for FileProvider {
 
 #[cfg(test)]
 mod tests {
-    use tempfile::TempDir;
     use crate::android_string::AndroidString;
     use std::collections::HashMap;
     use std::fs;
     use std::fs::File;
     use std::io::{Read, Seek, SeekFrom, Write};
     use std::path::Path;
+    use tempfile::TempDir;
 
     #[test]
     fn do_the_thing_errors_for_empty_lang_id_to_human_friendly_name_mapping() {
@@ -270,7 +276,10 @@ mod tests {
         let mut output_file = File::open(possible_output_file).unwrap();
         let mut output = String::new();
         output_file.read_to_string(&mut output).unwrap();
-        assert_eq!(output, "string_name,default_locale,french\nstring_1,string value,\nstring_2,string value,\n");
+        assert_eq!(
+            output,
+            "string_name,default_locale,french\nstring_1,string value,\nstring_2,string value,\n"
+        );
     }
 
     /// Returns the output of the method call to `write_out_strings_to_localize`
