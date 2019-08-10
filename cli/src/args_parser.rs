@@ -5,7 +5,7 @@ use crate::constants;
 
 pub fn build() -> App<'static, 'static> {
     App::new("Android Strings")
-        .about("To help with translations & common validations")
+        .about("To help with localization & common validations")
         .subcommand(build_localize_sub_command())
         .subcommand(build_localized_sub_command())
         .subcommand(build_validate_sub_command())
@@ -29,7 +29,7 @@ fn build_localize_sub_command() -> App<'static, 'static> {
 
 fn build_localized_sub_command() -> App<'static, 'static> {
     SubCommand::with_name(constants::command::LOCALIZED)
-        .about("Populates strings XML files from translations in CSVs")
+        .about("Populates strings XML files from localized text in CSVs")
         .arg(build_res_dir_arg())
         .arg(build_mapping_arg(
             "CSV file name (eg., french) to values qualifier (eg., fr)",

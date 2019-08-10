@@ -41,7 +41,7 @@ mod tests {
 			<resources>
 			    <string name="string_1">string 1 value</string>
 			    <string name="string_2" translatable="true">string 2 value</string>
-				<string name="non_translatable_string" translatable="false">non translatable string value</string>
+				<string name="non_localizable_string" translatable="false">non localizable string value</string>
 			</resources>
 		"##).into_iter();
 
@@ -66,8 +66,8 @@ mod tests {
         assert_eq!(
             strings.next(),
             Some(AndroidString::new(
-                String::from("non_translatable_string"),
-                String::from("non translatable string value"),
+                String::from("non_localizable_string"),
+                String::from("non localizable string value"),
                 false
             ))
         );
@@ -88,7 +88,7 @@ mod tests {
 					<string name="dont_care_string_3">value</string>
 					<string name="dont_care_string_4" translatable="false">value</string>
 				</inside_container>
-				<string name="non_translatable_string" translatable="false">non translatable string value</string>
+				<string name="non_localizable_string" translatable="false">non localizable string value</string>
 			</resources>
 			<outside_container>
 				<string name="dont_care_string_5">value</string>
@@ -117,8 +117,8 @@ mod tests {
         assert_eq!(
             strings.next(),
             Some(AndroidString::new(
-                String::from("non_translatable_string"),
-                String::from("non translatable string value"),
+                String::from("non_localizable_string"),
+                String::from("non localizable string value"),
                 false
             ))
         );

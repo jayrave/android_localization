@@ -43,33 +43,33 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
 
     // Read default strings
     let res_dir_path = Path::new(res_dir_path);
-    let mut translatable_default_strings =
-        filter::find_translatable_strings(xml_helper::read_default_strings(res_dir_path)?);
+    let mut localizable_default_strings =
+        filter::find_localizable_strings(xml_helper::read_default_strings(res_dir_path)?);
 
-    // For all languages, handle translations
+    // For all languages, handle localized text
     let mut paths_of_created_file = vec![];
     for (human_friendly_name, lang_id) in human_friendly_name_to_lang_id_mapping {
-        paths_of_created_file.push(handle_translations(
+        paths_of_created_file.push(handle_localized(
             res_dir_path,
             &lang_id,
             localized_text_input_dir_path,
             &human_friendly_name,
-            &mut translatable_default_strings,
+            &mut localizable_default_strings,
         )?);
     }
 
     Ok(paths_of_created_file)
 }
 
-fn handle_translations(
+fn handle_localized(
     res_dir_path: &Path,
     lang_id: &str,
     localized_text_input_dir_path: &str,
     file_name: &str,
-    translatable_default_strings: &mut Vec<AndroidString>,
+    localizable_default_strings: &mut Vec<AndroidString>,
 ) -> Result<String, Error> {
     // Read already localized foreign strings
-    let mut already_localized_foreign_strings = filter::find_translatable_strings(
+    let mut already_localized_foreign_strings = filter::find_localizable_strings(
         xml_helper::read_foreign_strings(res_dir_path, lang_id)?.into_strings(),
     );
 
@@ -88,7 +88,7 @@ fn handle_translations(
     // Extract android strings out of the newly localized strings
     let mut new_localized_foreign_strings = extract::extract_android_strings_from_localized(
         &mut new_localized_foreign_strings,
-        translatable_default_strings,
+        localizable_default_strings,
     );
 
     // Merge & dedup foreign strings
@@ -172,18 +172,18 @@ mod tests {
         let mut fr_strings_file_path = fr_values_dir_path.clone();
         fr_strings_file_path.push("strings.xml");
 
-        let mut translations_dir_path = temp_dir.path().to_path_buf();
-        translations_dir_path.push("translations");
-        let mut fr_translations_file_path = translations_dir_path.clone();
-        fr_translations_file_path.push("french.csv");
+        let mut localized_dir_path = temp_dir.path().to_path_buf();
+        localized_dir_path.push("localized");
+        let mut fr_localized_file_path = localized_dir_path.clone();
+        fr_localized_file_path.push("french.csv");
 
         // Create required dirs & files with content
         fs::create_dir_all(default_values_dir_path.clone()).unwrap();
         fs::create_dir_all(fr_values_dir_path.clone()).unwrap();
-        fs::create_dir_all(translations_dir_path.clone()).unwrap();
+        fs::create_dir_all(localized_dir_path.clone()).unwrap();
         let mut default_strings_file = File::create(default_strings_file_path).unwrap();
         let mut fr_strings_file = File::create(fr_strings_file_path.clone()).unwrap();
-        let mut fr_translations_file = File::create(fr_translations_file_path).unwrap();
+        let mut fr_localized_file = File::create(fr_localized_file_path).unwrap();
 
         // Write out required contents into files
         xml_writer::write(
@@ -204,7 +204,7 @@ mod tests {
         )
         .unwrap();
 
-        fr_translations_file
+        fr_localized_file
             .write("string_name, default_locale, french\ns1, english value 1, french new value 1".as_bytes())
             .unwrap();
 
@@ -213,7 +213,7 @@ mod tests {
         map.insert(String::from("french"), String::from("fr"));
         let created_output_files_path = super::do_the_thing(
             res_dir_path.clone().to_str().unwrap(),
-            translations_dir_path.to_str().unwrap(),
+            localized_dir_path.to_str().unwrap(),
             map,
         )
         .unwrap();

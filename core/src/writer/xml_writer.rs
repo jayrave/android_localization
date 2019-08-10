@@ -28,10 +28,10 @@ pub fn write<S: Write>(sink: &mut S, android_strings: Vec<AndroidString>) -> Res
         let mut string_element = WriteXmlEvent::start_element(constants::elements::STRING)
             .attr(constants::attributes::NAME, android_string.name());
 
-        // Include `translatable` attribute if required
-        if !android_string.is_translatable() {
+        // Include `localizable` attribute if required
+        if !android_string.is_localizable() {
             string_element =
-                string_element.attr(constants::attributes::TRANSLATABLE, constants::flags::FALSE);
+                string_element.attr(constants::attributes::LOCALIZABLE, constants::flags::FALSE);
         }
 
         writer.write(string_element)?;
@@ -88,13 +88,13 @@ mod tests {
     fn strings_are_written_to_file() {
         let android_strings = vec![
             AndroidString::new(
-                String::from("translatable_string"),
-                String::from("translatable string value"),
+                String::from("localizable_string"),
+                String::from("localizable string value"),
                 true,
             ),
             AndroidString::new(
-                String::from("non_translatable_string"),
-                String::from("non translatable string value"),
+                String::from("non_localizable_string"),
+                String::from("non localizable string value"),
                 false,
             ),
         ];
@@ -112,9 +112,9 @@ mod tests {
         assert_eq!(written_lines.next().unwrap(), r##"<resources>"##);
         assert_eq!(
             written_lines.next().unwrap(),
-            r##"    <string name="translatable_string">translatable string value</string>"##
+            r##"    <string name="localizable_string">localizable string value</string>"##
         );
-        assert_eq!(written_lines.next().unwrap(), r##"    <string name="non_translatable_string" translatable="false">non translatable string value</string>"##);
+        assert_eq!(written_lines.next().unwrap(), r##"    <string name="non_localizable_string" translatable="false">non localizable string value</string>"##);
         assert_eq!(written_lines.next().unwrap(), r##"</resources>"##);
         assert_eq!(written_lines.next(), None);
     }

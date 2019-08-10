@@ -41,17 +41,17 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
 
     // Read default strings
     let res_dir_path = Path::new(res_dir_path);
-    let mut translatable_default_strings =
-        filter::find_translatable_strings(xml_helper::read_default_strings(res_dir_path)?);
+    let mut localizable_default_strings =
+        filter::find_localizable_strings(xml_helper::read_default_strings(res_dir_path)?);
 
-    // For all languages, write out strings requiring translation
+    // For all languages, write out strings requiring localization
     for (lang_id, human_friendly_name) in lang_id_to_human_friendly_name_mapping {
         let possible_output_file_path = write_out_strings_to_localize(
             res_dir_path,
             &lang_id,
             output_dir_path,
             &human_friendly_name,
-            &mut translatable_default_strings,
+            &mut localizable_default_strings,
         )?;
 
         if let Some(output_file_path) = possible_output_file_path {
@@ -80,18 +80,18 @@ fn write_out_strings_to_localize(
     lang_id: &str,
     output_dir_path: &str,
     file_name: &str,
-    translatable_default_strings: &mut Vec<AndroidString>,
+    localizable_default_strings: &mut Vec<AndroidString>,
 ) -> Result<Option<String>, Error> {
     let mut foreign_strings =
         xml_helper::read_foreign_strings(res_dir_path, lang_id)?.into_strings();
     let strings_to_localize =
-        filter::find_missing_strings(&mut foreign_strings, translatable_default_strings);
+        filter::find_missing_strings(&mut foreign_strings, localizable_default_strings);
 
     if !strings_to_localize.is_empty() {
         let mut sink_provider = FileProvider::new(String::from(output_dir_path));
         let strings_to_localize = vec![LocalizableStrings::new(
             String::from(file_name),
-            filter::find_missing_strings(&mut foreign_strings, translatable_default_strings)
+            filter::find_missing_strings(&mut foreign_strings, localizable_default_strings)
         )];
 
         let result = csv_writer::write(strings_to_localize, &mut sink_provider);

@@ -187,8 +187,8 @@ mod tests {
         .unwrap();
 
         let invalid_strings_file = super::do_the_thing(res_dir_path.to_str().unwrap()).unwrap().unwrap_err();
-        let spanish_errors = format!("File path: {}; apostrophe errors: [(Translatable: true; Name: s1; Value: v'alue)]; format string errors: []\n", spanish_strings_file_path);
-        let french_errors = format!("File path: {}; apostrophe errors: [(Translatable: true; Name: s1; Value: val'ue %1$s)(Translatable: true; Name: s2; Value: v'alue %1$d)]; format string errors: [(Format string mismatch. Found format strings () in default (value) & found format strings (%1$s) in foreign (val'ue %1$s))(Format string mismatch. Found format strings () in default (v'alue) & found format strings (%1$d) in foreign (v'alue %1$d))]\n", french_strings_file_path);
+        let spanish_errors = format!("File path: {}; apostrophe errors: [(Localizable: true; Name: s1; Value: v'alue)]; format string errors: []\n", spanish_strings_file_path);
+        let french_errors = format!("File path: {}; apostrophe errors: [(Localizable: true; Name: s1; Value: val'ue %1$s)(Localizable: true; Name: s2; Value: v'alue %1$d)]; format string errors: [(Format string mismatch. Found format strings () in default (value) & found format strings (%1$s) in foreign (val'ue %1$s))(Format string mismatch. Found format strings () in default (v'alue) & found format strings (%1$d) in foreign (v'alue %1$d))]\n", french_strings_file_path);
         assert_eq!(
             invalid_strings_file,
             vec![

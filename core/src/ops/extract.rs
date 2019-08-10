@@ -38,7 +38,7 @@ pub fn extract_android_strings_from_localized(
                         result.push(AndroidString::new(
                             String::from(localized_string.name()),
                             String::from(localized_string.localized()),
-                            default_string.is_translatable(),
+                            default_string.is_localizable(),
                         ));
                     }
 
