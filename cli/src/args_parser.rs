@@ -70,7 +70,7 @@ fn build_mapping_arg(help: &'static str) -> Arg<'static, 'static> {
         .multiple(true)
 }
 
-#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
+#[cfg_attr(feature = "cargo-clippy", allow(clippy::needless_pass_by_value))]
 fn mapping_validator(mapping: String) -> Result<(), String> {
     let valid_mapping = match constants::TEXT_TO_TEXT_REGEX.captures(&mapping) {
         None => false,
