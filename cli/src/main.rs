@@ -1,3 +1,9 @@
+use std::env;
+use std::process;
+
 fn main() {
-    android_localization_cli::do_the_thing()
+    match android_localization_cli::do_the_thing(&mut env::args_os()) {
+        Ok(_) => process::exit(0),
+        Err(_) => process::exit(1),
+    }
 }
