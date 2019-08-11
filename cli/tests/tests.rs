@@ -35,6 +35,34 @@ fn one_locale_per_file_with_mapping() {
     );
 }
 
+#[test]
+fn one_locale_per_file_without_mapping() {
+    let temp_dir = tempfile::tempdir().unwrap();
+    let output_dir_path = temp_dir.path().to_str().unwrap();
+    android_localization_cli::do_the_thing(vec![
+        "does_not_matter",
+        "localize",
+        "--res",
+        "./tests_data/localize/input",
+        "--output",
+        output_dir_path,
+    ])
+    .unwrap();
+
+    assert_equality_of_file_contents(
+        "./tests_data/localize/output_one_locale_per_file_without_mapping/",
+        "french.csv",
+        temp_dir.path().to_str().unwrap(),
+        "fr.csv",
+    );
+    assert_equality_of_file_contents(
+        "./tests_data/localize/output_one_locale_per_file_without_mapping/",
+        "spanish.csv",
+        temp_dir.path().to_str().unwrap(),
+        "es.csv",
+    );
+}
+
 fn assert_equality_of_file_contents(
     file1_dir_path: &str,
     file1_filename: &str,
