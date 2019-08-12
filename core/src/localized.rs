@@ -7,7 +7,6 @@ use std::path::PathBuf;
 use crate::android_string::AndroidString;
 use crate::constants;
 use crate::error::{Error, ResultExt};
-use crate::localized_string::LocalizedString;
 use crate::ops::dedup;
 use crate::ops::extract;
 use crate::ops::filter;
@@ -83,15 +82,22 @@ fn handle_localized(
     )
     .with_context(localized_file_path_string_or_fb)?;
 
-    let mut new_localized_foreign_strings: Vec<LocalizedString> = new_localized_foreign_strings
+    let new_localized_foreign_strings = new_localized_foreign_strings
         .into_iter()
         .next()
-        .expect("There should be at least one locale")
-        .into_strings();
+        .expect("There should be at least one locale");
+
+    if new_localized_foreign_strings.locale() != file_name {
+        return Err(From::from(format!(
+            "Expected column header to be {} but was {}",
+            file_name,
+            new_localized_foreign_strings.locale()
+        )));
+    }
 
     // Extract android strings out of the newly localized strings
     let mut new_localized_foreign_strings = extract::extract_android_strings_from_localized(
-        &mut new_localized_foreign_strings,
+        &mut new_localized_foreign_strings.into_strings(),
         localizable_default_strings,
     );
 
@@ -241,6 +247,60 @@ mod tests {
                 AndroidString::new(String::from("s1"), String::from("french new value 1"), true),
                 AndroidString::new(String::from("s2"), String::from("french old value 2"), true),
             ]
+        )
+    }
+
+    #[test]
+    fn handle_localized_throws_if_locale_column_header_is_not_as_expected() {
+        let temp_dir = tempfile::tempdir().unwrap();
+
+        // Build paths
+        let mut res_dir_path = temp_dir.path().to_path_buf();
+        res_dir_path.push("res");
+        let mut fr_values_dir_path = res_dir_path.clone();
+        fr_values_dir_path.push("values-fr");
+        let mut fr_strings_file_path = fr_values_dir_path.clone();
+        fr_strings_file_path.push("strings.xml");
+
+        let mut localized_dir_path = temp_dir.path().to_path_buf();
+        localized_dir_path.push("localized");
+        let mut fr_localized_file_path = localized_dir_path.clone();
+        fr_localized_file_path.push("french.csv");
+
+        // Create required dirs & files with content
+        fs::create_dir_all(fr_values_dir_path.clone()).unwrap();
+        fs::create_dir_all(localized_dir_path.clone()).unwrap();
+        let mut fr_strings_file = File::create(fr_strings_file_path.clone()).unwrap();
+        let mut fr_localized_file = File::create(fr_localized_file_path).unwrap();
+
+        // Write out required contents into files
+        xml_writer::write(
+            &mut fr_strings_file,
+            vec![AndroidString::new(
+                String::from("s1"),
+                String::from("french old value 1"),
+                true,
+            )],
+        )
+        .unwrap();
+
+        fr_localized_file
+            .write("string_name, default_locale, asdf\ns1, ev1, fv1".as_bytes())
+            .unwrap();
+
+        // Perform action
+        let error = super::handle_localized(
+            res_dir_path.as_path(),
+            "fr",
+            localized_dir_path.to_str().unwrap(),
+            "french",
+            &mut vec![],
+        )
+        .unwrap_err();
+
+        assert_eq!(
+            error.to_string(),
+            "Expected column header to be french but was asdf"
         )
     }
 
