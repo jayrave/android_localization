@@ -24,11 +24,10 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
     localized_text_input_dir_path: &str,
     locale_name_to_id_map: HashMap<String, String, S>,
 ) -> Result<Vec<String>, Error> {
-    let locale_name_to_id_map =
-        foreign_locale_ids_finder::build_map_if_empty_or_return(
-            locale_name_to_id_map,
-            res_dir_path,
-        )?;
+    let locale_name_to_id_map = foreign_locale_ids_finder::build_map_if_empty_or_return(
+        locale_name_to_id_map,
+        res_dir_path,
+    )?;
 
     if locale_name_to_id_map.is_empty() {
         return Err::<_, Error>(From::from(String::from(
@@ -105,7 +104,8 @@ fn handle_localized(
         ));
 
     // Write out foreign strings back to file
-    let (mut file, output_file_path) = writable_empty_foreign_strings_file(res_dir_path, locale_id)?;
+    let (mut file, output_file_path) =
+        writable_empty_foreign_strings_file(res_dir_path, locale_id)?;
     xml_writer::write(&mut file, to_be_written_foreign_strings)
         .with_context(output_file_path.clone())?;
 

@@ -15,7 +15,10 @@ pub fn read_default_strings(res_dir_path: &Path) -> Result<Vec<AndroidString>, E
     xml_reader::read(file).with_context(path)
 }
 
-pub fn read_foreign_strings(res_dir_path: &Path, locale_id: &str) -> Result<StringsWithPath, Error> {
+pub fn read_foreign_strings(
+    res_dir_path: &Path,
+    locale_id: &str,
+) -> Result<StringsWithPath, Error> {
     let (file, path) = open_foreign_strings_file(res_dir_path, locale_id)?;
     xml_reader::read(file)
         .with_context(path.clone())

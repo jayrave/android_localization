@@ -156,11 +156,8 @@ mod tests {
         map.insert(String::from("fr"), String::from("fr"));
         map.insert(String::from("it"), String::from("it"));
         assert_eq!(
-            super::build_map_if_empty_or_return(
-                HashMap::new(),
-                res_dir_path.to_str().unwrap()
-            )
-            .unwrap(),
+            super::build_map_if_empty_or_return(HashMap::new(), res_dir_path.to_str().unwrap())
+                .unwrap(),
             map
         )
     }

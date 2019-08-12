@@ -21,11 +21,10 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
     output_dir_path: &str,
     locale_id_to_name_map: HashMap<String, String, S>,
 ) -> Result<Vec<String>, Error> {
-    let locale_id_to_name_map =
-        foreign_locale_ids_finder::build_map_if_empty_or_return(
-            locale_id_to_name_map,
-            res_dir_path,
-        )?;
+    let locale_id_to_name_map = foreign_locale_ids_finder::build_map_if_empty_or_return(
+        locale_id_to_name_map,
+        res_dir_path,
+    )?;
 
     if locale_id_to_name_map.is_empty() {
         return Err::<_, Error>(From::from(String::from(
@@ -91,7 +90,7 @@ fn write_out_strings_to_localize(
         let mut sink_provider = FileProvider::new(String::from(output_dir_path));
         let strings_to_localize = vec![LocalizableStrings::new(
             String::from(file_name),
-            filter::find_missing_strings(&mut foreign_strings, localizable_default_strings),
+            strings_to_localize,
         )];
 
         let result = csv_writer::write(strings_to_localize, &mut sink_provider);
