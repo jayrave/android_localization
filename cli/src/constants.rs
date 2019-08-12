@@ -7,15 +7,15 @@ pub mod command {
 }
 
 pub mod arg {
-    pub const RES_DIR: &str = "res";
-    pub const LOCALIZE_OUTPUT: &str = "output";
-    pub const LOCALIZED_INPUT: &str = "input";
+    pub const RES_DIR: &str = "res-dir";
+    pub const LOCALIZE_OUTPUT_DIR: &str = "output-dir";
+    pub const LOCALIZED_INPUT_DIR: &str = "input-dir";
     pub const MAPPING: &str = "mapping";
 
     pub mod short {
         pub const RES_DIR: &str = "r";
-        pub const LOCALIZE_OUTPUT: &str = "o";
-        pub const LOCALIZED_INPUT: &str = "i";
+        pub const LOCALIZE_OUTPUT_DIR: &str = "o";
+        pub const LOCALIZED_INPUT_DIR: &str = "i";
         pub const MAPPING: &str = "m";
     }
 }

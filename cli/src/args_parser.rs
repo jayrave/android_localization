@@ -19,10 +19,10 @@ fn build_localize_sub_command() -> App<'static, 'static> {
             "Values qualifier (eg., fr) to CSV file name (eg., french)",
         ))
         .arg(
-            Arg::with_name(constants::arg::LOCALIZE_OUTPUT)
+            Arg::with_name(constants::arg::LOCALIZE_OUTPUT_DIR)
                 .help("Specifies output dir to write CSV files into")
-                .long(constants::arg::LOCALIZE_OUTPUT)
-                .short(constants::arg::short::LOCALIZE_OUTPUT)
+                .long(constants::arg::LOCALIZE_OUTPUT_DIR)
+                .short(constants::arg::short::LOCALIZE_OUTPUT_DIR)
                 .takes_value(true)
                 .required(true),
         )
@@ -36,10 +36,10 @@ fn build_localized_sub_command() -> App<'static, 'static> {
             "CSV file name (eg., french) to values qualifier (eg., fr)",
         ))
         .arg(
-            Arg::with_name(constants::arg::LOCALIZED_INPUT)
+            Arg::with_name(constants::arg::LOCALIZED_INPUT_DIR)
                 .help("Specifies input dir to read CSV files from")
-                .long(constants::arg::LOCALIZED_INPUT)
-                .short(constants::arg::short::LOCALIZED_INPUT)
+                .long(constants::arg::LOCALIZED_INPUT_DIR)
+                .short(constants::arg::short::LOCALIZED_INPUT_DIR)
                 .takes_value(true)
                 .required(true),
         )

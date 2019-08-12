@@ -7,9 +7,9 @@ fn one_locale_per_file_with_mapping() {
     android_localization_cli::do_the_thing(vec![
         "does_not_matter",
         "localize",
-        "--res",
+        "--res-dir",
         "./tests_data/localize/input",
-        "--output",
+        "--output-dir",
         output_dir_path,
         "--mapping",
         "fr=french",
@@ -39,9 +39,9 @@ fn one_locale_per_file_without_mapping() {
     android_localization_cli::do_the_thing(vec![
         "does_not_matter",
         "localize",
-        "--res",
+        "--res-dir",
         "./tests_data/localize/input",
-        "--output",
+        "--output-dir",
         output_dir_path,
     ])
     .unwrap();
