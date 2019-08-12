@@ -29,7 +29,9 @@ fn do_to_csv(matches: &ArgMatches) -> Result<(), ()> {
         "Texts to be localized written to",
         android_localization_core::localize::do_the_thing(
             matches.value_of(constants::arg::RES_DIR).unwrap(),
-            matches.value_of(constants::arg::LOCALIZE_OUTPUT_DIR).unwrap(),
+            matches
+                .value_of(constants::arg::LOCALIZE_OUTPUT_DIR)
+                .unwrap(),
             build_mappings(matches),
         ),
     )
@@ -40,7 +42,9 @@ fn do_from_csv(matches: &ArgMatches) -> Result<(), ()> {
         "Localized texts written to",
         android_localization_core::localized::do_the_thing(
             matches.value_of(constants::arg::RES_DIR).unwrap(),
-            matches.value_of(constants::arg::LOCALIZED_INPUT_DIR).unwrap(),
+            matches
+                .value_of(constants::arg::LOCALIZED_INPUT_DIR)
+                .unwrap(),
             build_mappings(matches),
         ),
     )

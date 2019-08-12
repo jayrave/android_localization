@@ -9,7 +9,7 @@ use crate::error::Error;
 use crate::error::ResultExt;
 
 lazy_static::lazy_static! {
-    static ref LANG_ID_REGEX: Regex = Regex::new("-([a-zA-z]+)$").unwrap();
+    static ref LOCALE_ID_REGEX: Regex = Regex::new("-([a-zA-z]+)$").unwrap();
 }
 
 /// Finds language IDs from the folder names. Only folders whose name are of the
@@ -23,7 +23,7 @@ pub fn find(res_dir_path: &str) -> Result<Vec<String>, Error> {
         )));
     }
 
-    let lang_ids = fs::read_dir(res_dir_path)
+    let locale_ids = fs::read_dir(res_dir_path)
         .with_context(String::from(res_dir_path))?
         .filter_map(|dir_entry| match dir_entry {
             Err(_) => None,
@@ -44,7 +44,7 @@ pub fn find(res_dir_path: &str) -> Result<Vec<String>, Error> {
                 }
             },
         })
-        .filter_map(|file_name| match LANG_ID_REGEX.captures(&file_name) {
+        .filter_map(|file_name| match LOCALE_ID_REGEX.captures(&file_name) {
             None => None,
             Some(capture) => match capture.get(1) {
                 None => None,
@@ -53,21 +53,21 @@ pub fn find(res_dir_path: &str) -> Result<Vec<String>, Error> {
         })
         .collect();
 
-    Ok(lang_ids)
+    Ok(locale_ids)
 }
 
 /// Look @ `find`'s doc to figure out how the lang IDs are figured out
-pub fn find_and_build_mapping_if_empty_or_return<S: ::std::hash::BuildHasher>(
-    mut mapping: HashMap<String, String, S>,
+pub fn build_map_if_empty_or_return<S: ::std::hash::BuildHasher>(
+    mut map: HashMap<String, String, S>,
     res_dir_path: &str,
 ) -> Result<HashMap<String, String, S>, Error> {
-    if mapping.is_empty() {
-        for lang_id in find(res_dir_path)? {
-            mapping.insert(lang_id.clone(), lang_id);
+    if map.is_empty() {
+        for locale_id in find(res_dir_path)? {
+            map.insert(locale_id.clone(), locale_id);
         }
     }
 
-    Ok(mapping)
+    Ok(map)
 }
 
 #[cfg(test)]
@@ -91,7 +91,7 @@ mod tests {
     }
 
     #[test]
-    fn find_finds_foreign_lang_ids() {
+    fn find_finds_foreign_locale_ids() {
         let tempdir = tempfile::tempdir().unwrap();
         let mut res_dir_path = tempdir.path().to_path_buf();
         res_dir_path.push("res");
@@ -115,29 +115,29 @@ mod tests {
         fs::create_dir_all(&italian_values_dir_path).unwrap();
         create_strings_file_in(&italian_values_dir_path);
 
-        let mut lang_ids = super::find(res_dir_path.to_str().unwrap())
+        let mut locale_ids = super::find(res_dir_path.to_str().unwrap())
             .unwrap()
             .into_iter();
 
-        let lang_id_1 = lang_ids.next().unwrap();
-        let lang_id_2 = lang_ids.next().unwrap();
-        assert_eq!(lang_ids.next(), None);
-        assert!(lang_id_1 == "fr" || lang_id_1 == "it");
-        assert!(lang_id_2 == "fr" || lang_id_2 == "it");
+        let locale_id_1 = locale_ids.next().unwrap();
+        let locale_id_2 = locale_ids.next().unwrap();
+        assert_eq!(locale_ids.next(), None);
+        assert!(locale_id_1 == "fr" || locale_id_1 == "it");
+        assert!(locale_id_2 == "fr" || locale_id_2 == "it");
     }
 
     #[test]
-    fn find_and_build_mapping_if_empty_or_return_returns_non_empty_map_as_is() {
-        let mut mapping = HashMap::new();
-        mapping.insert(String::from("a"), String::from("a"));
+    fn build_map_if_empty_or_return() {
+        let mut map = HashMap::new();
+        map.insert(String::from("a"), String::from("a"));
         assert_eq!(
-            super::find_and_build_mapping_if_empty_or_return(mapping.clone(), "").unwrap(),
-            mapping
+            super::build_map_if_empty_or_return(map.clone(), "").unwrap(),
+            map
         )
     }
 
     #[test]
-    fn find_and_build_mapping_if_empty_or_return_builds_mapping() {
+    fn build_map_if_empty_or_return_builds_map() {
         let tempdir = tempfile::tempdir().unwrap();
         let mut res_dir_path = tempdir.path().to_path_buf();
         res_dir_path.push("res");
@@ -152,16 +152,16 @@ mod tests {
         fs::create_dir_all(&italian_values_dir_path).unwrap();
         create_strings_file_in(&italian_values_dir_path);
 
-        let mut mapping = HashMap::new();
-        mapping.insert(String::from("fr"), String::from("fr"));
-        mapping.insert(String::from("it"), String::from("it"));
+        let mut map = HashMap::new();
+        map.insert(String::from("fr"), String::from("fr"));
+        map.insert(String::from("it"), String::from("it"));
         assert_eq!(
-            super::find_and_build_mapping_if_empty_or_return(
+            super::build_map_if_empty_or_return(
                 HashMap::new(),
                 res_dir_path.to_str().unwrap()
             )
             .unwrap(),
-            mapping
+            map
         )
     }
 

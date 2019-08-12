@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use crate::error::Error;
-use crate::util::foreign_lang_ids_finder;
+use crate::util::foreign_locale_ids_finder;
 use crate::util::xml_helper;
 use crate::validate::apostrophe;
 use crate::validate::format_string;
@@ -14,14 +14,14 @@ pub fn do_the_thing(
     let res_dir_path_string = res_dir_path;
     let res_dir_path = Path::new(res_dir_path);
     let default_strings = xml_helper::read_default_strings(res_dir_path)?;
-    let lang_ids = foreign_lang_ids_finder::find(res_dir_path_string)?;
+    let locale_ids = foreign_locale_ids_finder::find(res_dir_path_string)?;
 
     let mut path_of_validated_files = vec![];
     let mut invalid_strings_files = vec![];
     let mut default_parsed_data = format_string::parse_and_build_data(&default_strings);
 
-    for lang_id in lang_ids {
-        let strings_with_path = xml_helper::read_foreign_strings(res_dir_path, &lang_id)?;
+    for locale_id in locale_ids {
+        let strings_with_path = xml_helper::read_foreign_strings(res_dir_path, &locale_id)?;
         let foreign_strings_file_path = String::from(strings_with_path.path());
         let mut foreign_strings = strings_with_path.into_strings();
 

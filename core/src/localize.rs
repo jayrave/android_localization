@@ -9,7 +9,7 @@ use crate::constants;
 use crate::error::{Error, ResultExt};
 use crate::localizable_strings::LocalizableStrings;
 use crate::ops::filter;
-use crate::util::foreign_lang_ids_finder;
+use crate::util::foreign_locale_ids_finder;
 use crate::util::xml_helper;
 use crate::writer::csv_writer;
 
@@ -19,15 +19,15 @@ use crate::writer::csv_writer;
 pub fn do_the_thing<S: ::std::hash::BuildHasher>(
     res_dir_path: &str,
     output_dir_path: &str,
-    lang_id_to_human_friendly_name_mapping: HashMap<String, String, S>,
+    locale_id_to_name_map: HashMap<String, String, S>,
 ) -> Result<Vec<String>, Error> {
-    let lang_id_to_human_friendly_name_mapping =
-        foreign_lang_ids_finder::find_and_build_mapping_if_empty_or_return(
-            lang_id_to_human_friendly_name_mapping,
+    let locale_id_to_name_map =
+        foreign_locale_ids_finder::build_map_if_empty_or_return(
+            locale_id_to_name_map,
             res_dir_path,
         )?;
 
-    if lang_id_to_human_friendly_name_mapping.is_empty() {
+    if locale_id_to_name_map.is_empty() {
         return Err::<_, Error>(From::from(String::from(
             "Res dir doesn't have any non-default values dir with strings file!",
         )))
@@ -43,12 +43,12 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
         filter::find_localizable_strings(xml_helper::read_default_strings(res_dir_path)?);
 
     // For all languages, write out strings requiring localization
-    for (lang_id, human_friendly_name) in lang_id_to_human_friendly_name_mapping {
+    for (locale_id, locale_name) in locale_id_to_name_map {
         let possible_output_file_path = write_out_strings_to_localize(
             res_dir_path,
-            &lang_id,
+            &locale_id,
             output_dir_path,
-            &human_friendly_name,
+            &locale_name,
             &mut localizable_default_strings,
         )?;
 
@@ -77,13 +77,13 @@ fn create_output_dir_if_required(output_dir_path: &str) -> Result<(), Error> {
 
 fn write_out_strings_to_localize(
     res_dir_path: &Path,
-    lang_id: &str,
+    locale_id: &str,
     output_dir_path: &str,
     file_name: &str,
     localizable_default_strings: &mut Vec<AndroidString>,
 ) -> Result<Option<String>, Error> {
     let mut foreign_strings =
-        xml_helper::read_foreign_strings(res_dir_path, lang_id)?.into_strings();
+        xml_helper::read_foreign_strings(res_dir_path, locale_id)?.into_strings();
     let strings_to_localize =
         filter::find_missing_strings(&mut foreign_strings, localizable_default_strings);
 
@@ -176,7 +176,7 @@ mod tests {
     use crate::android_string::AndroidString;
 
     #[test]
-    fn do_the_thing_errors_for_empty_lang_id_to_human_friendly_name_mapping() {
+    fn do_the_thing_errors_for_empty_locale_id_to_name_map() {
         let temp_dir = tempfile::tempdir().unwrap();
         let mut res_dir_path = temp_dir.path().to_path_buf();
         res_dir_path.push("res");

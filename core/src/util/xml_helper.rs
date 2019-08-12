@@ -15,8 +15,8 @@ pub fn read_default_strings(res_dir_path: &Path) -> Result<Vec<AndroidString>, E
     xml_reader::read(file).with_context(path)
 }
 
-pub fn read_foreign_strings(res_dir_path: &Path, lang_id: &str) -> Result<StringsWithPath, Error> {
-    let (file, path) = open_foreign_strings_file(res_dir_path, lang_id)?;
+pub fn read_foreign_strings(res_dir_path: &Path, locale_id: &str) -> Result<StringsWithPath, Error> {
+    let (file, path) = open_foreign_strings_file(res_dir_path, locale_id)?;
     xml_reader::read(file)
         .with_context(path.clone())
         .map(|strings| StringsWithPath { path, strings })
@@ -26,9 +26,9 @@ fn open_default_strings_file(res_dir_path: &Path) -> Result<FileWithPath, Error>
     open_strings_file(res_dir_path, constants::fs::BASE_VALUES_DIR_NAME)
 }
 
-fn open_foreign_strings_file(res_dir_path: &Path, lang_id: &str) -> Result<FileWithPath, Error> {
+fn open_foreign_strings_file(res_dir_path: &Path, locale_id: &str) -> Result<FileWithPath, Error> {
     let values_dir_name = String::from(constants::fs::BASE_VALUES_DIR_NAME);
-    let values_dir_name = values_dir_name.add(&format!("-{}", lang_id));
+    let values_dir_name = values_dir_name.add(&format!("-{}", locale_id));
     open_strings_file(res_dir_path, &values_dir_name)
 }
 

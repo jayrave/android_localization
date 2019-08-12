@@ -12,7 +12,7 @@ use crate::ops::extract;
 use crate::ops::filter;
 use crate::ops::merge;
 use crate::reader::csv_reader;
-use crate::util::foreign_lang_ids_finder;
+use crate::util::foreign_locale_ids_finder;
 use crate::util::xml_helper;
 use crate::writer::xml_writer;
 
@@ -22,15 +22,15 @@ use crate::writer::xml_writer;
 pub fn do_the_thing<S: ::std::hash::BuildHasher>(
     res_dir_path: &str,
     localized_text_input_dir_path: &str,
-    human_friendly_name_to_lang_id_mapping: HashMap<String, String, S>,
+    locale_name_to_id_map: HashMap<String, String, S>,
 ) -> Result<Vec<String>, Error> {
-    let human_friendly_name_to_lang_id_mapping =
-        foreign_lang_ids_finder::find_and_build_mapping_if_empty_or_return(
-            human_friendly_name_to_lang_id_mapping,
+    let locale_name_to_id_map =
+        foreign_locale_ids_finder::build_map_if_empty_or_return(
+            locale_name_to_id_map,
             res_dir_path,
         )?;
 
-    if human_friendly_name_to_lang_id_mapping.is_empty() {
+    if locale_name_to_id_map.is_empty() {
         return Err::<_, Error>(From::from(String::from(
             "Res dir doesn't have any non-default values dir with strings file!",
         )))
@@ -44,12 +44,12 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
 
     // For all languages, handle localized text
     let mut paths_of_created_file = vec![];
-    for (human_friendly_name, lang_id) in human_friendly_name_to_lang_id_mapping {
+    for (locale_name, locale_id) in locale_name_to_id_map {
         paths_of_created_file.push(handle_localized(
             res_dir_path,
-            &lang_id,
+            &locale_id,
             localized_text_input_dir_path,
-            &human_friendly_name,
+            &locale_name,
             &mut localizable_default_strings,
         )?);
     }
@@ -59,14 +59,14 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
 
 fn handle_localized(
     res_dir_path: &Path,
-    lang_id: &str,
+    locale_id: &str,
     localized_text_input_dir_path: &str,
     file_name: &str,
     localizable_default_strings: &mut Vec<AndroidString>,
 ) -> Result<String, Error> {
     // Read already localized foreign strings
     let mut already_localized_foreign_strings = filter::find_localizable_strings(
-        xml_helper::read_foreign_strings(res_dir_path, lang_id)?.into_strings(),
+        xml_helper::read_foreign_strings(res_dir_path, locale_id)?.into_strings(),
     );
 
     // Read newly localized foreign strings
@@ -105,7 +105,7 @@ fn handle_localized(
         ));
 
     // Write out foreign strings back to file
-    let (mut file, output_file_path) = writable_empty_foreign_strings_file(res_dir_path, lang_id)?;
+    let (mut file, output_file_path) = writable_empty_foreign_strings_file(res_dir_path, locale_id)?;
     xml_writer::write(&mut file, to_be_written_foreign_strings)
         .with_context(output_file_path.clone())?;
 
@@ -116,15 +116,15 @@ fn handle_localized(
 /// is possible; if not, it passes out a fallback value)
 fn writable_empty_foreign_strings_file(
     res_dir_path: &Path,
-    lang_id: &str,
+    locale_id: &str,
 ) -> Result<(File, String), Error> {
     let values_dir_name = String::from(constants::fs::BASE_VALUES_DIR_NAME);
-    let values_dir_name = values_dir_name.add(&format!("-{}", lang_id));
+    let values_dir_name = values_dir_name.add(&format!("-{}", locale_id));
 
     let mut strings_file_path = res_dir_path.to_path_buf();
     strings_file_path.push(values_dir_name);
     strings_file_path.push(constants::fs::STRING_FILE_NAME);
-    let output_path_or_fb = String::from(strings_file_path.to_str().unwrap_or(lang_id));
+    let output_path_or_fb = String::from(strings_file_path.to_str().unwrap_or(locale_id));
 
     // empties out the file if it has any content
     Ok((
@@ -146,7 +146,7 @@ mod tests {
     use crate::writer::xml_writer;
 
     #[test]
-    fn do_the_thing_errors_for_empty_human_friendly_name_to_lang_id_mapping() {
+    fn do_the_thing_errors_for_empty_locale_name_to_id_map() {
         let temp_dir = tempfile::tempdir().unwrap();
         let mut res_dir_path = temp_dir.path().to_path_buf();
         res_dir_path.push("res");
