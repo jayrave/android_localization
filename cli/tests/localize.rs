@@ -18,17 +18,12 @@ fn one_locale_per_file_with_mapping() {
     ])
     .unwrap();
 
-    helpers::assert_equality_of_file_contents(
-        "./tests_data/localize/output_one_locale_per_file_with_mapping/",
-        "french.csv",
+    helpers::assert_eq_of_file_contents_to_either_or(
         temp_dir.path().to_str().unwrap(),
-        "french.csv",
-    );
-    helpers::assert_equality_of_file_contents(
+        "to_localize_1.csv",
         "./tests_data/localize/output_one_locale_per_file_with_mapping/",
-        "spanish.csv",
-        temp_dir.path().to_str().unwrap(),
-        "spanish.csv",
+        "es_fr.csv",
+        "fr_es.csv",
     );
 }
 
@@ -46,16 +41,11 @@ fn one_locale_per_file_without_mapping() {
     ])
     .unwrap();
 
-    helpers::assert_equality_of_file_contents(
-        "./tests_data/localize/output_one_locale_per_file_without_mapping/",
-        "french.csv",
+    helpers::assert_eq_of_file_contents_to_either_or(
         temp_dir.path().to_str().unwrap(),
-        "fr.csv",
-    );
-    helpers::assert_equality_of_file_contents(
+        "to_localize_1.csv",
         "./tests_data/localize/output_one_locale_per_file_without_mapping/",
-        "spanish.csv",
-        temp_dir.path().to_str().unwrap(),
-        "es.csv",
+        "es_fr.csv",
+        "fr_es.csv",
     );
 }

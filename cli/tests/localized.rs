@@ -22,13 +22,13 @@ fn one_locale_per_file_with_mapping() {
         ])
         .unwrap();
 
-        helpers::assert_equality_of_file_contents(
+        helpers::assert_eq_of_file_contents(
             "./tests_data/localized/output/",
             "french_strings.xml",
             &format!("{}/values-fr/", output_res_path),
             "strings.xml",
         );
-        helpers::assert_equality_of_file_contents(
+        helpers::assert_eq_of_file_contents(
             "./tests_data/localized/output/",
             "spanish_strings.xml",
             &format!("{}/values-es/", output_res_path),
@@ -50,13 +50,13 @@ fn one_locale_per_file_without_mapping() {
         ])
         .unwrap();
 
-        helpers::assert_equality_of_file_contents(
+        helpers::assert_eq_of_file_contents(
             "./tests_data/localized/output/",
             "french_strings.xml",
             &format!("{}/values-fr/", output_res_path),
             "strings.xml",
         );
-        helpers::assert_equality_of_file_contents(
+        helpers::assert_eq_of_file_contents(
             "./tests_data/localized/output/",
             "spanish_strings.xml",
             &format!("{}/values-es/", output_res_path),
