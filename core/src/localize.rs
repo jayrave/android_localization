@@ -237,6 +237,7 @@ mod tests {
         let (file_paths, output_dir) = test_write_out_strings_to_localize(
             &temp_dir,
             &contents.clone(),
+            &contents.clone(),
             &contents,
             default_strings,
         );
@@ -265,6 +266,7 @@ mod tests {
         let temp_dir = tempfile::tempdir().unwrap();
         let (file_paths, output_dir) = test_write_out_strings_to_localize(
             &temp_dir,
+            &contents.clone(),
             &contents.clone(),
             &contents,
             default_strings,
@@ -305,6 +307,7 @@ mod tests {
         temp_dir: &TempDir,
         french_values_file_content: &str,
         spanish_values_file_content: &str,
+        unmapped_german_values_file_content: &str,
         mut default_strings: Vec<AndroidString>,
     ) -> (Vec<String>, PathBuf) {
         // Build paths
@@ -318,12 +321,17 @@ mod tests {
         es_values_dir_path.push("values-es");
         let mut es_strings_file_path = es_values_dir_path.clone();
         es_strings_file_path.push("strings.xml");
+        let mut de_values_dir_path = res_dir_path.clone();
+        de_values_dir_path.push("values-de");
+        let mut de_strings_file_path = de_values_dir_path.clone();
+        de_strings_file_path.push("strings.xml");
         let mut output_dir_path = temp_dir.path().to_path_buf();
         output_dir_path.push("output");
 
         // Create required dirs & files with content
         fs::create_dir_all(fr_values_dir_path.clone()).unwrap();
         fs::create_dir_all(es_values_dir_path.clone()).unwrap();
+        fs::create_dir_all(de_values_dir_path.clone()).unwrap();
         fs::create_dir_all(output_dir_path.clone()).unwrap();
         let mut fr_strings_file = File::create(fr_strings_file_path).unwrap();
         fr_strings_file
@@ -333,7 +341,12 @@ mod tests {
         es_strings_file
             .write(spanish_values_file_content.as_bytes())
             .unwrap();
+        let mut de_strings_file = File::create(de_strings_file_path).unwrap();
+        de_strings_file
+            .write(unmapped_german_values_file_content.as_bytes())
+            .unwrap();
 
+        // Not including german in this map to make sure that mappings also work as a filter
         let mut locale_id_to_name_map = HashMap::new();
         locale_id_to_name_map.insert(String::from("fr"), String::from("french"));
         locale_id_to_name_map.insert(String::from("es"), String::from("spanish"));
