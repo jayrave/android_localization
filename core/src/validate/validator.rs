@@ -104,9 +104,9 @@ fn validate_foreign_strings(
 
 #[derive(Debug, PartialEq)]
 pub struct InvalidStringsFile {
-    file_path: String,
-    apostrophe_error: Option<apostrophe::InvalidStrings>,
-    format_string_error: Option<format_string::Mismatches>,
+    pub file_path: String,
+    pub apostrophe_error: Option<apostrophe::InvalidStrings>,
+    pub format_string_error: Option<format_string::Mismatches>,
 }
 
 #[cfg(test)]
