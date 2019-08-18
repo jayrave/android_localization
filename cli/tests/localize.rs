@@ -25,7 +25,7 @@ fn one_locale_per_file_with_mapping() {
     assert_status_and_stdout(output);
     assert_output_files(
         temp_dir,
-        "./tests_data/localize/output_one_locale_per_file_with_mapping/",
+        "./tests_data/localize/output_with_mapping/",
     );
 }
 
@@ -47,7 +47,7 @@ fn one_locale_per_file_without_mapping() {
     assert_status_and_stdout(output);
     assert_output_files(
         temp_dir,
-        "./tests_data/localize/output_one_locale_per_file_without_mapping/",
+        "./tests_data/localize/output_without_mapping/",
     );
 }
 
