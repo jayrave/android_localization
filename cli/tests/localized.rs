@@ -1,68 +1,78 @@
 mod helpers;
 
+use regex::Regex;
 use std::fs;
 use std::fs::File;
 use std::io::Write;
+use std::process::{Command, Output};
 use tempfile::TempDir;
 
 #[test]
 fn one_locale_per_file_with_mapping() {
     execute_with_copied_sample_res(tempfile::tempdir().unwrap(), |output_res_path: String| {
-        android_localization_cli::do_the_thing(vec![
-            "does_not_matter",
-            "localized",
-            "--res-dir",
-            &output_res_path.clone(),
-            "--input-dir",
-            "./tests_data/localized/input/one_locale_per_file_with_mapping",
-            "--mapping",
-            "french=fr",
-            "--mapping",
-            "spanish=es",
-        ])
-        .unwrap();
+        let output = Command::new("cargo")
+            .args(vec![
+                "run",
+                "localized",
+                "--res-dir",
+                &output_res_path.clone(),
+                "--input-dir",
+                "./tests_data/localized/input/one_locale_per_file_with_mapping",
+                "--mapping",
+                "french=fr",
+                "--mapping",
+                "spanish=es",
+            ])
+            .output()
+            .unwrap();
 
-        helpers::assert_eq_of_file_contents(
-            "./tests_data/localized/output/",
-            "french_strings.xml",
-            &format!("{}/values-fr/", output_res_path),
-            "strings.xml",
-        );
-        helpers::assert_eq_of_file_contents(
-            "./tests_data/localized/output/",
-            "spanish_strings.xml",
-            &format!("{}/values-es/", output_res_path),
-            "strings.xml",
-        );
+        assert_status_and_stdout(output);
+        assert_output_files(output_res_path);
     })
 }
 
 #[test]
 fn one_locale_per_file_without_mapping() {
     execute_with_copied_sample_res(tempfile::tempdir().unwrap(), |output_res_path: String| {
-        android_localization_cli::do_the_thing(vec![
-            "does_not_matter",
+        let output = Command::new("cargo")
+            .args(vec![
+                "run",
+                "localized",
+                "--res-dir",
+                &output_res_path.clone(),
+                "--input-dir",
+                "./tests_data/localized/input/one_locale_per_file_without_mapping",
+            ])
+            .output()
+            .unwrap();
+
+        assert_status_and_stdout(output);
+        assert_output_files(output_res_path);
+    })
+}
+
+#[test]
+fn errors_are_printed_out() {
+    let temp_dir = tempfile::tempdir().unwrap();
+    let output = Command::new("cargo")
+        .args(vec![
+            "run",
             "localized",
             "--res-dir",
-            &output_res_path.clone(),
+            &format!(
+                "{}/non_existent",
+                temp_dir.path().to_path_buf().to_str().unwrap()
+            ),
             "--input-dir",
-            "./tests_data/localized/input/one_locale_per_file_without_mapping",
+            temp_dir.path().to_str().unwrap(),
         ])
+        .output()
         .unwrap();
 
-        helpers::assert_eq_of_file_contents(
-            "./tests_data/localized/output/",
-            "french_strings.xml",
-            &format!("{}/values-fr/", output_res_path),
-            "strings.xml",
-        );
-        helpers::assert_eq_of_file_contents(
-            "./tests_data/localized/output/",
-            "spanish_strings.xml",
-            &format!("{}/values-es/", output_res_path),
-            "strings.xml",
-        );
-    })
+    assert!(!output.status.success());
+    assert!(String::from_utf8(output.stderr)
+        .unwrap()
+        .ends_with("non_existent) doesn\'t exist\n"));
 }
 
 fn execute_with_copied_sample_res<F>(temp_dir: TempDir, test: F)
@@ -128,4 +138,39 @@ where
         .unwrap();
 
     test(String::from(res_dir_path.to_str().unwrap()))
+}
+
+fn assert_status_and_stdout(output: Output) {
+    assert!(output.status.success());
+
+    let output = String::from_utf8(output.stdout).unwrap();
+    let mut output_lines = output.split("\n");
+
+    let regex = Regex::new("values-es/strings.xml|values-fr/strings.xml").unwrap();
+
+    assert_eq!(
+        output_lines.next().unwrap(),
+        "Localized texts written to - "
+    );
+    assert_eq!(output_lines.next().unwrap(), "");
+    assert!(regex.is_match(output_lines.next().unwrap()));
+    assert!(regex.is_match(output_lines.next().unwrap()));
+    assert_eq!(output_lines.next().unwrap(), "");
+    assert_eq!(output_lines.next(), None);
+}
+
+fn assert_output_files(output_res_path: String) {
+    helpers::assert_eq_of_file_contents(
+        "./tests_data/localized/output/",
+        "french_strings.xml",
+        &format!("{}/values-fr/", output_res_path),
+        "strings.xml",
+    );
+
+    helpers::assert_eq_of_file_contents(
+        "./tests_data/localized/output/",
+        "spanish_strings.xml",
+        &format!("{}/values-es/", output_res_path),
+        "strings.xml",
+    );
 }
