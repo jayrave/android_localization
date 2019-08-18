@@ -1,0 +1,1 @@
+# Android Localization [![Build Status](https://travis-ci.org/jayrave/android_localization.svg?branch=develop)](https://travis-ci.org/jayrave/android_localization)
