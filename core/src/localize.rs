@@ -80,21 +80,18 @@ fn write_out_strings_to_localize<S: ::std::hash::BuildHasher>(
             filter::find_missing_strings(&mut foreign_strings, localizable_default_strings);
 
         if !strings_to_localize.is_empty() {
-            localizable_strings_list.push(LocalizableStrings::new(
-                String::from(locale_name),
-                strings_to_localize,
-            ))
+            localizable_strings_list.push(LocalizableStrings::new(locale_name, strings_to_localize))
         }
     }
 
-    return if !localizable_strings_list.is_empty() {
+    if !localizable_strings_list.is_empty() {
         let mut sink_provider = FileProvider::new(String::from(output_dir_path));
         csv_writer::write(localizable_strings_list, &mut sink_provider)?;
 
         Ok(sink_provider.into_created_files())
     } else {
         Ok(vec![])
-    };
+    }
 }
 
 struct FileProvider {

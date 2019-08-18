@@ -11,14 +11,14 @@ use crate::reader::xml_reader;
 type FileWithPath = (File, String);
 
 pub fn read_default_strings(res_dir_path: &Path) -> Result<StringsWithPath, Error> {
-    return read_strings(open_default_strings_file(res_dir_path)?);
+    read_strings(open_default_strings_file(res_dir_path)?)
 }
 
 pub fn read_foreign_strings(
     res_dir_path: &Path,
     locale_id: &str,
 ) -> Result<StringsWithPath, Error> {
-    return read_strings(open_foreign_strings_file(res_dir_path, locale_id)?);
+    read_strings(open_foreign_strings_file(res_dir_path, locale_id)?)
 }
 
 fn read_strings(file_with_path: FileWithPath) -> Result<StringsWithPath, Error> {

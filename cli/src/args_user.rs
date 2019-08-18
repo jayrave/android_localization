@@ -64,7 +64,7 @@ fn do_validations(matches: &ArgMatches) -> Result<(), ()> {
             }
 
             Err(invalid_strings_files) => exit_on_failure(
-                android_localization_core::formatter::format_to_string(invalid_strings_files),
+                android_localization_core::formatter::format_to_string(invalid_strings_files).unwrap_or_else(|_| String::from("Looks like this utility is experiencing issues while displaying some invalid strings! Please contact the dev (jayrave) about this error")),
             ),
         },
     }

@@ -1,19 +1,18 @@
-use crate::validate::apostrophe;
-use crate::validate::format_string;
 use crate::validate::validator::InvalidStringsFile;
+use std::fmt::Error;
 use std::fmt::Write;
 
-pub fn format_to_string(invalid_strings_files: Vec<InvalidStringsFile>) -> String {
+pub fn format_to_string(invalid_strings_files: Vec<InvalidStringsFile>) -> Result<String, Error> {
     let files_count = invalid_strings_files.len();
     let mut issues_count = 0;
     let mut output = String::new();
 
     for (index, invalid_strings_file) in invalid_strings_files.into_iter().enumerate() {
         if index > 0 {
-            writeln!(&mut output, "");
+            writeln!(&mut output)?;
         }
 
-        issues_count += format_errors_from_one_file(invalid_strings_file, &mut output)
+        issues_count += format_errors_from_one_file(invalid_strings_file, &mut output)?
     }
 
     let pluralized_issue = if issues_count <= 1 { "issue" } else { "issues" };
@@ -23,14 +22,15 @@ pub fn format_to_string(invalid_strings_files: Vec<InvalidStringsFile>) -> Strin
         &mut output,
         "\nFound {} {} across {} {}!",
         issues_count, pluralized_issue, files_count, pluralized_file
-    );
-    return output;
+    )?;
+
+    Ok(output)
 }
 
 fn format_errors_from_one_file(
     invalid_strings_file: InvalidStringsFile,
     mut output: &mut String,
-) -> usize {
+) -> Result<usize, Error> {
     let mut file_output = String::new();
     let mut issues_count_in_file = 0;
     if invalid_strings_file.apostrophe_error.is_some() {
@@ -45,7 +45,7 @@ fn format_errors_from_one_file(
                 "Error {} (unescaped apostrophe): {}",
                 issues_count_in_file,
                 invalid_string.value()
-            );
+            )?;
         }
     }
 
@@ -70,7 +70,7 @@ fn format_errors_from_one_file(
                     .sorted_format_strings
                     .join(", "),
                 mismatch.foreign_parsed_data.android_string.value()
-            );
+            )?;
             writeln!(
                 &mut file_output,
                 "      {}                             Found [{}] in {}",
@@ -80,7 +80,7 @@ fn format_errors_from_one_file(
                     .sorted_format_strings
                     .join(", "),
                 mismatch.default_parsed_data.android_string.value()
-            );
+            )?;
         }
     }
 
@@ -94,10 +94,10 @@ fn format_errors_from_one_file(
         &mut output,
         "Path: {} ({} {})",
         invalid_strings_file.file_path, issues_count_in_file, pluralized_issue
-    );
-    write!(&mut output, "{}", file_output);
+    )?;
+    write!(&mut output, "{}", file_output)?;
 
-    return issues_count_in_file;
+    Ok(issues_count_in_file)
 }
 
 mod tests {
@@ -159,7 +159,7 @@ mod tests {
         ];
 
         assert_eq!(
-            super::format_to_string(invalid_strings_file),
+            super::format_to_string(invalid_strings_file).unwrap(),
             String::from(
                 r#"Path: default (1 issue)
 Error 1 (unescaped apostrophe): default_value

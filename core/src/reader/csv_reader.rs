@@ -97,7 +97,7 @@ fn extract_filtered_headers(
 
 fn extract_localized_record(
     record: &csv::StringRecord,
-    foreign_indices_allow_flags: &Vec<bool>,
+    foreign_indices_allow_flags: &[bool],
 ) -> Result<LocalizedRecord, Error> {
     // Since `ReaderBuilder` is set to be not flexible, we can be sure
     // that the this record is going to be as long as the headers record
