@@ -3,64 +3,102 @@ use std::path::Path;
 use crate::error::Error;
 use crate::util::foreign_locale_ids_finder;
 use crate::util::xml_helper;
+use crate::util::xml_helper::StringsWithPath;
 use crate::validate::apostrophe;
 use crate::validate::format_string;
+use crate::validate::format_string::ParsedData;
 
-/// Runs all validations for all foreign strings & returns a collection
+/// Runs all validations for default & all foreign strings & returns a collection
 /// of file names on which the validations were run
 pub fn do_the_thing(
     res_dir_path: &str,
 ) -> Result<Result<Vec<String>, Vec<InvalidStringsFile>>, Error> {
-    let res_dir_path_string = res_dir_path;
-    let res_dir_path = Path::new(res_dir_path);
-    let default_strings = xml_helper::read_default_strings(res_dir_path)?;
-    let locale_ids = foreign_locale_ids_finder::find(res_dir_path_string)?;
-
     let mut path_of_validated_files = vec![];
     let mut invalid_strings_files = vec![];
-    let mut default_parsed_data = format_string::parse_and_build_data(&default_strings);
 
+    let default_strings_with_path = xml_helper::read_default_strings(Path::new(res_dir_path))?;
+    let mut default_parsed_data =
+        format_string::parse_and_build_data(&default_strings_with_path.strings());
+    validate_default_strings(
+        default_strings_with_path,
+        &mut path_of_validated_files,
+        &mut invalid_strings_files,
+    );
+
+    let res_dir_path_string = res_dir_path;
+    let locale_ids = foreign_locale_ids_finder::find(res_dir_path_string)?;
     for locale_id in locale_ids {
-        let strings_with_path = xml_helper::read_foreign_strings(res_dir_path, &locale_id)?;
-        let foreign_strings_file_path = String::from(strings_with_path.path());
-        let mut foreign_strings = strings_with_path.into_strings();
-
-        let apos_result = apostrophe::validate(&foreign_strings);
-        let fs_result = format_string::validate(&mut default_parsed_data, &mut foreign_strings);
-
-        let invalid = if apos_result.is_err() && fs_result.is_err() {
-            Some(InvalidStringsFile {
-                file_path: foreign_strings_file_path.clone(),
-                apostrophe_error: Some(apos_result.unwrap_err()),
-                format_string_error: Some(fs_result.unwrap_err()),
-            })
-        } else if apos_result.is_err() {
-            Some(InvalidStringsFile {
-                file_path: foreign_strings_file_path.clone(),
-                apostrophe_error: Some(apos_result.unwrap_err()),
-                format_string_error: None,
-            })
-        } else if fs_result.is_err() {
-            Some(InvalidStringsFile {
-                file_path: foreign_strings_file_path.clone(),
-                apostrophe_error: None,
-                format_string_error: Some(fs_result.unwrap_err()),
-            })
-        } else {
-            None
-        };
-
-        if let Some(invalid_file) = invalid {
-            invalid_strings_files.push(invalid_file)
-        } else {
-            path_of_validated_files.push(foreign_strings_file_path)
-        }
+        validate_foreign_strings(
+            xml_helper::read_foreign_strings(Path::new(res_dir_path), &locale_id)?,
+            &mut default_parsed_data,
+            &mut path_of_validated_files,
+            &mut invalid_strings_files,
+        )
     }
 
     if invalid_strings_files.is_empty() {
         Ok(Ok(path_of_validated_files))
     } else {
         Ok(Err(invalid_strings_files))
+    }
+}
+
+fn validate_default_strings(
+    strings_with_path: StringsWithPath,
+    path_of_validated_files: &mut Vec<String>,
+    invalid_strings_files: &mut Vec<InvalidStringsFile>,
+) {
+    let default_strings_file_path = String::from(strings_with_path.path());
+    let apos_result = apostrophe::validate(&strings_with_path.into_strings());
+    if apos_result.is_err() {
+        invalid_strings_files.push(InvalidStringsFile {
+            file_path: default_strings_file_path,
+            apostrophe_error: Some(apos_result.unwrap_err()),
+            format_string_error: None,
+        })
+    } else {
+        path_of_validated_files.push(default_strings_file_path)
+    }
+}
+
+fn validate_foreign_strings(
+    strings_with_path: StringsWithPath,
+    mut default_parsed_data: &mut Vec<ParsedData>,
+    path_of_validated_files: &mut Vec<String>,
+    invalid_strings_files: &mut Vec<InvalidStringsFile>,
+) {
+    let foreign_strings_file_path = String::from(strings_with_path.path());
+    let mut foreign_strings = strings_with_path.into_strings();
+
+    let apos_result = apostrophe::validate(&foreign_strings);
+    let fs_result = format_string::validate(&mut default_parsed_data, &mut foreign_strings);
+
+    let invalid = if apos_result.is_err() && fs_result.is_err() {
+        Some(InvalidStringsFile {
+            file_path: foreign_strings_file_path.clone(),
+            apostrophe_error: Some(apos_result.unwrap_err()),
+            format_string_error: Some(fs_result.unwrap_err()),
+        })
+    } else if apos_result.is_err() {
+        Some(InvalidStringsFile {
+            file_path: foreign_strings_file_path.clone(),
+            apostrophe_error: Some(apos_result.unwrap_err()),
+            format_string_error: None,
+        })
+    } else if fs_result.is_err() {
+        Some(InvalidStringsFile {
+            file_path: foreign_strings_file_path.clone(),
+            apostrophe_error: None,
+            format_string_error: Some(fs_result.unwrap_err()),
+        })
+    } else {
+        None
+    };
+
+    if let Some(invalid_file) = invalid {
+        invalid_strings_files.push(invalid_file)
+    } else {
+        path_of_validated_files.push(foreign_strings_file_path)
     }
 }
 
@@ -92,7 +130,8 @@ mod tests {
         let mut default_values_dir_path = res_dir_path.clone();
         default_values_dir_path.push("values");
         fs::create_dir_all(&default_values_dir_path).unwrap();
-        let mut default_strings_file = create_strings_file_in(&default_values_dir_path).0;
+        let (mut default_strings_file, default_strings_file_path) =
+            create_strings_file_in(&default_values_dir_path);
 
         let mut french_values_dir_path = res_dir_path.clone();
         french_values_dir_path.push("values-fr");
@@ -140,7 +179,11 @@ mod tests {
             super::do_the_thing(res_dir_path.to_str().unwrap())
                 .unwrap()
                 .unwrap(),
-            vec![french_strings_file_path, spanish_strings_file_path],
+            vec![
+                default_strings_file_path,
+                french_strings_file_path,
+                spanish_strings_file_path
+            ],
         );
     }
 
@@ -153,7 +196,8 @@ mod tests {
         let mut default_values_dir_path = res_dir_path.clone();
         default_values_dir_path.push("values");
         fs::create_dir_all(&default_values_dir_path).unwrap();
-        let mut default_strings_file = create_strings_file_in(&default_values_dir_path).0;
+        let (mut default_strings_file, default_strings_file_path) =
+            create_strings_file_in(&default_values_dir_path);
 
         let mut french_values_dir_path = res_dir_path.clone();
         french_values_dir_path.push("values-fr");
@@ -188,6 +232,13 @@ mod tests {
         assert_eq!(
             invalid_strings_file,
             vec![
+                InvalidStringsFile {
+                    file_path: default_strings_file_path,
+                    apostrophe_error: Some(apostrophe::InvalidStrings {
+                        invalid_strings: vec![default_s2.clone()]
+                    }),
+                    format_string_error: None
+                },
                 InvalidStringsFile {
                     file_path: french_strings_file_path,
                     apostrophe_error: Some(apostrophe::InvalidStrings {

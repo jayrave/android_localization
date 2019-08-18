@@ -37,8 +37,9 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
 
     // Read default strings
     let res_dir_path = Path::new(res_dir_path);
-    let mut localizable_default_strings =
-        filter::find_localizable_strings(xml_helper::read_default_strings(res_dir_path)?);
+    let mut localizable_default_strings = filter::find_localizable_strings(
+        xml_helper::read_default_strings(res_dir_path)?.into_strings(),
+    );
 
     // For all languages, write out strings requiring localization
     write_out_strings_to_localize(

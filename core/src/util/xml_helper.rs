@@ -10,16 +10,19 @@ use crate::reader::xml_reader;
 
 type FileWithPath = (File, String);
 
-pub fn read_default_strings(res_dir_path: &Path) -> Result<Vec<AndroidString>, Error> {
-    let (file, path) = open_default_strings_file(res_dir_path)?;
-    xml_reader::read(file).with_context(path)
+pub fn read_default_strings(res_dir_path: &Path) -> Result<StringsWithPath, Error> {
+    return read_strings(open_default_strings_file(res_dir_path)?);
 }
 
 pub fn read_foreign_strings(
     res_dir_path: &Path,
     locale_id: &str,
 ) -> Result<StringsWithPath, Error> {
-    let (file, path) = open_foreign_strings_file(res_dir_path, locale_id)?;
+    return read_strings(open_foreign_strings_file(res_dir_path, locale_id)?);
+}
+
+fn read_strings(file_with_path: FileWithPath) -> Result<StringsWithPath, Error> {
+    let (file, path) = file_with_path;
     xml_reader::read(file)
         .with_context(path.clone())
         .map(|strings| StringsWithPath { path, strings })
@@ -54,6 +57,10 @@ pub struct StringsWithPath {
 impl StringsWithPath {
     pub fn path(&self) -> &str {
         &self.path
+    }
+
+    pub fn strings(&self) -> &[AndroidString] {
+        &self.strings
     }
 
     pub fn into_strings(self) -> Vec<AndroidString> {

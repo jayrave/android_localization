@@ -38,8 +38,9 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
 
     // Read default strings
     let res_dir_path = Path::new(res_dir_path);
-    let mut localizable_default_strings =
-        filter::find_localizable_strings(xml_helper::read_default_strings(res_dir_path)?);
+    let mut localizable_default_strings = filter::find_localizable_strings(
+        xml_helper::read_default_strings(res_dir_path)?.into_strings(),
+    );
 
     // For all languages, handle localized text
     let mut paths_of_created_file = vec![];
