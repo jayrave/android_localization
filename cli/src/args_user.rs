@@ -9,12 +9,12 @@ use std::fmt;
 /// Please don't let that bother you as the requirements are correctly setup in
 /// `args_parser.rs` & unwrapped values are guaranteed to be present there
 pub fn do_the_thing(matches: &ArgMatches) -> Result<(), ()> {
-    if let Some(from_csv_command) = matches.subcommand_matches(constants::command::LOCALIZED) {
-        return do_from_csv(&from_csv_command);
+    if let Some(localized_command) = matches.subcommand_matches(constants::command::LOCALIZED) {
+        return localized(&localized_command);
     }
 
-    if let Some(to_csv_command) = matches.subcommand_matches(constants::command::LOCALIZE) {
-        return do_to_csv(&to_csv_command);
+    if let Some(localize_command) = matches.subcommand_matches(constants::command::LOCALIZE) {
+        return localize(&localize_command);
     }
 
     if let Some(validations_command) = matches.subcommand_matches(constants::command::VALIDATE) {
@@ -24,7 +24,7 @@ pub fn do_the_thing(matches: &ArgMatches) -> Result<(), ()> {
     exit_on_failure(String::from("Command couldn't be recognized"))
 }
 
-fn do_to_csv(matches: &ArgMatches) -> Result<(), ()> {
+fn localize(matches: &ArgMatches) -> Result<(), ()> {
     exit_based_on_result(
         "Texts to be localized written to",
         android_localization_core::localize::do_the_thing(
@@ -37,7 +37,7 @@ fn do_to_csv(matches: &ArgMatches) -> Result<(), ()> {
     )
 }
 
-fn do_from_csv(matches: &ArgMatches) -> Result<(), ()> {
+fn localized(matches: &ArgMatches) -> Result<(), ()> {
     exit_based_on_result(
         "Localized texts written to",
         android_localization_core::localized::do_the_thing(
