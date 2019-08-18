@@ -22,7 +22,6 @@ fn build_localize_sub_command() -> App<'static, 'static> {
             Arg::with_name(constants::arg::LOCALIZE_OUTPUT_DIR)
                 .help("Specifies output dir to write CSV files into")
                 .long(constants::arg::LOCALIZE_OUTPUT_DIR)
-                .short(constants::arg::short::LOCALIZE_OUTPUT_DIR)
                 .takes_value(true)
                 .required(true),
         )
@@ -39,7 +38,6 @@ fn build_localized_sub_command() -> App<'static, 'static> {
             Arg::with_name(constants::arg::LOCALIZED_INPUT_DIR)
                 .help("Specifies input dir to read CSV files from")
                 .long(constants::arg::LOCALIZED_INPUT_DIR)
-                .short(constants::arg::short::LOCALIZED_INPUT_DIR)
                 .takes_value(true)
                 .required(true),
         )
@@ -55,7 +53,6 @@ fn build_res_dir_arg() -> Arg<'static, 'static> {
     Arg::with_name(constants::arg::RES_DIR)
         .help("Points to the `res` dir of an Android module")
         .long(constants::arg::RES_DIR)
-        .short(constants::arg::short::RES_DIR)
         .takes_value(true)
         .required(true)
 }
@@ -64,7 +61,6 @@ fn build_mapping_arg(help: &'static str) -> Arg<'static, 'static> {
     Arg::with_name(constants::arg::MAPPING)
         .help(help)
         .long(constants::arg::MAPPING)
-        .short(constants::arg::short::MAPPING)
         .takes_value(true)
         .validator(mapping_validator)
         .multiple(true)
