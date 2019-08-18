@@ -47,7 +47,7 @@ fn build_localized_sub_command() -> App<'static, 'static> {
 
 fn build_validate_sub_command() -> App<'static, 'static> {
     SubCommand::with_name(constants::command::VALIDATE)
-        .about("Runs some common validations on non-default string files")
+        .about("Runs some common validations on default & other locale string files")
         .arg(build_res_dir_arg())
 }
 
