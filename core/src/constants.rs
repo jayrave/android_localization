@@ -5,7 +5,7 @@ pub mod elements {
 
 pub mod attributes {
     pub const NAME: &str = "name";
-    pub const TRANSLATABLE: &str = "translatable";
+    pub const LOCALIZABLE: &str = "translatable";
 }
 
 pub mod flags {

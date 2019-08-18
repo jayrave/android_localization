@@ -1,18 +1,18 @@
-use android_string::AndroidString;
-use ops::sort;
-use regex::Regex;
 use std::cmp::Ordering;
-use std::error;
-use std::fmt;
 
-lazy_static! {
+use regex::Regex;
+
+use crate::android_string::AndroidString;
+use crate::ops::sort;
+
+lazy_static::lazy_static! {
     static ref FORMAT_STRING: Regex = Regex::new(r"(%\d+\$[ds])").unwrap();
 }
 
 pub fn validate(
     default_parsed_data: &mut Vec<ParsedData>,
     foreign_strings: &mut Vec<AndroidString>,
-) -> Result<(), Error> {
+) -> Result<(), Mismatches> {
     // Sort both the lists
     sort::sort_android_strings_by_name(foreign_strings);
     default_parsed_data.sort_by(|pd1, pd2| {
@@ -66,7 +66,7 @@ pub fn validate(
     if mismatches.is_empty() {
         Ok(())
     } else {
-        Err(Error { mismatches })
+        Err(Mismatches { mismatches })
     }
 }
 
@@ -92,54 +92,27 @@ fn parse_and_sort_format_strings(string: &AndroidString) -> Vec<String> {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ParsedData {
-    android_string: AndroidString,
-    sorted_format_strings: Vec<String>,
+    pub android_string: AndroidString,
+    pub sorted_format_strings: Vec<String>,
 }
 
 #[derive(Debug, PartialEq)]
 pub struct Mismatch {
-    default_parsed_data: ParsedData,
-    foreign_parsed_data: ParsedData,
+    pub default_parsed_data: ParsedData,
+    pub foreign_parsed_data: ParsedData,
 }
 
-impl fmt::Display for Mismatch {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "Format string mismatch. Found format strings ({}) in default ({}) & found format strings ({}) in foreign ({})",
-            self.default_parsed_data.sorted_format_strings.join(", "),
-            self.default_parsed_data.android_string.value(),
-            self.foreign_parsed_data.sorted_format_strings.join(", "),
-            self.foreign_parsed_data.android_string.value()
-        )
-    }
-}
-
-#[derive(Debug)]
-pub struct Error {
-    mismatches: Vec<Mismatch>,
-}
-
-impl error::Error for Error {
-    fn cause(&self) -> Option<&error::Error> {
-        None
-    }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.mismatches
-            .iter()
-            .map(|m| write!(f, "({})", m))
-            .collect()
-    }
+#[derive(Debug, PartialEq)]
+pub struct Mismatches {
+    pub mismatches: Vec<Mismatch>,
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::android_string::AndroidString;
+
     use super::Mismatch;
     use super::ParsedData;
-    use android_string::AndroidString;
 
     #[test]
     fn passes_in_absence_of_mismatches() {

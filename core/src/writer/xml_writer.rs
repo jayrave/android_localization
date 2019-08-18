@@ -1,15 +1,15 @@
-use android_string::AndroidString;
-use constants;
-use std::error;
-use std::fmt;
 use std::io::BufWriter;
 use std::io::Write;
-use xml::reader;
+
 use xml::reader::XmlEvent as ReadXmlEvent;
 use xml::writer;
 use xml::writer::XmlEvent as WriteXmlEvent;
 use xml::EmitterConfig;
 use xml::ParserConfig;
+
+use crate::android_string::AndroidString;
+use crate::constants;
+use crate::error::Error;
 
 pub fn write<S: Write>(sink: &mut S, android_strings: Vec<AndroidString>) -> Result<(), Error> {
     let mut writer = EmitterConfig::new()
@@ -27,10 +27,10 @@ pub fn write<S: Write>(sink: &mut S, android_strings: Vec<AndroidString>) -> Res
         let mut string_element = WriteXmlEvent::start_element(constants::elements::STRING)
             .attr(constants::attributes::NAME, android_string.name());
 
-        // Include `translatable` attribute if required
-        if !android_string.is_translatable() {
+        // Include `localizable` attribute if required
+        if !android_string.is_localizable() {
             string_element =
-                string_element.attr(constants::attributes::TRANSLATABLE, constants::flags::FALSE);
+                string_element.attr(constants::attributes::LOCALIZABLE, constants::flags::FALSE);
         }
 
         writer.write(string_element)?;
@@ -55,17 +55,21 @@ fn write_string<W: Write>(writer: &mut writer::EventWriter<W>, value: &str) -> R
     let reader = ParserConfig::new().create_reader(value.as_bytes());
     for element_or_error in reader {
         match element_or_error {
-            Err(error) => return Err(Error::XmlReadError(error)),
+            Err(error) => return Err::<_, Error>(From::from(error)),
             Ok(ref element) => match element {
                 ReadXmlEvent::Characters(_) => {
                     writer.write(element.as_writer_event().ok_or_else(|| {
-                        Error::LogicError(format!("Can't build writer event from {}", &value))
+                        let error: Error =
+                            From::from(format!("Can't build writer event from {}", &value));
+                        error
                     })?)
                 }
 
                 ReadXmlEvent::CData(_) => {
                     writer.write(element.as_writer_event().ok_or_else(|| {
-                        Error::LogicError(format!("Can't build writer event from {}", &value))
+                        let error: Error =
+                            From::from(format!("Can't build writer event from {}", &value));
+                        error
                     })?)
                 }
 
@@ -77,54 +81,21 @@ fn write_string<W: Write>(writer: &mut writer::EventWriter<W>, value: &str) -> R
     Ok(())
 }
 
-#[derive(Debug)]
-pub enum Error {
-    LogicError(String),
-    XmlReadError(reader::Error),
-    XmlWriteError(writer::Error),
-}
-
-impl From<writer::Error> for Error {
-    fn from(error: writer::Error) -> Self {
-        Error::XmlWriteError(error)
-    }
-}
-
-impl error::Error for Error {
-    fn cause(&self) -> Option<&error::Error> {
-        match self {
-            Error::LogicError(_) => None,
-            Error::XmlReadError(e) => Some(e),
-            Error::XmlWriteError(e) => Some(e),
-        }
-    }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Error::LogicError(message) => fmt::Display::fmt(message, f),
-            Error::XmlReadError(e) => fmt::Display::fmt(e, f),
-            Error::XmlWriteError(e) => fmt::Display::fmt(e, f),
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use android_string::AndroidString;
+    use crate::android_string::AndroidString;
 
     #[test]
     fn strings_are_written_to_file() {
         let android_strings = vec![
             AndroidString::new(
-                String::from("translatable_string"),
-                String::from("translatable string value"),
+                String::from("localizable_string"),
+                String::from("localizable string value"),
                 true,
             ),
             AndroidString::new(
-                String::from("non_translatable_string"),
-                String::from("non translatable string value"),
+                String::from("non_localizable_string"),
+                String::from("non localizable string value"),
                 false,
             ),
         ];
@@ -142,9 +113,9 @@ mod tests {
         assert_eq!(written_lines.next().unwrap(), r##"<resources>"##);
         assert_eq!(
             written_lines.next().unwrap(),
-            r##"    <string name="translatable_string">translatable string value</string>"##
+            r##"    <string name="localizable_string">localizable string value</string>"##
         );
-        assert_eq!(written_lines.next().unwrap(), r##"    <string name="non_translatable_string" translatable="false">non translatable string value</string>"##);
+        assert_eq!(written_lines.next().unwrap(), r##"    <string name="non_localizable_string" translatable="false">non localizable string value</string>"##);
         assert_eq!(written_lines.next().unwrap(), r##"</resources>"##);
         assert_eq!(written_lines.next(), None);
     }

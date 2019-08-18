@@ -1,10 +1,12 @@
-use android_string::AndroidString;
-use reader::xml_reader::error::Error;
-use reader::xml_reader::events_handler::EventsHandler;
 use std::io::BufReader;
 use std::io::Read;
+
 use xml::reader::XmlEvent;
 use xml::ParserConfig;
+
+use crate::android_string::AndroidString;
+use crate::error::Error;
+use crate::reader::xml_reader::events_handler::EventsHandler;
 
 pub fn read<S: Read>(source: S) -> Result<Vec<AndroidString>, Error> {
     let mut events_handler = EventsHandler::new();
@@ -12,7 +14,7 @@ pub fn read<S: Read>(source: S) -> Result<Vec<AndroidString>, Error> {
 
     for element_or_error in reader {
         match element_or_error {
-            Err(error) => return Err(Error::XmlError(error)),
+            Err(error) => return Err(error)?,
             Ok(element) => match element {
                 XmlEvent::StartElement {
                     name, attributes, ..
@@ -30,22 +32,24 @@ pub fn read<S: Read>(source: S) -> Result<Vec<AndroidString>, Error> {
 
 #[cfg(test)]
 mod tests {
-    extern crate tempfile;
-
-    use android_string::AndroidString;
     use std::fs::File;
     use std::io::{Seek, SeekFrom, Write};
 
+    use crate::android_string::AndroidString;
+
     #[test]
     fn strings_are_read_from_valid_clean_file() {
-        let mut strings = write_to_file_and_read_strings_out(r##"
+        let mut strings = write_to_file_and_read_strings_out(
+            r##"
 			<?xml version="1.0" encoding="utf-8"?>
 			<resources>
 			    <string name="string_1">string 1 value</string>
 			    <string name="string_2" translatable="true">string 2 value</string>
-				<string name="non_translatable_string" translatable="false">non translatable string value</string>
+				<string name="non_localizable_string" translatable="false">non localizable string value</string>
 			</resources>
-		"##).into_iter();
+		"##,
+        )
+        .into_iter();
 
         assert_eq!(
             strings.next(),
@@ -68,8 +72,8 @@ mod tests {
         assert_eq!(
             strings.next(),
             Some(AndroidString::new(
-                String::from("non_translatable_string"),
-                String::from("non translatable string value"),
+                String::from("non_localizable_string"),
+                String::from("non localizable string value"),
                 false
             ))
         );
@@ -79,7 +83,8 @@ mod tests {
 
     #[test]
     fn strings_are_read_from_valid_dirty_file() {
-        let mut strings = write_to_file_and_read_strings_out(r##"
+        let mut strings = write_to_file_and_read_strings_out(
+            r##"
 			<?xml version="1.0" encoding="utf-8"?>
 			<string name="dont_care_string_1">value</string>
 			<string name="dont_care_string_2" translatable="false">value</string>
@@ -90,13 +95,15 @@ mod tests {
 					<string name="dont_care_string_3">value</string>
 					<string name="dont_care_string_4" translatable="false">value</string>
 				</inside_container>
-				<string name="non_translatable_string" translatable="false">non translatable string value</string>
+				<string name="non_localizable_string" translatable="false">non localizable string value</string>
 			</resources>
 			<outside_container>
 				<string name="dont_care_string_5">value</string>
 				<string name="dont_care_string_6" translatable="false">value</string>
 			</outside_container>
-		"##).into_iter();
+		"##,
+        )
+        .into_iter();
 
         assert_eq!(
             strings.next(),
@@ -119,8 +126,8 @@ mod tests {
         assert_eq!(
             strings.next(),
             Some(AndroidString::new(
-                String::from("non_translatable_string"),
-                String::from("non translatable string value"),
+                String::from("non_localizable_string"),
+                String::from("non localizable string value"),
                 false
             ))
         );

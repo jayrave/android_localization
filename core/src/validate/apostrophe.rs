@@ -1,14 +1,13 @@
-use android_string::AndroidString;
 use regex::Regex;
-use std::error;
-use std::fmt;
 
-lazy_static! {
+use crate::android_string::AndroidString;
+
+lazy_static::lazy_static! {
     static ref APOSTROPHE: Regex = Regex::new("(')").unwrap();
     static ref ESCAPED_APOSTROPHE: Regex = Regex::new(r"(\\')").unwrap();
 }
 
-pub fn validate(strings: &[AndroidString]) -> Result<(), Error> {
+pub fn validate(strings: &[AndroidString]) -> Result<(), InvalidStrings> {
     let invalid_strings: Vec<AndroidString> = strings
         .iter()
         .filter(|s| !is_valid_value(s.value()))
@@ -18,7 +17,7 @@ pub fn validate(strings: &[AndroidString]) -> Result<(), Error> {
     if invalid_strings.is_empty() {
         Ok(())
     } else {
-        Err(Error { invalid_strings })
+        Err(InvalidStrings { invalid_strings })
     }
 }
 
@@ -27,29 +26,14 @@ fn is_valid_value(value: &str) -> bool {
     APOSTROPHE.captures_iter(value).count() == ESCAPED_APOSTROPHE.captures_iter(value).count()
 }
 
-#[derive(Debug)]
-pub struct Error {
-    invalid_strings: Vec<AndroidString>,
-}
-
-impl error::Error for Error {
-    fn cause(&self) -> Option<&error::Error> {
-        None
-    }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.invalid_strings
-            .iter()
-            .map(|s| write!(f, "({})", s))
-            .collect()
-    }
+#[derive(Debug, PartialEq)]
+pub struct InvalidStrings {
+    pub invalid_strings: Vec<AndroidString>,
 }
 
 #[cfg(test)]
 mod tests {
-    use android_string::AndroidString;
+    use crate::android_string::AndroidString;
 
     #[test]
     fn passes_in_absence_of_unescaped_apostrophes() {
@@ -62,7 +46,7 @@ mod tests {
 
     #[test]
     fn errors_in_presence_of_unescaped_apostrophes() {
-        let error = super::validate(&vec![
+        let invalid_strings = super::validate(&vec![
             AndroidString::new(String::from("s1"), String::from("val'ue"), true),
             AndroidString::new(String::from("s2"), String::from("value"), true),
             AndroidString::new(String::from("s3"), String::from(r"val\'ue"), true),
@@ -72,7 +56,7 @@ mod tests {
         .unwrap_err();
 
         assert_eq!(
-            error.invalid_strings,
+            invalid_strings.invalid_strings,
             vec![
                 AndroidString::new(String::from("s1"), String::from("val'ue"), true),
                 AndroidString::new(String::from("s4"), String::from("value'"), true),

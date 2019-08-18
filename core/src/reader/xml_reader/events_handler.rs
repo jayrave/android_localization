@@ -1,8 +1,9 @@
-use android_string::AndroidString;
-use reader::xml_reader::error::Error;
-use reader::xml_reader::event_handler::EventHandler;
-use reader::xml_reader::root_event_handler::RootEventHandler;
 use xml::attribute::OwnedAttribute;
+
+use crate::android_string::AndroidString;
+use crate::error::Error;
+use crate::reader::xml_reader::event_handler::EventHandler;
+use crate::reader::xml_reader::root_event_handler::RootEventHandler;
 
 pub struct EventsHandler {
     android_strings: Vec<AndroidString>,

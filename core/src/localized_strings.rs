@@ -1,4 +1,4 @@
-use localized_string::LocalizedString;
+use crate::localized_string::LocalizedString;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct LocalizedStrings {
@@ -17,5 +17,9 @@ impl LocalizedStrings {
 
     pub fn strings(&self) -> &Vec<LocalizedString> {
         &self.strings
+    }
+
+    pub fn into_strings(self) -> Vec<LocalizedString> {
+        self.strings
     }
 }

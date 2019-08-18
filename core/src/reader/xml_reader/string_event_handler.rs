@@ -1,26 +1,27 @@
-use android_string::AndroidString;
-use constants;
-use reader::xml_reader::error::Error;
-use reader::xml_reader::event_handler::EventHandler;
-use reader::xml_reader::sinking_event_handler::SinkingEventHandler;
 use xml::attribute::OwnedAttribute;
+
+use crate::android_string::AndroidString;
+use crate::constants;
+use crate::error::Error;
+use crate::reader::xml_reader::event_handler::EventHandler;
+use crate::reader::xml_reader::sinking_event_handler::SinkingEventHandler;
 
 pub struct StringEventHandler {
     name: String,
-    is_translatable: bool,
+    is_localizable: bool,
     built_android_string: Option<AndroidString>,
 }
 
 impl StringEventHandler {
     pub fn build(attributes: Vec<OwnedAttribute>) -> Result<StringEventHandler, Error> {
         let mut string_name = None;
-        let mut is_translatable = true;
+        let mut is_localizable = true;
         for attribute in attributes {
             match attribute.name.local_name.as_str() {
                 constants::attributes::NAME => string_name = Some(attribute.value),
-                constants::attributes::TRANSLATABLE => {
+                constants::attributes::LOCALIZABLE => {
                     if let constants::flags::FALSE = attribute.value.as_str() {
-                        is_translatable = false
+                        is_localizable = false
                     }
                 }
                 _ => {}
@@ -28,12 +29,12 @@ impl StringEventHandler {
         }
 
         match string_name {
-            None => Err(Error::SyntaxError(String::from(
+            None => Err(String::from(
                 "string element is missing required name attribute",
-            ))),
+            ))?,
             Some(name) => Ok(StringEventHandler {
                 name,
-                is_translatable,
+                is_localizable,
                 built_android_string: None,
             }),
         }
@@ -48,7 +49,7 @@ impl StringEventHandler {
         self.built_android_string = Some(AndroidString::new(
             self.name.clone(),
             text,
-            self.is_translatable,
+            self.is_localizable,
         ));
     }
 }
@@ -77,8 +78,9 @@ impl EventHandler for StringEventHandler {
 
 #[cfg(test)]
 mod tests {
+    use crate::reader::xml_reader::event_handler::EventHandler;
+
     use super::StringEventHandler;
-    use reader::xml_reader::event_handler::EventHandler;
 
     #[test]
     fn builds_string_with_one_character_event() {
@@ -135,7 +137,7 @@ mod tests {
     fn build_event_handler() -> StringEventHandler {
         StringEventHandler {
             name: String::from("test_string"),
-            is_translatable: true,
+            is_localizable: true,
             built_android_string: None,
         }
     }

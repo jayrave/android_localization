@@ -1,15 +1,12 @@
-extern crate android_strings_core as core;
-extern crate clap;
-extern crate console;
-extern crate regex;
-
-#[macro_use]
-extern crate lazy_static;
-
 mod args_parser;
 mod args_user;
 mod constants;
+use std::ffi::OsString;
 
-pub fn do_the_thing() {
-    args_user::do_the_thing(&args_parser::build().get_matches())
+pub fn do_the_thing<I, T>(itr: I) -> Result<(), ()>
+where
+    I: IntoIterator<Item = T>,
+    T: Into<OsString> + Clone,
+{
+    args_user::do_the_thing(&args_parser::build().get_matches_from(itr))
 }

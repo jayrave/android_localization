@@ -1,12 +1,10 @@
-use android_string::AndroidString;
-use ops::sort;
 use std::cmp::Ordering;
 
-pub fn find_translatable_strings(strings: Vec<AndroidString>) -> Vec<AndroidString> {
-    strings
-        .into_iter()
-        .filter(|s| s.is_translatable())
-        .collect()
+use crate::android_string::AndroidString;
+use crate::ops::sort;
+
+pub fn find_localizable_strings(strings: Vec<AndroidString>) -> Vec<AndroidString> {
+    strings.into_iter().filter(|s| s.is_localizable()).collect()
 }
 
 /// It is assumed that neither lists have strings with the same names. If they
@@ -57,23 +55,23 @@ pub fn find_missing_strings(
 
 #[cfg(test)]
 mod tests {
-    use android_string::AndroidString;
+    use crate::android_string::AndroidString;
 
     #[test]
-    fn finds_translatable_strings() {
-        let mut translatable_strings = super::find_translatable_strings(vec![
+    fn finds_localizable_strings() {
+        let mut localizable_strings = super::find_localizable_strings(vec![
             AndroidString::new(
-                String::from("translatable_string_1"),
+                String::from("localizable_string_1"),
                 String::from("string value"),
                 true,
             ),
             AndroidString::new(
-                String::from("non_translatable_string"),
+                String::from("non_localizable_string"),
                 String::from("string value"),
                 false,
             ),
             AndroidString::new(
-                String::from("translatable_string_2"),
+                String::from("localizable_string_2"),
                 String::from("string value"),
                 true,
             ),
@@ -81,24 +79,24 @@ mod tests {
         .into_iter();
 
         assert_eq!(
-            translatable_strings.next().unwrap(),
+            localizable_strings.next().unwrap(),
             AndroidString::new(
-                String::from("translatable_string_1"),
+                String::from("localizable_string_1"),
                 String::from("string value"),
                 true,
             )
         );
 
         assert_eq!(
-            translatable_strings.next().unwrap(),
+            localizable_strings.next().unwrap(),
             AndroidString::new(
-                String::from("translatable_string_2"),
+                String::from("localizable_string_2"),
                 String::from("string value"),
                 true,
             )
         );
 
-        assert_eq!(translatable_strings.next(), None);
+        assert_eq!(localizable_strings.next(), None);
     }
 
     #[test]

@@ -1,6 +1,7 @@
-use android_string::AndroidString;
-use reader::xml_reader::error::Error;
 use xml::attribute::OwnedAttribute;
+
+use crate::android_string::AndroidString;
+use crate::error::Error;
 
 /// One instance of `EventHandler` is only expected to ever build one `AndroidString`
 pub trait EventHandler {

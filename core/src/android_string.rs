@@ -4,15 +4,15 @@ use std::fmt;
 pub struct AndroidString {
     name: String,
     value: String,
-    is_translatable: bool,
+    is_localizable: bool,
 }
 
 impl AndroidString {
-    pub fn new(name: String, value: String, is_translatable: bool) -> AndroidString {
+    pub fn new(name: String, value: String, is_localizable: bool) -> AndroidString {
         AndroidString {
             name,
             value,
-            is_translatable,
+            is_localizable,
         }
     }
 
@@ -24,8 +24,8 @@ impl AndroidString {
         &self.value
     }
 
-    pub fn is_translatable(&self) -> bool {
-        self.is_translatable
+    pub fn is_localizable(&self) -> bool {
+        self.is_localizable
     }
 }
 
@@ -33,8 +33,8 @@ impl fmt::Display for AndroidString {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "Translatable: {}; Name: {}; Value: {}",
-            self.is_translatable(),
+            "Localizable: {}; Name: {}; Value: {}",
+            self.is_localizable(),
             self.name(),
             self.value()
         )

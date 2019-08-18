@@ -1,7 +1,8 @@
-use android_string::AndroidString;
-use localized_string::LocalizedString;
-use ops::sort;
 use std::cmp::Ordering;
+
+use crate::android_string::AndroidString;
+use crate::localized_string::LocalizedString;
+use crate::ops::sort;
 
 /// Localized strings will be converted into `AndroidString` only if both the name
 /// & the default value from `LocalizedString` match up with whatever is in the
@@ -38,7 +39,7 @@ pub fn extract_android_strings_from_localized(
                         result.push(AndroidString::new(
                             String::from(localized_string.name()),
                             String::from(localized_string.localized()),
-                            default_string.is_translatable(),
+                            default_string.is_localizable(),
                         ));
                     }
 
@@ -56,8 +57,8 @@ pub fn extract_android_strings_from_localized(
 
 #[cfg(test)]
 mod tests {
-    use android_string::AndroidString;
-    use localized_string::LocalizedString;
+    use crate::android_string::AndroidString;
+    use crate::localized_string::LocalizedString;
 
     #[test]
     fn extracted() {
