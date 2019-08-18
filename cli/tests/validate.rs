@@ -47,5 +47,5 @@ fn errors_are_printed_out() {
     assert!(!output.status.success());
     assert!(String::from_utf8(output.stderr)
         .unwrap()
-        .ends_with("There are some validation issues! TODO => format\n"));
+        .ends_with("Found 2 issues across 2 files!\n"));
 }

@@ -63,9 +63,9 @@ fn do_validations(matches: &ArgMatches) -> Result<(), ()> {
                 exit_based_on_result("No issues found. Validated the following files", result)
             }
 
-            Err(_error) => exit_on_failure(String::from(
-                "There are some validation issues! TODO => format",
-            )),
+            Err(invalid_strings_files) => exit_on_failure(
+                android_localization_core::formatter::format_to_string(invalid_strings_files),
+            ),
         },
     }
 }

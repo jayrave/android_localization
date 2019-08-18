@@ -3,7 +3,7 @@ use crate::validate::format_string;
 use crate::validate::validator::InvalidStringsFile;
 use std::fmt::Write;
 
-fn format_to_string(invalid_strings_files: Vec<InvalidStringsFile>) -> String {
+pub fn format_to_string(invalid_strings_files: Vec<InvalidStringsFile>) -> String {
     let files_count = invalid_strings_files.len();
     let mut issues_count = 0;
     let mut output = String::new();
@@ -19,7 +19,7 @@ fn format_to_string(invalid_strings_files: Vec<InvalidStringsFile>) -> String {
     let pluralized_issue = if issues_count <= 1 { "issue" } else { "issues" };
     let pluralized_file = if files_count <= 1 { "file" } else { "files" };
 
-    writeln!(
+    write!(
         &mut output,
         "\nFound {} {} across {} {}!",
         issues_count, pluralized_issue, files_count, pluralized_file
@@ -173,8 +173,7 @@ Error 1 (unescaped apostrophe): spanish_value
 Error 2 (mismatched format string): Found [%1$d] in spanish_value
                                     Found [%1$s, %1$d] in default_value
 
-Found 4 issues across 3 files!
-"#
+Found 4 issues across 3 files!"#
             )
         );
     }
