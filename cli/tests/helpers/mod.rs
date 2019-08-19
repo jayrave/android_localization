@@ -28,9 +28,9 @@ pub fn assert_eq_of_file_contents_to_either_or(
     // wouldn't match when run on Windows! Do work around this, we are
     // comparing the lines instead (`String#lines` takes care of handling
     // both \n & \r\n)
-    let actual_file_lines = actual_file_contents.lines();
-    let expected_file_lines1 = expected_file_contents1.lines();
-    let expected_file_lines2 = expected_file_contents2.lines();
+    let actual_file_lines = actual_file_contents.lines().collect::<Vec<&str>>();
+    let expected_file_lines1 = expected_file_contents1.lines().collect::<Vec<&str>>();
+    let expected_file_lines2 = expected_file_contents2.lines().collect::<Vec<&str>>();
 
     let result1 = actual_file_lines == expected_file_lines1;
     let result2 = actual_file_lines == expected_file_lines2;
