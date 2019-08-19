@@ -4,7 +4,7 @@ use clap::Arg;
 use clap::SubCommand;
 
 pub fn build() -> App<'static, 'static> {
-    App::new("Android Strings")
+    App::new("Android Localization")
         .about("To help with localization & common validations")
         .subcommand(build_localize_sub_command())
         .subcommand(build_localized_sub_command())
@@ -20,7 +20,7 @@ fn build_localize_sub_command() -> App<'static, 'static> {
         ))
         .arg(
             Arg::with_name(constants::arg::LOCALIZE_OUTPUT_DIR)
-                .help("Specifies output dir to write CSV files into")
+                .help("Specifies output dir to write CSV files to")
                 .long(constants::arg::LOCALIZE_OUTPUT_DIR)
                 .takes_value(true)
                 .required(true),
@@ -35,9 +35,9 @@ fn build_localized_sub_command() -> App<'static, 'static> {
             "CSV file name (eg., french) to values qualifier (eg., fr)",
         ))
         .arg(
-            Arg::with_name(constants::arg::LOCALIZED_INPUT_DIR)
-                .help("Specifies input dir to read CSV files from")
-                .long(constants::arg::LOCALIZED_INPUT_DIR)
+            Arg::with_name(constants::arg::LOCALIZED_INPUT_FILE)
+                .help("Specifies input CSV file to read localized text from")
+                .long(constants::arg::LOCALIZED_INPUT_FILE)
                 .takes_value(true)
                 .required(true),
         )
@@ -45,7 +45,7 @@ fn build_localized_sub_command() -> App<'static, 'static> {
 
 fn build_validate_sub_command() -> App<'static, 'static> {
     SubCommand::with_name(constants::command::VALIDATE)
-        .about("Runs some common validations on default & other locale string files")
+        .about("Runs some common validations on XML string files")
         .arg(build_res_dir_arg())
 }
 

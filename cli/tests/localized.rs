@@ -16,8 +16,8 @@ fn one_locale_per_file_with_mapping() {
                 "localized",
                 "--res-dir",
                 &output_res_path.clone(),
-                "--input-dir",
-                "./tests_data/localized/input/one_locale_per_file_with_mapping",
+                "--input-file",
+                "./tests_data/localized/input/localized_with_mapping.csv",
                 "--mapping",
                 "french=fr",
                 "--mapping",
@@ -40,8 +40,8 @@ fn one_locale_per_file_without_mapping() {
                 "localized",
                 "--res-dir",
                 &output_res_path.clone(),
-                "--input-dir",
-                "./tests_data/localized/input/one_locale_per_file_without_mapping",
+                "--input-file",
+                "./tests_data/localized/input/localized_without_mapping.csv",
             ])
             .output()
             .unwrap();
@@ -63,7 +63,7 @@ fn errors_are_printed_out() {
                 "{}/non_existent",
                 temp_dir.path().to_path_buf().to_str().unwrap()
             ),
-            "--input-dir",
+            "--input-file",
             temp_dir.path().to_str().unwrap(),
         ])
         .output()

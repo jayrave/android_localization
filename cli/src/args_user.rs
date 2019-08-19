@@ -43,7 +43,7 @@ fn localized(matches: &ArgMatches) -> Result<(), ()> {
         android_localization_core::localized::do_the_thing(
             matches.value_of(constants::arg::RES_DIR).unwrap(),
             matches
-                .value_of(constants::arg::LOCALIZED_INPUT_DIR)
+                .value_of(constants::arg::LOCALIZED_INPUT_FILE)
                 .unwrap(),
             build_mappings(matches),
         ),

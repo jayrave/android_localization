@@ -9,7 +9,7 @@ pub mod command {
 pub mod arg {
     pub const RES_DIR: &str = "res-dir";
     pub const LOCALIZE_OUTPUT_DIR: &str = "output-dir";
-    pub const LOCALIZED_INPUT_DIR: &str = "input-dir";
+    pub const LOCALIZED_INPUT_FILE: &str = "input-file";
     pub const MAPPING: &str = "mapping";
 }
 
