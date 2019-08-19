@@ -20,11 +20,13 @@ fn success_is_printed_out() {
     let output = String::from_utf8(output.stdout).unwrap();
     let mut output_lines = output.split("\n");
 
-    let mut default_path = PathBuf::from("valid_input/values");
+    let mut default_path = PathBuf::from("valid_input");
+    default_path.push("values");
     default_path.push("strings.xml");
     let default_path = default_path.to_str().unwrap();
 
-    let mut fr_path = PathBuf::from("valid_input/values-fr");
+    let mut fr_path = PathBuf::from("valid_input");
+    fr_path.push("values-fr");
     fr_path.push("strings.xml");
     let fr_path = fr_path.to_str().unwrap();
 
@@ -64,5 +66,5 @@ fn errors_are_printed_out() {
     assert!(!output.status.success());
     assert!(String::from_utf8(output.stderr)
         .unwrap()
-        .ends_with("Found 2 issues across 2 files!\n"));
+        .contains("Found 2 issues across 2 files!\n"));
 }
