@@ -4,8 +4,8 @@ use std::io;
 
 #[derive(Debug)]
 pub struct Error {
-    context: Option<String>,
-    kind: ErrorKind,
+    pub(crate) context: Option<String>,
+    pub(crate) kind: ErrorKind,
 }
 
 #[derive(Debug)]
