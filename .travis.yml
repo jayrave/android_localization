@@ -10,6 +10,21 @@ os:
   - osx
   - windows
 
+matrix:
+  include:
+    # Targeting all rust on linux
+    - os: linux
+      rust: stable
+    - os: linux
+      rust: beta
+    - os: linux
+      rust: nightly
+    # Target only stable rust on osx & windows
+    - os: osx
+      rust: stable
+    - os: windows
+      rust: stable
+
 cache: cargo
 
 script:
