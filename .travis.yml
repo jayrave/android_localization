@@ -26,6 +26,12 @@ script:
   - cargo build --verbose --all
   - cargo test --verbose --all
 
+branches:
+  only:
+    # Pushes and PR to the master & develop branch
+    - master
+    - develop
+
 notifications:
   email:
     on_success: never
