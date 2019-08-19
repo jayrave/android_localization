@@ -63,7 +63,7 @@ fn errors_are_printed_out() {
     assert!(!output.status.success());
     assert!(String::from_utf8(output.stderr)
         .unwrap()
-        .ends_with("localize/non_existent_dir) doesn't exist\n"));
+        .contains("localize/non_existent_dir) doesn't exist\n"));
 }
 
 fn assert_status_and_stdout(output: Output) {

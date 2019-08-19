@@ -24,8 +24,16 @@ pub fn assert_eq_of_file_contents_to_either_or(
     let expected_file_contents1 = read_file_contents(expected_dir_path, expected_filename1);
     let expected_file_contents2 = read_file_contents(expected_dir_path, expected_filename2);
 
-    let result1 = actual_file_contents == expected_file_contents1;
-    let result2 = actual_file_contents == expected_file_contents2;
+    // By default, the CSV writer we use, uses \n as line terminator which
+    // wouldn't match when run on Windows! Do work around this, we are
+    // comparing the lines instead (`String#lines` takes care of handling
+    // both \n & \r\n)
+    let actual_file_lines = actual_file_contents.lines();
+    let expected_file_lines1 = expected_file_contents1.lines();
+    let expected_file_lines2 = expected_file_contents2.lines();
+
+    let result1 = actual_file_lines == expected_file_lines1;
+    let result2 = actual_file_lines == expected_file_lines2;
     assert!(
         result1 || result2,
         r#"---------

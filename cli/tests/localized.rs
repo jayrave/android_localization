@@ -72,7 +72,7 @@ fn errors_are_printed_out() {
     assert!(!output.status.success());
     assert!(String::from_utf8(output.stderr)
         .unwrap()
-        .ends_with("non_existent) doesn\'t exist\n"));
+        .contains("non_existent) doesn\'t exist\n"));
 }
 
 fn execute_with_copied_sample_res<F>(temp_dir: TempDir, test: F)
