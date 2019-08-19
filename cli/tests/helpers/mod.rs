@@ -28,11 +28,14 @@ pub fn assert_eq_of_file_contents_to_either_or(
     let result2 = actual_file_contents == expected_file_contents2;
     assert!(
         result1 || result2,
-        r#"Actual: {};
-        Expected either
-        {}
-        or
-        {}"#,
+        r#"---------
+Actual
+{}
+Expected either
+{}
+or
+{}
+---------"#,
         actual_file_contents,
         expected_file_contents1,
         expected_file_contents2
