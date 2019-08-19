@@ -4,7 +4,7 @@ use tempfile::TempDir;
 mod helpers;
 
 #[test]
-fn one_locale_per_file_with_mapping() {
+fn with_mapping() {
     let temp_dir = tempfile::tempdir().unwrap();
     let output = Command::new("cargo")
         .args(vec![
@@ -27,7 +27,7 @@ fn one_locale_per_file_with_mapping() {
 }
 
 #[test]
-fn one_locale_per_file_without_mapping() {
+fn without_mapping() {
     let temp_dir = tempfile::tempdir().unwrap();
     let output = Command::new("cargo")
         .args(vec![

@@ -8,7 +8,7 @@ use std::process::{Command, Output};
 use tempfile::TempDir;
 
 #[test]
-fn one_locale_per_file_with_mapping() {
+fn with_mapping() {
     execute_with_copied_sample_res(tempfile::tempdir().unwrap(), |output_res_path: String| {
         let output = Command::new("cargo")
             .args(vec![
@@ -32,7 +32,7 @@ fn one_locale_per_file_with_mapping() {
 }
 
 #[test]
-fn one_locale_per_file_without_mapping() {
+fn without_mapping() {
     execute_with_copied_sample_res(tempfile::tempdir().unwrap(), |output_res_path: String| {
         let output = Command::new("cargo")
             .args(vec![
