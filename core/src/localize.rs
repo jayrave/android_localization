@@ -138,11 +138,7 @@ impl FileProvider {
 }
 
 impl csv_writer::SinkProvider for FileProvider {
-    fn execute_with_new_sink(
-        &mut self,
-        for_locales: Vec<String>,
-        writer: csv_writer::Writer,
-    ) -> Result<(), Error> {
+    fn execute_with_new_sink(&mut self, writer: csv_writer::Writer) -> Result<(), Error> {
         self.count_of_files_created += 1;
         let filename = format!("to_localize_{}", self.count_of_files_created);
         let mut sink = self.create_output_file(&filename).unwrap();

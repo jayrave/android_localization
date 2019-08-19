@@ -1,8 +1,7 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::fs::File;
 use std::ops::Add;
 use std::path::Path;
-use std::path::PathBuf;
 
 use crate::android_string::AndroidString;
 use crate::constants;
@@ -239,11 +238,7 @@ mod tests {
             AndroidString::new(String::from("s2"), String::from("german old value 2"), true),
         ];
 
-        xml_writer::write(
-            &mut de_strings_file,
-            german_android_strings.clone(),
-        )
-            .unwrap();
+        xml_writer::write(&mut de_strings_file, german_android_strings.clone()).unwrap();
 
         localized_file
             .write(

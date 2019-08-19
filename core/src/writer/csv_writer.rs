@@ -25,15 +25,9 @@ pub fn write(
     // We may need multiple sinks to write locale requiring
     // different strings to be localized
     for (_, some_strings_list) in grouped_strings_list.into_iter() {
-        let for_locales = some_strings_list
-            .iter()
-            .map(|s| String::from(s.to_locale()))
-            .collect();
-
-        let writer = Writer {
+        sink_provider.execute_with_new_sink(Writer {
             strings_list: some_strings_list,
-        };
-        sink_provider.execute_with_new_sink(for_locales, writer)?;
+        })?;
     }
 
     Ok(())
@@ -81,11 +75,7 @@ impl Writer {
 }
 
 pub trait SinkProvider {
-    fn execute_with_new_sink(
-        &mut self,
-        for_locales: Vec<String>,
-        writer: Writer,
-    ) -> Result<(), Error>;
+    fn execute_with_new_sink(&mut self, writer: Writer) -> Result<(), Error>;
 }
 
 #[cfg(test)]
@@ -98,20 +88,14 @@ mod tests {
     use super::Writer;
 
     struct ByteSinkProvider {
-        data: Vec<(Vec<String>, String)>,
+        data: Vec<String>,
     }
 
     impl SinkProvider for ByteSinkProvider {
-        fn execute_with_new_sink(
-            &mut self,
-            for_locales: Vec<String>,
-            writer: Writer,
-        ) -> Result<(), Error> {
+        fn execute_with_new_sink(&mut self, writer: Writer) -> Result<(), Error> {
             let mut contents = vec![];
             let result = writer.write(&mut contents);
-            self.data
-                .push((for_locales, String::from_utf8(contents).unwrap()));
-
+            self.data.push(String::from_utf8(contents).unwrap());
             result
         }
     }
@@ -165,9 +149,9 @@ mod tests {
         assert_eq!(
             sink_provider.data,
             vec![
-                (vec![String::from("french")], String::from("string_name,default_locale,french\nstring_1,english 1,\n")),
-                (vec![String::from("german"), String::from("dutch")], String::from("string_name,default_locale,german,dutch\nstring_1,english 1,,\nstring_2,english 2,,\n")),
-                (vec![String::from("spanish")], String::from("string_name,default_locale,spanish\nstring_2,english 2,\n"))
+                String::from("string_name,default_locale,french\nstring_1,english 1,\n"),
+                String::from("string_name,default_locale,german,dutch\nstring_1,english 1,,\nstring_2,english 2,,\n"),
+                String::from("string_name,default_locale,spanish\nstring_2,english 2,\n")
             ]
         );
     }
