@@ -1,9 +1,9 @@
 mod helpers;
 
-use regex::Regex;
 use std::fs;
 use std::fs::File;
 use std::io::Write;
+use std::path::PathBuf;
 use std::process::{Command, Output};
 use tempfile::TempDir;
 
@@ -146,15 +146,31 @@ fn assert_status_and_stdout(output: Output) {
     let output = String::from_utf8(output.stdout).unwrap();
     let mut output_lines = output.split("\n");
 
-    let regex = Regex::new("values-es/strings.xml|values-fr/strings.xml").unwrap();
+    let mut fr_path = PathBuf::from("values-fr");
+    fr_path.push("strings.xml");
+    let fr_path = fr_path.to_str().unwrap();
+
+    let mut es_path = PathBuf::from("values-es");
+    es_path.push("strings.xml");
+    let es_path = es_path.to_str().unwrap();
 
     assert_eq!(
         output_lines.next().unwrap(),
         "Localized texts written to - "
     );
     assert_eq!(output_lines.next().unwrap(), "");
-    assert!(regex.is_match(output_lines.next().unwrap()));
-    assert!(regex.is_match(output_lines.next().unwrap()));
+    helpers::assert_eq_to_either_or(
+        output_lines.next().unwrap(),
+        fr_path,
+        es_path,
+        |actual, expected| actual.contains(expected),
+    );
+    helpers::assert_eq_to_either_or(
+        output_lines.next().unwrap(),
+        fr_path,
+        es_path,
+        |actual, expected| actual.contains(expected),
+    );
     assert_eq!(output_lines.next().unwrap(), "");
     assert_eq!(output_lines.next(), None);
 }

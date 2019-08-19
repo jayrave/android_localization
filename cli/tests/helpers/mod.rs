@@ -1,3 +1,4 @@
+use std::fmt::{Debug, Display};
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
@@ -32,21 +33,35 @@ pub fn assert_eq_of_file_contents_to_either_or(
     let expected_file_lines1 = expected_file_contents1.lines().collect::<Vec<&str>>();
     let expected_file_lines2 = expected_file_contents2.lines().collect::<Vec<&str>>();
 
-    let result1 = actual_file_lines == expected_file_lines1;
-    let result2 = actual_file_lines == expected_file_lines2;
+    assert_eq_to_either_or(
+        actual_file_lines,
+        expected_file_lines1,
+        expected_file_lines2,
+        |a, b| a == b,
+    );
+}
+
+pub fn assert_eq_to_either_or<T, F>(actual: T, expected1: T, expected2: T, comparator: F)
+where
+    T: PartialEq,
+    T: Debug,
+    F: Fn(&T, &T) -> bool,
+{
+    let result1 = comparator(&actual, &expected1);
+    let result2 = comparator(&actual, &expected2);
     assert!(
         result1 || result2,
         r#"---------
 Actual
-{}
+{:?}
 Expected either
-{}
+{:?}
 or
-{}
+{:?}
 ---------"#,
-        actual_file_contents,
-        expected_file_contents1,
-        expected_file_contents2
+        actual,
+        expected1,
+        expected2
     )
 }
 
