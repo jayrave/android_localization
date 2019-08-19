@@ -4,7 +4,7 @@ use tempfile::TempDir;
 mod helpers;
 
 #[test]
-fn one_locale_per_file_with_mapping() {
+fn with_mapping() {
     let temp_dir = tempfile::tempdir().unwrap();
     let output = Command::new("cargo")
         .args(vec![
@@ -27,7 +27,7 @@ fn one_locale_per_file_with_mapping() {
 }
 
 #[test]
-fn one_locale_per_file_without_mapping() {
+fn without_mapping() {
     let temp_dir = tempfile::tempdir().unwrap();
     let output = Command::new("cargo")
         .args(vec![
@@ -63,7 +63,7 @@ fn errors_are_printed_out() {
     assert!(!output.status.success());
     assert!(String::from_utf8(output.stderr)
         .unwrap()
-        .ends_with("localize/non_existent_dir) doesn't exist\n"));
+        .contains("localize/non_existent_dir) doesn't exist\n"));
 }
 
 fn assert_status_and_stdout(output: Output) {

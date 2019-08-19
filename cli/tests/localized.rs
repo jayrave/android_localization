@@ -1,14 +1,14 @@
 mod helpers;
 
-use regex::Regex;
 use std::fs;
 use std::fs::File;
 use std::io::Write;
+use std::path::PathBuf;
 use std::process::{Command, Output};
 use tempfile::TempDir;
 
 #[test]
-fn one_locale_per_file_with_mapping() {
+fn with_mapping() {
     execute_with_copied_sample_res(tempfile::tempdir().unwrap(), |output_res_path: String| {
         let output = Command::new("cargo")
             .args(vec![
@@ -32,7 +32,7 @@ fn one_locale_per_file_with_mapping() {
 }
 
 #[test]
-fn one_locale_per_file_without_mapping() {
+fn without_mapping() {
     execute_with_copied_sample_res(tempfile::tempdir().unwrap(), |output_res_path: String| {
         let output = Command::new("cargo")
             .args(vec![
@@ -72,7 +72,7 @@ fn errors_are_printed_out() {
     assert!(!output.status.success());
     assert!(String::from_utf8(output.stderr)
         .unwrap()
-        .ends_with("non_existent) doesn\'t exist\n"));
+        .contains("non_existent) doesn\'t exist\n"));
 }
 
 fn execute_with_copied_sample_res<F>(temp_dir: TempDir, test: F)
@@ -146,15 +146,31 @@ fn assert_status_and_stdout(output: Output) {
     let output = String::from_utf8(output.stdout).unwrap();
     let mut output_lines = output.split("\n");
 
-    let regex = Regex::new("values-es/strings.xml|values-fr/strings.xml").unwrap();
+    let mut fr_path = PathBuf::from("values-fr");
+    fr_path.push("strings.xml");
+    let fr_path = fr_path.to_str().unwrap();
+
+    let mut es_path = PathBuf::from("values-es");
+    es_path.push("strings.xml");
+    let es_path = es_path.to_str().unwrap();
 
     assert_eq!(
         output_lines.next().unwrap(),
         "Localized texts written to - "
     );
     assert_eq!(output_lines.next().unwrap(), "");
-    assert!(regex.is_match(output_lines.next().unwrap()));
-    assert!(regex.is_match(output_lines.next().unwrap()));
+    helpers::assert_eq_to_either_or(
+        output_lines.next().unwrap(),
+        fr_path,
+        es_path,
+        |actual, expected| actual.contains(expected),
+    );
+    helpers::assert_eq_to_either_or(
+        output_lines.next().unwrap(),
+        fr_path,
+        es_path,
+        |actual, expected| actual.contains(expected),
+    );
     assert_eq!(output_lines.next().unwrap(), "");
     assert_eq!(output_lines.next(), None);
 }

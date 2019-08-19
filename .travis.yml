@@ -1,12 +1,37 @@
 language: rust
 
-rust:
-  - stable
-  - beta
-  - nightly
+env:
+  global:
+    - RUST_BACKTRACE: full
+
+matrix:
+  fast_finish: true
+  include:
+    # Targeting all rust on linux
+    - os: linux
+      rust: stable
+    - os: linux
+      rust: beta
+    - os: linux
+      rust: nightly
+    # Target only stable rust on osx & windows
+    - os: osx
+      rust: stable
+    - os: windows
+      rust: stable
 
 cache: cargo
 
 script:
   - cargo build --verbose --all
   - cargo test --verbose --all
+
+branches:
+  only:
+    # Pushes and PR to the master & develop branch
+    - master
+    - develop
+
+notifications:
+  email:
+    on_success: never

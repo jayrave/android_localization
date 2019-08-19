@@ -73,15 +73,16 @@ mod tests {
     use std::fs;
     use std::fs::File;
     use std::io::{Read, Write};
+    use crate::error;
 
     #[test]
     fn open_strings_file_errors_if_values_dir_is_missing() {
         let res_dir = tempfile::tempdir().unwrap();
         let error = super::open_strings_file(res_dir.path(), "values");
-        assert!(error
-            .unwrap_err()
-            .to_string()
-            .contains("No such file or directory"))
+        match error.unwrap_err().kind {
+            error::ErrorKind::Io(_) => {}
+            error_kind => panic!("Expected IO error. Received: {:?}", error_kind)
+        }
     }
 
     #[test]
@@ -93,10 +94,10 @@ mod tests {
         fs::create_dir(values_dir_path).unwrap();
 
         let error = super::open_strings_file(res_dir.path(), "values");
-        assert!(error
-            .unwrap_err()
-            .to_string()
-            .contains("No such file or directory"))
+        match error.unwrap_err().kind {
+            error::ErrorKind::Io(_) => {}
+            error_kind => panic!("Expected IO error. Received: {:?}", error_kind)
+        }
     }
 
     #[test]
