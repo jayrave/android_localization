@@ -1,3 +1,4 @@
+use android_localization_helpers::DevExpt;
 use regex::Regex;
 
 pub mod command {
@@ -14,5 +15,5 @@ pub mod arg {
 }
 
 lazy_static::lazy_static! {
-    pub static ref TEXT_TO_TEXT_REGEX: Regex = Regex::new("^([a-zA-Z]+)=([a-zA-Z]+)$").unwrap();
+    pub static ref TEXT_TO_TEXT_REGEX: Regex = Regex::new("^([a-zA-Z]+)=([a-zA-Z]+)$").expt("Invalid regex!");
 }

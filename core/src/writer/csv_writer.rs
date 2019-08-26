@@ -4,6 +4,8 @@ use std::hash::Hash;
 use std::hash::Hasher;
 use std::io::Write;
 
+use android_localization_helpers::DevExpt;
+
 use csv;
 
 use crate::error::Error;
@@ -48,7 +50,7 @@ impl Writer {
         // Sink is automatically buffered
         let mut csv_writer = csv::Writer::from_writer(sink);
         let locale_count = self.strings_list.len();
-        let localizable_strings = self.strings_list.first().unwrap();
+        let localizable_strings = self.strings_list.first().expt("Empty strings list!");
         let value_count = localizable_strings.default_locale_strings().len();
 
         // Write header record
@@ -63,7 +65,10 @@ impl Writer {
         // Write values
         let mut record = vec![""; locale_count + 2];
         for i in 0..value_count {
-            let localizable_string = localizable_strings.default_locale_strings().get(i).unwrap();
+            let localizable_string = localizable_strings
+                .default_locale_strings()
+                .get(i)
+                .expt("Already checked the size but it still fails!");
             record[0] = localizable_string.name();
             record[1] = localizable_string.value();
             csv_writer.write_record(&record)?;

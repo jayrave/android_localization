@@ -4,6 +4,7 @@ use crate::android_string::AndroidString;
 use crate::error::Error;
 use crate::reader::xml_reader::event_handler::EventHandler;
 use crate::reader::xml_reader::root_event_handler::RootEventHandler;
+use android_localization_helpers::DevExpt;
 
 pub struct EventsHandler {
     android_strings: Vec<AndroidString>,
@@ -26,7 +27,7 @@ impl EventsHandler {
         let event_handler = self
             .event_handlers
             .last_mut()
-            .unwrap()
+            .expt("There must have been at least one event handler!")
             .build_handler(tag_name, attributes)?;
         self.event_handlers.push(event_handler);
         Ok(())
@@ -35,14 +36,14 @@ impl EventsHandler {
     pub fn handle_characters_event(&mut self, text: String) {
         self.event_handlers
             .last_mut()
-            .unwrap()
+            .expt("There must have been at least one event handler!")
             .handle_characters_event(text);
     }
 
     pub fn handle_cdata_event(&mut self, text: String) {
         self.event_handlers
             .last_mut()
-            .unwrap()
+            .expt("There must have been at least one event handler!")
             .handle_cdata_event(text);
     }
 

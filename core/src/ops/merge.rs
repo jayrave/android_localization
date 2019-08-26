@@ -1,5 +1,6 @@
 use crate::android_string::AndroidString;
 use crate::ops::sort;
+use android_localization_helpers::DevExpt;
 
 /// While grouping strings, strings from `strings_1` take precedence over `strings_2` in case both
 /// strings have the same name
@@ -24,12 +25,26 @@ pub fn merge_and_group_strings(
         // Our iteration condition will make sure that either string_1 or string_2
         // will be a valid string always
         if string_1.is_some()
-            && (string_2.is_none() || string_1.unwrap().name() <= string_2.unwrap().name())
+            && (string_2.is_none()
+                || string_1
+                    .expt("Already checked for is_some but still fails!")
+                    .name()
+                    <= string_2
+                        .expt("Already checked for is_some but still fails!")
+                        .name())
         {
-            result.push(string_1.unwrap().clone());
+            result.push(
+                string_1
+                    .expt("Already checked for is_some but still fails!")
+                    .clone(),
+            );
             strings_1_index += 1;
         } else {
-            result.push(string_2.unwrap().clone());
+            result.push(
+                string_2
+                    .expt("Already checked for is_some but still fails!")
+                    .clone(),
+            );
             strings_2_index += 1;
         }
     }

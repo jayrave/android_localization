@@ -1,4 +1,5 @@
 use crate::validate::validator::InvalidStringsFile;
+use android_localization_helpers::DevExpt;
 use std::fmt::Error;
 use std::fmt::Write;
 
@@ -36,7 +37,7 @@ fn format_errors_from_one_file(
     if invalid_strings_file.apostrophe_error.is_some() {
         for invalid_string in invalid_strings_file
             .apostrophe_error
-            .unwrap()
+            .expt("Apostrophe error without invalid strings!")
             .invalid_strings
         {
             issues_count_in_file += 1;
@@ -50,7 +51,11 @@ fn format_errors_from_one_file(
     }
 
     if invalid_strings_file.format_string_error.is_some() {
-        for mismatch in invalid_strings_file.format_string_error.unwrap().mismatches {
+        for mismatch in invalid_strings_file
+            .format_string_error
+            .expt("Format string error without mismatches!")
+            .mismatches
+        {
             issues_count_in_file += 1;
 
             // To make sure that the errors array line up as much as possible

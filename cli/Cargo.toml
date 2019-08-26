@@ -6,6 +6,7 @@ edition = '2018'
 
 [dependencies]
 android_localization_core = { path = '../core' }
+android_localization_helpers = { path = '../helpers' }
 clap = '2.32.0'
 console = '0.6.2'
 lazy_static = '1.1.0'

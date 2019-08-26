@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
+use android_localization_helpers::DevExpt;
 use regex::Regex;
 
 use crate::constants;
@@ -9,7 +10,7 @@ use crate::error::Error;
 use crate::error::ResultExt;
 
 lazy_static::lazy_static! {
-    static ref LOCALE_ID_REGEX: Regex = Regex::new("-([a-zA-z]+)$").unwrap();
+    static ref LOCALE_ID_REGEX: Regex = Regex::new("-([a-zA-z]+)$").expt("Invalid regex!");
 }
 
 /// Finds language IDs from the folder names. Only folders whose name are of the

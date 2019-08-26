@@ -6,6 +6,7 @@ use csv::ReaderBuilder;
 use crate::error::Error;
 use crate::localized_string::LocalizedString;
 use crate::localized_strings::LocalizedStrings;
+use android_localization_helpers::DevExpt;
 use std::collections::HashSet;
 
 pub fn read<S: Read>(
@@ -67,8 +68,12 @@ fn extract_filtered_headers(
     }
 
     let mut iterator = record.into_iter();
-    let header1 = iterator.next().unwrap(); // Safe to unwrap since size is at least 3
-    let header2 = iterator.next().unwrap(); // Safe to unwrap since size is at least 3
+    let header1 = iterator
+        .next()
+        .expt("Already checked the length but still fails!");
+    let header2 = iterator
+        .next()
+        .expt("Already checked the length but still fails!");
 
     if header1 != "string_name" {
         Err(String::from("First header should be named string_name"))?;

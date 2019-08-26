@@ -1,10 +1,11 @@
 use regex::Regex;
 
 use crate::android_string::AndroidString;
+use android_localization_helpers::DevExpt;
 
 lazy_static::lazy_static! {
-    static ref APOSTROPHE: Regex = Regex::new("(')").unwrap();
-    static ref ESCAPED_APOSTROPHE: Regex = Regex::new(r"(\\')").unwrap();
+    static ref APOSTROPHE: Regex = Regex::new("(')").expt("Invalid regex!");
+    static ref ESCAPED_APOSTROPHE: Regex = Regex::new(r"(\\')").expt("Invalid regex!");
 }
 
 pub fn validate(strings: &[AndroidString]) -> Result<(), InvalidStrings> {
