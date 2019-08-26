@@ -4,6 +4,7 @@ use regex::Regex;
 
 use crate::android_string::AndroidString;
 use crate::ops::sort;
+use crate::util::two_pointer_comparison;
 
 lazy_static::lazy_static! {
     static ref FORMAT_STRING: Regex = Regex::new(r"(%\d+\$[ds])").unwrap();
@@ -19,49 +20,24 @@ pub fn validate(
         sort::compare_android_strings(&pd1.android_string, &pd2.android_string)
     });
 
-    let total_strings_count = default_parsed_data.len() + foreign_strings.len();
     let mut mismatches = vec![];
-    let mut default_parsed_data_index = 0;
-    let mut foreign_strings_index = 0;
-
-    for _ in 0..total_strings_count {
-        let default_parsed_datum = default_parsed_data.get(default_parsed_data_index);
-        let foreign_string = foreign_strings.get(foreign_strings_index);
-
-        // Can't compare if either of the lists have run out! This check is imperative as the
-        // code flow in the else block increments both lists' pointers if there is a match
-        if default_parsed_datum.is_none() || foreign_string.is_none() {
-            break;
-        } else {
-            let default_parsed_datum = default_parsed_datum.unwrap();
-            let foreign_string = foreign_string.unwrap();
-            match default_parsed_datum
-                .android_string
-                .name()
-                .cmp(foreign_string.name())
-            {
-                Ordering::Less => default_parsed_data_index += 1,
-                Ordering::Greater => foreign_strings_index += 1,
-                Ordering::Equal => {
-                    let format_strings = parse_format_strings(foreign_string);
-                    if default_parsed_datum.sorted_format_strings != format_strings {
-                        mismatches.push(Mismatch {
-                            default_parsed_data: default_parsed_datum.clone(),
-                            foreign_parsed_data: ParsedData {
-                                android_string: foreign_string.clone(),
-                                sorted_format_strings: format_strings,
-                            },
-                        });
-                    }
-
-                    // Feel free to increment both the indices as we have a `is_none` check
-                    // for both the strings
-                    default_parsed_data_index += 1;
-                    foreign_strings_index += 1;
-                }
+    two_pointer_comparison::compare(
+        default_parsed_data,
+        foreign_strings,
+        |parsed_data, android_string| parsed_data.android_string.name().cmp(android_string.name()),
+        |parsed_data, android_string| {
+            let format_strings = parse_format_strings(android_string);
+            if parsed_data.sorted_format_strings != format_strings {
+                mismatches.push(Mismatch {
+                    default_parsed_data: parsed_data.clone(),
+                    foreign_parsed_data: ParsedData {
+                        android_string: android_string.clone(),
+                        sorted_format_strings: format_strings,
+                    },
+                });
             }
         }
-    }
+    );
 
     if mismatches.is_empty() {
         Ok(())

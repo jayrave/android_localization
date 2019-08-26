@@ -3,6 +3,7 @@ use std::cmp::Ordering;
 use crate::android_string::AndroidString;
 use crate::localized_string::LocalizedString;
 use crate::ops::sort;
+use crate::util::two_pointer_comparison;
 
 /// Localized strings will be converted into `AndroidString` only if both the name
 /// & the default value from `LocalizedString` match up with whatever is in the
@@ -16,42 +17,20 @@ pub fn extract_android_strings_from_localized(
     sort::sort_localized_strings_by_name(localized_strings);
 
     let mut result = Vec::with_capacity(localized_strings.len()); // Max number of expected strings
-    let mut localized_strings_index = 0;
-    let mut default_strings_index = 0;
-
-    // We want to exhaust both the lists in the worst case (no common strings)
-    let total_strings_count = localized_strings.len() + default_strings.len();
-    for _ in 0..total_strings_count {
-        let localized_string = localized_strings.get(localized_strings_index);
-        let default_string = default_strings.get(default_strings_index);
-
-        // Can't compare if either of the strings have run out! This check is imperative as the
-        // code flow in the else block increments both strings' pointers if there is a match
-        if localized_string.is_none() || default_string.is_none() {
-            break;
-        } else {
-            let localized_string = localized_string.unwrap();
-            let default_string = default_string.unwrap();
-            match localized_string.name().cmp(default_string.name()) {
-                Ordering::Less => localized_strings_index += 1,
-                Ordering::Greater => default_strings_index += 1,
-                Ordering::Equal => {
-                    if localized_string.default() == default_string.value() {
-                        result.push(AndroidString::new(
-                            String::from(localized_string.name()),
-                            String::from(localized_string.localized()),
-                            default_string.is_localizable(),
-                        ));
-                    }
-
-                    // Feel free to increment both the indices as we have a `is_none` check
-                    // for both the strings
-                    localized_strings_index += 1;
-                    default_strings_index += 1;
-                }
+    two_pointer_comparison::compare(
+        localized_strings,
+        default_strings,
+        |localized_string, default_string| localized_string.name().cmp(default_string.name()),
+        |localized_string, default_string| {
+            if localized_string.default() == default_string.value() {
+                result.push(AndroidString::new(
+                    String::from(localized_string.name()),
+                    String::from(localized_string.localized()),
+                    default_string.is_localizable(),
+                ));
             }
         }
-    }
+    );
 
     result
 }
