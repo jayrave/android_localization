@@ -11,8 +11,11 @@ pub fn compare<ITEM1, ITEM2, COMPARATOR, HANDLER>(
     list1: &[ITEM1],
     list2: &[ITEM2],
     comparator: COMPARATOR,
-    mut equal_items_handler: HANDLER
-) where COMPARATOR: Fn(&ITEM1, &ITEM2) -> Ordering, HANDLER: FnMut(&ITEM1, &ITEM2) {
+    mut equal_items_handler: HANDLER,
+) where
+    COMPARATOR: Fn(&ITEM1, &ITEM2) -> Ordering,
+    HANDLER: FnMut(&ITEM1, &ITEM2),
+{
     let mut list1_index = 0;
     let mut list2_index = 0;
 
@@ -61,10 +64,7 @@ mod tests {
             |a, b| results.push((a.clone(), b.clone())),
         );
 
-        assert_eq!(
-            results,
-            vec![(3, 3.0), (6, 6.0), (8, 8.0)]
-        )
+        assert_eq!(results, vec![(3, 3.0), (6, 6.0), (8, 8.0)])
     }
 
     #[test]
@@ -80,9 +80,6 @@ mod tests {
             |a, b| results.push((a.clone(), b.clone())),
         );
 
-        assert_eq!(
-            results,
-            vec![(3.0, 3), (6.0, 6), (8.0, 8)]
-        )
+        assert_eq!(results, vec![(3.0, 3), (6.0, 6), (8.0, 8)])
     }
 }

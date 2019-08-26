@@ -36,7 +36,7 @@ pub fn validate(
                     },
                 });
             }
-        }
+        },
     );
 
     if mismatches.is_empty() {

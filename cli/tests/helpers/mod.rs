@@ -25,7 +25,7 @@ pub fn assert_eq_of_file_contents_to_either_or(
     test_helpers::assert_eq_to_either_or(
         read_file_contents_as_lines(actual_dir_path, actual_filename),
         read_file_contents_as_lines(expected_dir_path, expected_filename1),
-        read_file_contents_as_lines(expected_dir_path, expected_filename2)
+        read_file_contents_as_lines(expected_dir_path, expected_filename2),
     );
 }
 
@@ -46,5 +46,8 @@ fn read_file_contents_as_lines(dir_path: &str, filename: &str) -> Vec<String> {
     // By default, the writers we employ, use \n as line terminator which
     // wouldn't match when run on Windows! To work around this, we are using
     // lines instead (`String#lines` takes care of handling both \n & \r\n)
-    read_file_contents(dir_path, filename).lines().map(String::from).collect()
+    read_file_contents(dir_path, filename)
+        .lines()
+        .map(String::from)
+        .collect()
 }

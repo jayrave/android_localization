@@ -10,9 +10,7 @@ use crate::validate::format_string::ParsedData;
 
 /// Runs all validations for default & all foreign strings & returns a collection
 /// of file names on which the validations were run
-pub fn validate(
-    res_dir_path: &str,
-) -> Result<Result<Vec<String>, Vec<InvalidStringsFile>>, Error> {
+pub fn validate(res_dir_path: &str) -> Result<Result<Vec<String>, Vec<InvalidStringsFile>>, Error> {
     let mut path_of_validated_files = vec![];
     let mut invalid_strings_files = vec![];
 

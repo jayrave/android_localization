@@ -70,10 +70,10 @@ impl StringsWithPath {
 
 #[cfg(test)]
 mod tests {
+    use crate::error;
     use std::fs;
     use std::fs::File;
     use std::io::{Read, Write};
-    use crate::error;
 
     #[test]
     fn open_strings_file_errors_if_values_dir_is_missing() {
@@ -81,7 +81,7 @@ mod tests {
         let error = super::open_strings_file(res_dir.path(), "values");
         match error.unwrap_err().kind {
             error::ErrorKind::Io(_) => {}
-            error_kind => panic!("Expected IO error. Received: {:?}", error_kind)
+            error_kind => panic!("Expected IO error. Received: {:?}", error_kind),
         }
     }
 
@@ -96,7 +96,7 @@ mod tests {
         let error = super::open_strings_file(res_dir.path(), "values");
         match error.unwrap_err().kind {
             error::ErrorKind::Io(_) => {}
-            error_kind => panic!("Expected IO error. Received: {:?}", error_kind)
+            error_kind => panic!("Expected IO error. Received: {:?}", error_kind),
         }
     }
 

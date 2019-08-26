@@ -29,7 +29,7 @@ pub fn extract_android_strings_from_localized(
                     default_string.is_localizable(),
                 ));
             }
-        }
+        },
     );
 
     result
