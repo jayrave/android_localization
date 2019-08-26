@@ -69,7 +69,7 @@ fn write_out_strings_to_localize<S: ::std::hash::BuildHasher>(
     res_dir_path: &Path,
     output_dir_path: &str,
     locale_id_to_name_map: HashMap<String, String, S>,
-    localizable_default_strings: &mut Vec<AndroidString>,
+    localizable_default_strings: &mut [AndroidString],
 ) -> Result<Vec<String>, Error> {
     let mut localizable_strings_list = vec![];
     for (locale_id, locale_name) in locale_id_to_name_map {

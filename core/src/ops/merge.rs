@@ -4,8 +4,8 @@ use crate::ops::sort;
 /// While grouping strings, strings from `strings_1` take precedence over `strings_2` in case both
 /// strings have the same name
 pub fn merge_and_group_strings(
-    strings_1: &mut Vec<AndroidString>,
-    strings_2: &mut Vec<AndroidString>,
+    strings_1: &mut [AndroidString],
+    strings_2: &mut [AndroidString],
 ) -> Vec<AndroidString> {
     // Sort both the list to group list-wise
     sort::sort_android_strings_by_name(strings_1);

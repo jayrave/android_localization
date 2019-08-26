@@ -61,7 +61,7 @@ fn validate_default_strings(
 
 fn validate_foreign_strings(
     strings_with_path: StringsWithPath,
-    mut default_parsed_data: &mut Vec<ParsedData>,
+    mut default_parsed_data: &mut [ParsedData],
     path_of_validated_files: &mut Vec<String>,
     invalid_strings_files: &mut Vec<InvalidStringsFile>,
 ) {

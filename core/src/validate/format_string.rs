@@ -11,8 +11,8 @@ lazy_static::lazy_static! {
 }
 
 pub fn validate(
-    default_parsed_data: &mut Vec<ParsedData>,
-    foreign_strings: &mut Vec<AndroidString>,
+    default_parsed_data: &mut [ParsedData],
+    foreign_strings: &mut [AndroidString],
 ) -> Result<(), Mismatches> {
     // Sort both the lists
     sort::sort_android_strings_by_name(foreign_strings);

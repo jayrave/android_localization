@@ -11,8 +11,8 @@ pub fn find_localizable_strings(strings: Vec<AndroidString>) -> Vec<AndroidStrin
 /// do, the result is undefined! This method doesn't check whether `all_strings`
 /// contains everything that is contained in `lacking_strings`
 pub fn find_missing_strings(
-    lacking_strings: &mut Vec<AndroidString>,
-    all_strings: &mut Vec<AndroidString>,
+    lacking_strings: &mut [AndroidString],
+    all_strings: &mut [AndroidString],
 ) -> Vec<AndroidString> {
     // Sort both the strings
     sort::sort_android_strings_by_name(lacking_strings);

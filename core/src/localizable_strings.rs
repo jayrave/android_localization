@@ -21,7 +21,7 @@ impl LocalizableStrings {
         &self.to_locale
     }
 
-    pub fn default_locale_strings(&self) -> &Vec<AndroidString> {
+    pub fn default_locale_strings(&self) -> &[AndroidString] {
         &self.default_locale_strings
     }
 }

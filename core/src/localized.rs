@@ -54,7 +54,7 @@ fn handle_localized<S: ::std::hash::BuildHasher>(
     res_dir_path: &Path,
     localized_text_file_path: &str,
     locale_name_to_id_map: HashMap<String, String, S>,
-    localizable_default_strings: &mut Vec<AndroidString>,
+    localizable_default_strings: &mut [AndroidString],
 ) -> Result<Vec<String>, Error> {
     // Read all new localized strings
     let new_localized_foreign_strings_list = csv_reader::read(

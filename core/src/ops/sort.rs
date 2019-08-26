@@ -4,14 +4,14 @@ use crate::android_string::AndroidString;
 use crate::localized_string::LocalizedString;
 
 /// In place, stable sorting
-pub fn sort_android_strings_by_name(strings: &mut Vec<AndroidString>) {
+pub fn sort_android_strings_by_name(strings: &mut [AndroidString]) {
     // Not using `sort_by_key` as I can't figure out how to specify
     // lifetime for closure's return :(
     strings.sort_by(|s1, s2| s1.name().cmp(s2.name()));
 }
 
 /// In place, stable sorting
-pub fn sort_localized_strings_by_name(strings: &mut Vec<LocalizedString>) {
+pub fn sort_localized_strings_by_name(strings: &mut [LocalizedString]) {
     // Not using `sort_by_key` as I can't figure out how to specify
     // lifetime for closure's return :(
     strings.sort_by(|s1, s2| s1.name().cmp(s2.name()));

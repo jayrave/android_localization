@@ -9,8 +9,8 @@ use crate::util::two_pointer_comparison;
 /// & the default value from `LocalizedString` match up with whatever is in the
 /// default string
 pub fn extract_android_strings_from_localized(
-    localized_strings: &mut Vec<LocalizedString>,
-    default_strings: &mut Vec<AndroidString>,
+    localized_strings: &mut [LocalizedString],
+    default_strings: &mut [AndroidString],
 ) -> Vec<AndroidString> {
     // Sort both the incoming strings
     sort::sort_android_strings_by_name(default_strings);
