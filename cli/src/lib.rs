@@ -8,5 +8,5 @@ where
     I: IntoIterator<Item = T>,
     T: Into<OsString> + Clone,
 {
-    args_user::do_the_thing(&args_parser::build().get_matches_from(itr))
+    args_user::do_the_thing(args_parser::build().get_matches_from(itr))
 }

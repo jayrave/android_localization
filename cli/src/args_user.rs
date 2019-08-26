@@ -8,17 +8,17 @@ use std::fmt;
 /// In this file, you most probably would see wide spread usages of `Option#unwrap`.
 /// Please don't let that bother you as the requirements are correctly setup in
 /// `args_parser.rs` & unwrapped values are guaranteed to be present there
-pub fn do_the_thing(matches: &ArgMatches) -> Result<(), ()> {
+pub fn do_the_thing(matches: ArgMatches) -> Result<(), ()> {
     if let Some(localized_command) = matches.subcommand_matches(constants::command::LOCALIZED) {
-        return localized(&localized_command);
+        return localized(localized_command);
     }
 
     if let Some(localize_command) = matches.subcommand_matches(constants::command::LOCALIZE) {
-        return localize(&localize_command);
+        return localize(localize_command);
     }
 
     if let Some(validations_command) = matches.subcommand_matches(constants::command::VALIDATE) {
-        return do_validations(&validations_command);
+        return validate(validations_command);
     }
 
     exit_on_failure(String::from("Command couldn't be recognized"))
@@ -50,7 +50,7 @@ fn localized(matches: &ArgMatches) -> Result<(), ()> {
     )
 }
 
-fn do_validations(matches: &ArgMatches) -> Result<(), ()> {
+fn validate(matches: &ArgMatches) -> Result<(), ()> {
     let result = android_localization_core::validator::do_the_thing(
         matches.value_of(constants::arg::RES_DIR).unwrap(),
     );

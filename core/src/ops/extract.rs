@@ -15,11 +15,12 @@ pub fn extract_android_strings_from_localized(
     sort::sort_android_strings_by_name(default_strings);
     sort::sort_localized_strings_by_name(localized_strings);
 
-    let total_strings_count = localized_strings.len() + default_strings.len();
     let mut result = Vec::with_capacity(localized_strings.len()); // Max number of expected strings
     let mut localized_strings_index = 0;
     let mut default_strings_index = 0;
 
+    // We want to exhaust both the lists in the worst case (no common strings)
+    let total_strings_count = localized_strings.len() + default_strings.len();
     for _ in 0..total_strings_count {
         let localized_string = localized_strings.get(localized_strings_index);
         let default_string = default_strings.get(default_strings_index);

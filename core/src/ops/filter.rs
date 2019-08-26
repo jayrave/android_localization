@@ -22,17 +22,17 @@ pub fn find_missing_strings(
     let mut result = vec![];
     let mut lacking_strings_index = 0;
     for string in all_strings {
-        loop {
+        'lacking_strings_loop: loop {
             let lacking_string = lacking_strings.get(lacking_strings_index);
             match lacking_string {
                 None => {
                     // `lacking_string` has run out of strings!
                     result.push(string.clone());
-                    break; // To go out of the infinite loop
+                    break 'lacking_strings_loop;
                 }
 
                 Some(ls) => match ls.name().cmp(string.name()) {
-                    Ordering::Equal => break, // To go out of the infinite loop
+                    Ordering::Equal => break 'lacking_strings_loop,
                     Ordering::Less => {
                         // `lacking_strings` seems to have strings not in `android_strings`.
                         // There is a still a chance that `lacking_strings` has the required
@@ -43,7 +43,7 @@ pub fn find_missing_strings(
                     Ordering::Greater => {
                         // `lacking_strings` doesn't have this string from `all_strings`
                         result.push(string.clone());
-                        break; // To go out of the infinite loop
+                        break 'lacking_strings_loop;
                     }
                 },
             }

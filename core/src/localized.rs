@@ -83,12 +83,14 @@ fn handle_localized<S: ::std::hash::BuildHasher>(
             localizable_default_strings,
         );
 
-        // Merge & dedup foreign strings
-        let to_be_written_foreign_strings =
-            dedup::dedup_grouped_strings(merge::merge_and_group_strings(
-                &mut new_localized_foreign_strings,
-                &mut already_localized_foreign_strings,
-            ));
+        // Merge already existing & newly localized strings
+        let mut to_be_written_foreign_strings = merge::merge_and_group_strings(
+            &mut new_localized_foreign_strings,
+            &mut already_localized_foreign_strings,
+        );
+
+        // There could be duplicates!
+        dedup::dedup_grouped_strings(&mut to_be_written_foreign_strings);
 
         // Write out foreign strings back to file
         let (mut file, output_file_path) =

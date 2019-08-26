@@ -19,7 +19,7 @@ pub trait EventHandler {
         // No op
     }
 
-    // It would be great it a way can be found to make this consume self instead of
+    // It would be great if a way can be found to make this consume self instead of
     // just take in a reference. Compiler complains if this is made a consumer as
     // `EventHandler` is used as a trait object & boxed, un-sized objects can't be
     // moved out :(

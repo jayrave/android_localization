@@ -43,7 +43,7 @@ pub fn validate(
                 Ordering::Less => default_parsed_data_index += 1,
                 Ordering::Greater => foreign_strings_index += 1,
                 Ordering::Equal => {
-                    let format_strings = parse_and_sort_format_strings(foreign_string);
+                    let format_strings = parse_format_strings(foreign_string);
                     if default_parsed_datum.sorted_format_strings != format_strings {
                         mismatches.push(Mismatch {
                             default_parsed_data: default_parsed_datum.clone(),
@@ -75,19 +75,16 @@ pub fn parse_and_build_data(strings: &[AndroidString]) -> Vec<ParsedData> {
         .iter()
         .map(|s| ParsedData {
             android_string: s.clone(),
-            sorted_format_strings: parse_and_sort_format_strings(s),
+            sorted_format_strings: parse_format_strings(s),
         })
         .collect()
 }
 
-fn parse_and_sort_format_strings(string: &AndroidString) -> Vec<String> {
-    let mut format_strings = FORMAT_STRING
+fn parse_format_strings(string: &AndroidString) -> Vec<String> {
+    FORMAT_STRING
         .find_iter(string.value())
         .map(|m| String::from(m.as_str()))
-        .collect::<Vec<String>>();
-
-    format_strings.sort();
-    format_strings
+        .collect::<Vec<String>>()
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -222,10 +219,10 @@ mod tests {
             ParsedData {
                 android_string: strings[1].clone(),
                 sorted_format_strings: vec![
-                    String::from("%1$d"),
-                    String::from("%1$s"),
-                    String::from("%2$d"),
                     String::from("%2$s"),
+                    String::from("%1$d"),
+                    String::from("%2$d"),
+                    String::from("%1$s"),
                 ],
             },
         ];
@@ -235,7 +232,7 @@ mod tests {
 
     #[test]
     fn parse_returns_empty_list_in_case_of_no_format_strings() {
-        assert!(super::parse_and_sort_format_strings(&AndroidString::new(
+        assert!(super::parse_format_strings(&AndroidString::new(
             String::from("s1"),
             String::from("value"),
             true
@@ -246,16 +243,16 @@ mod tests {
     #[test]
     fn parse_returns_only_valid_format_strings() {
         assert_eq!(
-            super::parse_and_sort_format_strings(&AndroidString::new(
+            super::parse_format_strings(&AndroidString::new(
                 String::from("s1"),
                 String::from(r"%2$s a %1$d %2$d b %2$z c %1$s"),
                 true
             )),
             vec![
-                String::from("%1$d"),
-                String::from("%1$s"),
-                String::from("%2$d"),
                 String::from("%2$s"),
+                String::from("%1$d"),
+                String::from("%2$d"),
+                String::from("%1$s"),
             ]
         )
     }
