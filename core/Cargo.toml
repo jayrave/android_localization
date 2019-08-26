@@ -1,15 +1,15 @@
 [package]
-name = "android_localization_core"
-version = "0.1.0"
-authors = ["jayrave <jayanthan.raveendiran@gmail.com>"]
+name = 'android_localization_core'
+version = '0.1.0'
+authors = ['jayrave <jayanthan.raveendiran@gmail.com>']
 edition = '2018'
 
 [dependencies]
-csv = "1"
-lazy_static = "1.1.0"
-regex = "1.0.5"
-xml-rs = "0.8"
+csv = '1'
+lazy_static = '1.1.0'
+regex = '1.0.5'
+xml-rs = '0.8'
 
 [dev-dependencies]
-tempfile = "3.0.3"
-test_helpers = { path = "../test_helpers" }
+tempfile = '3.0.3'
+test_helpers = { path = '../test_helpers' }
