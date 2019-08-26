@@ -1,5 +1,3 @@
-use std::cmp::Ordering;
-
 use crate::android_string::AndroidString;
 use crate::localized_string::LocalizedString;
 use crate::ops::sort;

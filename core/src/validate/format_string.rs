@@ -1,5 +1,3 @@
-use std::cmp::Ordering;
-
 use regex::Regex;
 
 use crate::android_string::AndroidString;

@@ -7,13 +7,19 @@ pub trait DevExpt<T, S: AsRef<str>> {
 
 impl<T, S: AsRef<str>> DevExpt<T, S> for Option<T> {
     fn expt(self, msg: S) -> T {
-        self.expect(&build_message_to_contact_dev(msg))
+        self.unwrap_or_else(|| panic!(build_message_to_contact_dev(msg)))
     }
 }
 
 impl<T, S: AsRef<str>, E: Error> DevExpt<T, S> for Result<T, E> {
     fn expt(self, msg: S) -> T {
-        self.expect(&build_message_to_contact_dev(msg))
+        self.unwrap_or_else(|error| {
+            panic!(build_message_to_contact_dev(format!(
+                "{}: {}",
+                error,
+                msg.as_ref()
+            )))
+        })
     }
 }
 
