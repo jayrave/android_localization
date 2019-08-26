@@ -149,13 +149,13 @@ impl csv_writer::SinkProvider for FileProvider {
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
-    use std::fmt::Display;
     use std::fs;
     use std::fs::File;
     use std::io::{Read, Write};
     use std::path::{Path, PathBuf};
 
     use tempfile::TempDir;
+    use test_helpers;
 
     use crate::android_string::AndroidString;
 
@@ -290,7 +290,7 @@ mod tests {
             File::open(&Path::new(&file_paths.into_iter().next().unwrap())).unwrap();
         let mut output = String::new();
         output_file.read_to_string(&mut output).unwrap();
-        assert_eq_to_either_or(
+        test_helpers::assert_eq_to_either_or(
             output,
             String::from("string_name,default_locale,spanish,french\nstring_1,string value,,\nstring_2,string value,,\n"),
             String::from("string_name,default_locale,french,spanish\nstring_1,string value,,\nstring_2,string value,,\n")
@@ -357,25 +357,5 @@ mod tests {
         .unwrap();
 
         (result, output_dir_path)
-    }
-
-    fn assert_eq_to_either_or<T>(actual: T, expected1: T, expected2: T)
-    where
-        T: PartialEq,
-        T: Display,
-    {
-        let result1 = actual == expected1;
-        let result2 = actual == expected2;
-        assert!(
-            result1 || result2,
-            r#"Actual: {};
-        Expected either
-        {}
-        or
-        {}"#,
-            actual,
-            expected1,
-            expected2
-        )
     }
 }

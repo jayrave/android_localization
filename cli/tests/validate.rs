@@ -3,6 +3,8 @@ mod helpers;
 use std::path::PathBuf;
 use std::process::Command;
 
+use test_helpers;
+
 #[test]
 fn success_is_printed_out() {
     let output = Command::new("cargo")
@@ -35,13 +37,13 @@ fn success_is_printed_out() {
         "No issues found. Validated the following files - "
     );
     assert_eq!(output_lines.next().unwrap(), "");
-    helpers::assert_eq_to_either_or(
+    test_helpers::assert_eq_to_either_or_by(
         output_lines.next().unwrap(),
         default_path,
         fr_path,
         |actual, expected| actual.contains(expected),
     );
-    helpers::assert_eq_to_either_or(
+    test_helpers::assert_eq_to_either_or_by(
         output_lines.next().unwrap(),
         default_path,
         fr_path,

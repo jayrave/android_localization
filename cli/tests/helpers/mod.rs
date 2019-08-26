@@ -2,6 +2,7 @@ use std::fmt::{Debug, Display};
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
+use test_helpers;
 
 pub fn assert_eq_of_file_contents(
     actual_dir_path: &str,
@@ -21,35 +22,11 @@ pub fn assert_eq_of_file_contents_to_either_or(
     expected_filename1: &str,
     expected_filename2: &str,
 ) {
-    assert_eq_to_either_or(
+    test_helpers::assert_eq_to_either_or(
         read_file_contents_as_lines(actual_dir_path, actual_filename),
         read_file_contents_as_lines(expected_dir_path, expected_filename1),
-        read_file_contents_as_lines(expected_dir_path, expected_filename2),
-        |a, b| a == b,
+        read_file_contents_as_lines(expected_dir_path, expected_filename2)
     );
-}
-
-pub fn assert_eq_to_either_or<T, F>(actual: T, expected1: T, expected2: T, comparator: F)
-where
-    T: PartialEq + Debug,
-    F: Fn(&T, &T) -> bool,
-{
-    let result1 = comparator(&actual, &expected1);
-    let result2 = comparator(&actual, &expected2);
-    assert!(
-        result1 || result2,
-        r#"---------
-Actual
-{:?}
-Expected either
-{:?}
-or
-{:?}
----------"#,
-        actual,
-        expected1,
-        expected2
-    )
 }
 
 pub fn read_file_contents(dir_path: &str, filename: &str) -> String {
