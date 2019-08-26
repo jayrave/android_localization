@@ -10,7 +10,7 @@ lazy_static::lazy_static! {
 pub fn validate(strings: &[AndroidString]) -> Result<(), InvalidStrings> {
     let invalid_strings: Vec<AndroidString> = strings
         .iter()
-        .filter(|s| !is_valid_value(s.value()))
+        .filter(|s| is_invalid_value(s.value()))
         .cloned()
         .collect();
 
@@ -21,9 +21,9 @@ pub fn validate(strings: &[AndroidString]) -> Result<(), InvalidStrings> {
     }
 }
 
-fn is_valid_value(value: &str) -> bool {
+fn is_invalid_value(value: &str) -> bool {
     // Could use look behind/look ahead, but this is easier to understand & implement
-    APOSTROPHE.captures_iter(value).count() == ESCAPED_APOSTROPHE.captures_iter(value).count()
+    APOSTROPHE.captures_iter(value).count() != ESCAPED_APOSTROPHE.captures_iter(value).count()
 }
 
 #[derive(Debug, PartialEq)]

@@ -38,7 +38,7 @@ mod tests {
     use crate::android_string::AndroidString;
 
     #[test]
-    fn strings_are_read_from_valid_clean_file() {
+    fn reads_strings_from_valid_clean_file() {
         let mut strings = write_to_file_and_read_strings_out(
             r##"
 			<?xml version="1.0" encoding="utf-8"?>
@@ -82,7 +82,7 @@ mod tests {
     }
 
     #[test]
-    fn strings_are_read_from_valid_dirty_file() {
+    fn reads_strings_from_valid_dirty_file() {
         let mut strings = write_to_file_and_read_strings_out(
             r##"
 			<?xml version="1.0" encoding="utf-8"?>
@@ -136,7 +136,7 @@ mod tests {
     }
 
     #[test]
-    fn string_with_cdata_is_read_correctly() {
+    fn reads_cdata_correctly() {
         let mut strings = write_to_file_and_read_strings_out(r##"
             <?xml version="1.0" encoding="utf-8"?>
             <resources>
@@ -157,7 +157,7 @@ mod tests {
     }
 
     #[test]
-    fn string_with_whitespace_between_cdata_is_read_correctly() {
+    fn reads_string_with_whitespace_between_cdata() {
         let mut strings = write_to_file_and_read_strings_out(r##"
             <?xml version="1.0" encoding="utf-8"?>
             <resources>

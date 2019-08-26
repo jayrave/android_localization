@@ -8,7 +8,7 @@ use std::fmt;
 /// In this file, you most probably would see wide spread usages of `Option#unwrap`.
 /// Please don't let that bother you as the requirements are correctly setup in
 /// `args_parser.rs` & unwrapped values are guaranteed to be present there
-pub fn do_the_thing(matches: ArgMatches) -> Result<(), ()> {
+pub fn execute_for_matches(matches: ArgMatches) -> Result<(), ()> {
     if let Some(localized_command) = matches.subcommand_matches(constants::command::LOCALIZED) {
         return localized(localized_command);
     }
@@ -27,7 +27,7 @@ pub fn do_the_thing(matches: ArgMatches) -> Result<(), ()> {
 fn localize(matches: &ArgMatches) -> Result<(), ()> {
     exit_based_on_result(
         "Texts to be localized written to",
-        android_localization_core::localize::do_the_thing(
+        android_localization_core::localize::localize(
             matches.value_of(constants::arg::RES_DIR).unwrap(),
             matches
                 .value_of(constants::arg::LOCALIZE_OUTPUT_DIR)
@@ -40,7 +40,7 @@ fn localize(matches: &ArgMatches) -> Result<(), ()> {
 fn localized(matches: &ArgMatches) -> Result<(), ()> {
     exit_based_on_result(
         "Localized texts written to",
-        android_localization_core::localized::do_the_thing(
+        android_localization_core::localized::localized(
             matches.value_of(constants::arg::RES_DIR).unwrap(),
             matches
                 .value_of(constants::arg::LOCALIZED_INPUT_FILE)
@@ -51,7 +51,7 @@ fn localized(matches: &ArgMatches) -> Result<(), ()> {
 }
 
 fn validate(matches: &ArgMatches) -> Result<(), ()> {
-    let result = android_localization_core::validator::do_the_thing(
+    let result = android_localization_core::validator::validate(
         matches.value_of(constants::arg::RES_DIR).unwrap(),
     );
     match result {

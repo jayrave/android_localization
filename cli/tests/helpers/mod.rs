@@ -31,8 +31,7 @@ pub fn assert_eq_of_file_contents_to_either_or(
 
 pub fn assert_eq_to_either_or<T, F>(actual: T, expected1: T, expected2: T, comparator: F)
 where
-    T: PartialEq,
-    T: Debug,
+    T: PartialEq + Debug,
     F: Fn(&T, &T) -> bool,
 {
     let result1 = comparator(&actual, &expected1);

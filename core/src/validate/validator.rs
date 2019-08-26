@@ -10,7 +10,7 @@ use crate::validate::format_string::ParsedData;
 
 /// Runs all validations for default & all foreign strings & returns a collection
 /// of file names on which the validations were run
-pub fn do_the_thing(
+pub fn validate(
     res_dir_path: &str,
 ) -> Result<Result<Vec<String>, Vec<InvalidStringsFile>>, Error> {
     let mut path_of_validated_files = vec![];
@@ -122,7 +122,7 @@ mod tests {
     use crate::writer::xml_writer;
 
     #[test]
-    fn returns_list_of_file_names() {
+    fn validates() {
         let tempdir = tempfile::tempdir().unwrap();
         let mut res_dir_path = tempdir.path().to_path_buf();
         res_dir_path.push("res");
@@ -175,7 +175,7 @@ mod tests {
         )
         .unwrap();
 
-        let mut actual_output = super::do_the_thing(res_dir_path.to_str().unwrap())
+        let mut actual_output = super::validate(res_dir_path.to_str().unwrap())
             .unwrap()
             .unwrap();
 
@@ -193,7 +193,7 @@ mod tests {
     }
 
     #[test]
-    fn validations_issues_are_raised() {
+    fn errors() {
         let tempdir = tempfile::tempdir().unwrap();
         let mut res_dir_path = tempdir.path().to_path_buf();
         res_dir_path.push("res");
@@ -230,7 +230,7 @@ mod tests {
         let spanish_s2 = AndroidString::new(String::from("s2"), String::from("v'alue %1$d"), true);
         xml_writer::write(&mut spanish_strings_file, vec![spanish_s2.clone()]).unwrap();
 
-        let mut invalid_strings_files = super::do_the_thing(res_dir_path.to_str().unwrap())
+        let mut invalid_strings_files = super::validate(res_dir_path.to_str().unwrap())
             .unwrap()
             .unwrap_err();
 

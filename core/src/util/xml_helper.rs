@@ -101,7 +101,7 @@ mod tests {
     }
 
     #[test]
-    fn open_default_strings_file() {
+    fn open_default_strings_file_opens() {
         let res_dir = tempfile::tempdir().unwrap();
 
         let mut values_dir_path = res_dir.path().to_path_buf();
@@ -123,7 +123,7 @@ mod tests {
     }
 
     #[test]
-    fn open_foreign_strings_file() {
+    fn open_foreign_strings_file_opens() {
         let res_dir = tempfile::tempdir().unwrap();
 
         let mut values_dir_path = res_dir.path().to_path_buf();

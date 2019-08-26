@@ -5,7 +5,7 @@ use crate::error::Error;
 
 /// One instance of `EventHandler` is only expected to ever build one `AndroidString`
 pub trait EventHandler {
-    fn handler_for_start_element_event(
+    fn build_handler(
         &self,
         tag_name: String,
         attributes: Vec<OwnedAttribute>,

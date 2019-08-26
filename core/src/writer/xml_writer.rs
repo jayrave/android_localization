@@ -86,7 +86,7 @@ mod tests {
     use crate::android_string::AndroidString;
 
     #[test]
-    fn strings_are_written_to_file() {
+    fn writes_strings_to_file() {
         let android_strings = vec![
             AndroidString::new(
                 String::from("localizable_string"),

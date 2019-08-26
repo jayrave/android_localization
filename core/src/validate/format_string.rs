@@ -112,7 +112,7 @@ mod tests {
     use super::ParsedData;
 
     #[test]
-    fn passes_in_absence_of_mismatches() {
+    fn validate_passes_in_absence_of_mismatches() {
         let mut default_parsed_data = vec![
             ParsedData {
                 android_string: AndroidString::new(String::from("s1"), String::from("value"), true),
@@ -133,7 +133,7 @@ mod tests {
     }
 
     #[test]
-    fn errors_in_presence_of_mismatches() {
+    fn validate_errors_in_presence_of_mismatches() {
         let mut default_parsed_data = vec![
             ParsedData {
                 android_string: AndroidString::new(String::from("s3"), String::from("value"), true),

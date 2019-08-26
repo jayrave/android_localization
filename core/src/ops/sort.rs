@@ -27,7 +27,7 @@ mod tests {
     use crate::localized_string::LocalizedString;
 
     #[test]
-    fn android_sorted_by_name() {
+    fn sorts_android_strings_by_name() {
         let mut strings = vec![
             AndroidString::new(String::from("string_2"), String::from("string value"), true),
             AndroidString::new(
@@ -78,7 +78,7 @@ mod tests {
     }
 
     #[test]
-    fn localized_sorted_by_name() {
+    fn sorts_localized_strings_by_name() {
         let mut strings = vec![
             LocalizedString::new(
                 String::from("string_2"),

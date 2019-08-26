@@ -15,7 +15,7 @@ impl RootEventHandler {
 }
 
 impl EventHandler for RootEventHandler {
-    fn handler_for_start_element_event(
+    fn build_handler(
         &self,
         tag_name: String,
         _attributes: Vec<OwnedAttribute>,

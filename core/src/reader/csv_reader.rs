@@ -145,7 +145,7 @@ mod tests {
     use crate::localized_strings::LocalizedStrings;
 
     #[test]
-    fn strings_are_read_from_valid_file() {
+    fn reads_strings_from_valid_file() {
         let mut strings_list = read_strings_from_file(
             r#"string_name, default_locale, french, german, spanish
             string_1, english 1, french 1, german 1, spanish 1

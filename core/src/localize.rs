@@ -16,7 +16,7 @@ use crate::writer::csv_writer;
 /// Returns the list of output files created by this call. These aren't guaranteed
 /// to be valid paths to files. Sometimes, if a file's path can't be expressed by
 /// `String` (in case it has non UTF-8 chars), it could just be the file's name
-pub fn do_the_thing<S: ::std::hash::BuildHasher>(
+pub fn localize<S: ::std::hash::BuildHasher>(
     res_dir_path: &str,
     output_dir_path: &str,
     locale_id_to_name_map: HashMap<String, String, S>,
@@ -160,14 +160,14 @@ mod tests {
     use crate::android_string::AndroidString;
 
     #[test]
-    fn do_the_thing_errors_for_empty_locale_id_to_name_map() {
+    fn errors_for_empty_locale_id_to_name_map() {
         let temp_dir = tempfile::tempdir().unwrap();
         let mut res_dir_path = temp_dir.path().to_path_buf();
         res_dir_path.push("res");
         fs::create_dir(res_dir_path.clone()).unwrap();
 
         let error =
-            super::do_the_thing(res_dir_path.to_str().unwrap(), "", HashMap::new()).unwrap_err();
+            super::localize(res_dir_path.to_str().unwrap(), "", HashMap::new()).unwrap_err();
         assert_eq!(
             error.context(),
             &Some(String::from(res_dir_path.to_str().unwrap()))

@@ -27,7 +27,7 @@ impl EventsHandler {
             .event_handlers
             .last_mut()
             .unwrap()
-            .handler_for_start_element_event(tag_name, attributes)?;
+            .build_handler(tag_name, attributes)?;
         self.event_handlers.push(event_handler);
         Ok(())
     }

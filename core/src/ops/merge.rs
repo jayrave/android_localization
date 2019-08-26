@@ -42,7 +42,7 @@ mod tests {
     use crate::android_string::AndroidString;
 
     #[test]
-    fn merged_and_grouped() {
+    fn merges_and_groups() {
         let mut strings = super::merge_and_group_strings(
             &mut vec![
                 AndroidString::new(String::from("string_1"), String::from("string value"), true),
@@ -95,7 +95,7 @@ mod tests {
     }
 
     #[test]
-    fn merged_and_grouped_with_list_1_strings_taking_precedence_over_list_2_strings_in_case_of_same_name(
+    fn list_1_strings_takes_precedence_over_list_2_strings_in_case_of_same_name(
     ) {
         let mut strings = super::merge_and_group_strings(
             &mut vec![

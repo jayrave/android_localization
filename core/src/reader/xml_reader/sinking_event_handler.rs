@@ -12,7 +12,7 @@ impl SinkingEventHandler {
 }
 
 impl EventHandler for SinkingEventHandler {
-    fn handler_for_start_element_event(
+    fn build_handler(
         &self,
         _tag_name: String,
         _attributes: Vec<OwnedAttribute>,

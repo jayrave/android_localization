@@ -101,7 +101,7 @@ mod tests {
     }
 
     #[test]
-    fn strings_are_written_to_files() {
+    fn writes_strings_to_files() {
         let mut strings_list = vec![];
         strings_list.push(LocalizableStrings::new(
             String::from("french"),

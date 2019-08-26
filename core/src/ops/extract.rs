@@ -62,7 +62,7 @@ mod tests {
     use crate::localized_string::LocalizedString;
 
     #[test]
-    fn extracted() {
+    fn extracts() {
         let mut default_strings = vec![
             AndroidString::new(
                 String::from("string_2"),

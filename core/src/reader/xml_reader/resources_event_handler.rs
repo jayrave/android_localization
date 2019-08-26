@@ -15,7 +15,7 @@ impl ResourcesEventHandler {
 }
 
 impl EventHandler for ResourcesEventHandler {
-    fn handler_for_start_element_event(
+    fn build_handler(
         &self,
         tag_name: String,
         attributes: Vec<OwnedAttribute>,

@@ -127,7 +127,7 @@ mod tests {
     }
 
     #[test]
-    fn build_map_if_empty_or_return() {
+    fn build_map_if_empty_or_return_returns_as_is() {
         let mut map = HashMap::new();
         map.insert(String::from("a"), String::from("a"));
         assert_eq!(

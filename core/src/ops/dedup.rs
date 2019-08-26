@@ -12,7 +12,7 @@ mod tests {
     use crate::android_string::AndroidString;
 
     #[test]
-    fn deduplicated() {
+    fn dedupes() {
         let mut android_strings = vec![
             AndroidString::new(
                 String::from("string_1"),
