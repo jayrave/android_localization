@@ -203,8 +203,8 @@ mod tests {
         xml_writer::write(
             &mut default_strings_file,
             vec![
-                AndroidString::new(String::from("s1"), String::from("english value 1"), true),
-                AndroidString::new(String::from("s2"), String::from("english value 2"), true),
+                AndroidString::localizable("s1", "english value 1"),
+                AndroidString::localizable("s2", "english value 2"),
             ],
         )
         .unwrap();
@@ -212,8 +212,8 @@ mod tests {
         xml_writer::write(
             &mut fr_strings_file,
             vec![
-                AndroidString::new(String::from("s1"), String::from("french old value 1"), true),
-                AndroidString::new(String::from("s2"), String::from("french old value 2"), true),
+                AndroidString::localizable("s1", "french old value 1"),
+                AndroidString::localizable("s2", "french old value 2"),
             ],
         )
         .unwrap();
@@ -221,23 +221,15 @@ mod tests {
         xml_writer::write(
             &mut es_strings_file,
             vec![
-                AndroidString::new(
-                    String::from("s1"),
-                    String::from("spanish old value 1"),
-                    true,
-                ),
-                AndroidString::new(
-                    String::from("s2"),
-                    String::from("spanish old value 2"),
-                    true,
-                ),
+                AndroidString::localizable("s1", "spanish old value 1"),
+                AndroidString::localizable("s2", "spanish old value 2"),
             ],
         )
         .unwrap();
 
         let german_android_strings = vec![
-            AndroidString::new(String::from("s1"), String::from("german old value 1"), true),
-            AndroidString::new(String::from("s2"), String::from("german old value 2"), true),
+            AndroidString::localizable("s1", "german old value 1"),
+            AndroidString::localizable("s2", "german old value 2"),
         ];
 
         xml_writer::write(&mut de_strings_file, german_android_strings.clone()).unwrap();
@@ -278,8 +270,8 @@ s2, english value 2,,spanish new value 2,german new value 2"#
                 .unwrap()
                 .into_strings(),
             vec![
-                AndroidString::new(String::from("s1"), String::from("french new value 1"), true),
-                AndroidString::new(String::from("s2"), String::from("french old value 2"), true),
+                AndroidString::localizable("s1", "french new value 1"),
+                AndroidString::localizable("s2", "french old value 2"),
             ]
         );
 
@@ -288,16 +280,8 @@ s2, english value 2,,spanish new value 2,german new value 2"#
                 .unwrap()
                 .into_strings(),
             vec![
-                AndroidString::new(
-                    String::from("s1"),
-                    String::from("spanish old value 1"),
-                    true
-                ),
-                AndroidString::new(
-                    String::from("s2"),
-                    String::from("spanish new value 2"),
-                    true
-                ),
+                AndroidString::localizable("s1", "spanish old value 1"),
+                AndroidString::localizable("s2", "spanish new value 2"),
             ]
         );
 

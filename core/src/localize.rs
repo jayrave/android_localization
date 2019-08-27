@@ -223,12 +223,7 @@ mod tests {
 			</resources>
 		"##;
 
-        let default_strings = vec![AndroidString::new(
-            String::from("string"),
-            String::from("string value"),
-            true,
-        )];
-
+        let default_strings = vec![AndroidString::localizable("string", "string value")];
         let temp_dir = tempfile::tempdir().unwrap();
         let (file_paths, output_dir) = test_write_out_strings_to_localize(
             &temp_dir,
@@ -255,8 +250,8 @@ mod tests {
 		"##;
 
         let default_strings = vec![
-            AndroidString::new(String::from("string_1"), String::from("string value"), true),
-            AndroidString::new(String::from("string_2"), String::from("string value"), true),
+            AndroidString::localizable("string_1", "string value"),
+            AndroidString::localizable("string_2", "string value"),
         ];
 
         let temp_dir = tempfile::tempdir().unwrap();

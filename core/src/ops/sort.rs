@@ -29,18 +29,10 @@ mod tests {
     #[test]
     fn sorts_android_strings_by_name() {
         let mut strings = vec![
-            AndroidString::new(String::from("string_2"), String::from("string value"), true),
-            AndroidString::new(
-                String::from("string_3"),
-                String::from("string 3 value 1"),
-                true,
-            ),
-            AndroidString::new(
-                String::from("string_3"),
-                String::from("string 3 value 2"),
-                true,
-            ),
-            AndroidString::new(String::from("string_1"), String::from("string value"), true),
+            AndroidString::localizable("string_2", "string value"),
+            AndroidString::localizable("string_3", "string 3 value 1"),
+            AndroidString::localizable("string_3", "string 3 value 2"),
+            AndroidString::localizable("string_1", "string value"),
         ];
 
         super::sort_android_strings_by_name(&mut strings);
@@ -48,30 +40,22 @@ mod tests {
 
         assert_eq!(
             strings.next().unwrap(),
-            AndroidString::new(String::from("string_1"), String::from("string value"), true)
+            AndroidString::localizable("string_1", "string value")
         );
 
         assert_eq!(
             strings.next().unwrap(),
-            AndroidString::new(String::from("string_2"), String::from("string value"), true)
+            AndroidString::localizable("string_2", "string value")
         );
 
         assert_eq!(
             strings.next().unwrap(),
-            AndroidString::new(
-                String::from("string_3"),
-                String::from("string 3 value 1"),
-                true
-            )
+            AndroidString::localizable("string_3", "string 3 value 1")
         );
 
         assert_eq!(
             strings.next().unwrap(),
-            AndroidString::new(
-                String::from("string_3"),
-                String::from("string 3 value 2"),
-                true
-            )
+            AndroidString::localizable("string_3", "string 3 value 2")
         );
 
         assert_eq!(strings.next(), None);

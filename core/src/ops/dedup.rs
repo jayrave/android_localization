@@ -14,36 +14,12 @@ mod tests {
     #[test]
     fn dedupes() {
         let mut android_strings = vec![
-            AndroidString::new(
-                String::from("string_1"),
-                String::from("string 1 value 1"),
-                true,
-            ),
-            AndroidString::new(
-                String::from("string_1"),
-                String::from("string 1 value 2"),
-                true,
-            ),
-            AndroidString::new(
-                String::from("string_1"),
-                String::from("string 1 value 3"),
-                false,
-            ),
-            AndroidString::new(
-                String::from("string_2"),
-                String::from("string 2 value 1"),
-                false,
-            ),
-            AndroidString::new(
-                String::from("string_2"),
-                String::from("string 2 value 2"),
-                false,
-            ),
-            AndroidString::new(
-                String::from("string_2"),
-                String::from("string 2 value 3"),
-                true,
-            ),
+            AndroidString::localizable("string_1", "string 1 value 1"),
+            AndroidString::localizable("string_1", "string 1 value 2"),
+            AndroidString::unlocalizable("string_1", "string 1 value 3"),
+            AndroidString::unlocalizable("string_2", "string 2 value 1"),
+            AndroidString::unlocalizable("string_2", "string 2 value 2"),
+            AndroidString::localizable("string_2", "string 2 value 3"),
         ];
 
         super::dedup_grouped_strings(&mut android_strings);
@@ -51,19 +27,11 @@ mod tests {
 
         assert_eq!(
             deduplicated_items.next().unwrap(),
-            AndroidString::new(
-                String::from("string_1"),
-                String::from("string 1 value 1"),
-                true
-            )
+            AndroidString::localizable("string_1", "string 1 value 1")
         );
         assert_eq!(
             deduplicated_items.next().unwrap(),
-            AndroidString::new(
-                String::from("string_2"),
-                String::from("string 2 value 1"),
-                false
-            )
+            AndroidString::unlocalizable("string_2", "string 2 value 1")
         );
         assert_eq!(deduplicated_items.next(), None);
     }

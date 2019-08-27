@@ -60,40 +60,20 @@ mod tests {
     #[test]
     fn finds_localizable_strings() {
         let mut localizable_strings = super::find_localizable_strings(vec![
-            AndroidString::new(
-                String::from("localizable_string_1"),
-                String::from("string value"),
-                true,
-            ),
-            AndroidString::new(
-                String::from("non_localizable_string"),
-                String::from("string value"),
-                false,
-            ),
-            AndroidString::new(
-                String::from("localizable_string_2"),
-                String::from("string value"),
-                true,
-            ),
+            AndroidString::localizable("localizable_string_1", "string value"),
+            AndroidString::unlocalizable("non_localizable_string", "string value"),
+            AndroidString::localizable("localizable_string_2", "string value"),
         ])
         .into_iter();
 
         assert_eq!(
             localizable_strings.next().unwrap(),
-            AndroidString::new(
-                String::from("localizable_string_1"),
-                String::from("string value"),
-                true,
-            )
+            AndroidString::localizable("localizable_string_1", "string value")
         );
 
         assert_eq!(
             localizable_strings.next().unwrap(),
-            AndroidString::new(
-                String::from("localizable_string_2"),
-                String::from("string value"),
-                true,
-            )
+            AndroidString::localizable("localizable_string_2", "string value")
         );
 
         assert_eq!(localizable_strings.next(), None);
@@ -102,49 +82,17 @@ mod tests {
     #[test]
     fn finds_missing_strings() {
         let mut lacking_strings = vec![
-            AndroidString::new(
-                String::from("common_string_3"),
-                String::from("string value"),
-                true,
-            ),
-            AndroidString::new(
-                String::from("only_in_lacking_strings"),
-                String::from("string value"),
-                true,
-            ),
-            AndroidString::new(
-                String::from("common_string_1"),
-                String::from("string value"),
-                false,
-            ),
+            AndroidString::localizable("common_string_3", "string value"),
+            AndroidString::localizable("only_in_lacking_strings", "string value"),
+            AndroidString::unlocalizable("common_string_1", "string value"),
         ];
 
         let mut all_strings = vec![
-            AndroidString::new(
-                String::from("common_string_1"),
-                String::from("string value"),
-                false,
-            ),
-            AndroidString::new(
-                String::from("only_in_all_strings_1"),
-                String::from("string value"),
-                false,
-            ),
-            AndroidString::new(
-                String::from("common_string_3"),
-                String::from("string value"),
-                true,
-            ),
-            AndroidString::new(
-                String::from("only_in_all_strings_3"),
-                String::from("string value"),
-                false,
-            ),
-            AndroidString::new(
-                String::from("only_in_all_strings_2"),
-                String::from("string value"),
-                false,
-            ),
+            AndroidString::unlocalizable("common_string_1", "string value"),
+            AndroidString::unlocalizable("only_in_all_strings_1", "string value"),
+            AndroidString::localizable("common_string_3", "string value"),
+            AndroidString::unlocalizable("only_in_all_strings_3", "string value"),
+            AndroidString::unlocalizable("only_in_all_strings_2", "string value"),
         ];
 
         let mut missing_strings =
@@ -152,27 +100,15 @@ mod tests {
 
         assert_eq!(
             missing_strings.next().unwrap(),
-            AndroidString::new(
-                String::from("only_in_all_strings_1"),
-                String::from("string value"),
-                false,
-            )
+            AndroidString::unlocalizable("only_in_all_strings_1", "string value")
         );
         assert_eq!(
             missing_strings.next().unwrap(),
-            AndroidString::new(
-                String::from("only_in_all_strings_2"),
-                String::from("string value"),
-                false,
-            )
+            AndroidString::unlocalizable("only_in_all_strings_2", "string value")
         );
         assert_eq!(
             missing_strings.next().unwrap(),
-            AndroidString::new(
-                String::from("only_in_all_strings_3"),
-                String::from("string value"),
-                false,
-            )
+            AndroidString::unlocalizable("only_in_all_strings_3", "string value")
         );
         assert_eq!(missing_strings.next(), None);
     }

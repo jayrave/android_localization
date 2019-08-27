@@ -39,8 +39,8 @@ mod tests {
     #[test]
     fn passes_in_absence_of_unescaped_apostrophes() {
         assert!(super::validate(&vec![
-            AndroidString::new(String::from("s1"), String::from("value"), true),
-            AndroidString::new(String::from("s2"), String::from(r"val\'ue"), true),
+            AndroidString::localizable("s1", "value"),
+            AndroidString::localizable("s2", r"val\'ue"),
         ])
         .is_ok())
     }
@@ -48,19 +48,19 @@ mod tests {
     #[test]
     fn errors_in_presence_of_unescaped_apostrophes() {
         let invalid_strings = super::validate(&vec![
-            AndroidString::new(String::from("s1"), String::from("val'ue"), true),
-            AndroidString::new(String::from("s2"), String::from("value"), true),
-            AndroidString::new(String::from("s3"), String::from(r"val\'ue"), true),
-            AndroidString::new(String::from("s4"), String::from("value'"), true),
-            AndroidString::new(String::from("s5"), String::from(r"\'va\l\ue\'"), true),
+            AndroidString::localizable("s1", "val'ue"),
+            AndroidString::localizable("s2", "value"),
+            AndroidString::localizable("s3", r"val\'ue"),
+            AndroidString::localizable("s4", "value'"),
+            AndroidString::localizable("s5", r"\'va\l\ue\'"),
         ])
         .unwrap_err();
 
         assert_eq!(
             invalid_strings.invalid_strings,
             vec![
-                AndroidString::new(String::from("s1"), String::from("val'ue"), true),
-                AndroidString::new(String::from("s4"), String::from("value'"), true),
+                AndroidString::localizable("s1", "val'ue"),
+                AndroidString::localizable("s4", "value'"),
             ]
         )
     }

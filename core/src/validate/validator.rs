@@ -145,31 +145,19 @@ mod tests {
 
         xml_writer::write(
             &mut default_strings_file,
-            vec![AndroidString::new(
-                String::from("s1"),
-                String::from("value"),
-                true,
-            )],
+            vec![AndroidString::localizable("s1", "value")],
         )
         .unwrap();
 
         xml_writer::write(
             &mut french_strings_file,
-            vec![AndroidString::new(
-                String::from("s1"),
-                String::from("value"),
-                true,
-            )],
+            vec![AndroidString::localizable("s1", "value")],
         )
         .unwrap();
 
         xml_writer::write(
             &mut spanish_strings_file,
-            vec![AndroidString::new(
-                String::from("s1"),
-                String::from("value"),
-                true,
-            )],
+            vec![AndroidString::localizable("s1", "value")],
         )
         .unwrap();
 
@@ -214,18 +202,18 @@ mod tests {
         let (mut spanish_strings_file, spanish_strings_file_path) =
             create_strings_file_in(&spanish_values_dir_path);
 
-        let default_s1 = AndroidString::new(String::from("s1"), String::from("value"), true);
-        let default_s2 = AndroidString::new(String::from("s2"), String::from("v'alue"), true);
+        let default_s1 = AndroidString::localizable("s1", "value");
+        let default_s2 = AndroidString::localizable("s2", "v'alue");
         xml_writer::write(
             &mut default_strings_file,
             vec![default_s1.clone(), default_s2.clone()],
         )
         .unwrap();
 
-        let french_s1 = AndroidString::new(String::from("s1"), String::from("v'alue"), true);
+        let french_s1 = AndroidString::localizable("s1", "v'alue");
         xml_writer::write(&mut french_strings_file, vec![french_s1.clone()]).unwrap();
 
-        let spanish_s2 = AndroidString::new(String::from("s2"), String::from("v'alue %1$d"), true);
+        let spanish_s2 = AndroidString::localizable("s2", "v'alue %1$d");
         xml_writer::write(&mut spanish_strings_file, vec![spanish_s2.clone()]).unwrap();
 
         let mut invalid_strings_files = super::validate(res_dir_path.to_str().unwrap())

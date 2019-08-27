@@ -90,18 +90,18 @@ mod tests {
     fn validate_passes_in_absence_of_mismatches() {
         let mut default_parsed_data = vec![
             ParsedData {
-                android_string: AndroidString::new(String::from("s1"), String::from("value"), true),
+                android_string: AndroidString::localizable("s1", "value"),
                 sorted_format_strings: vec![],
             },
             ParsedData {
-                android_string: AndroidString::new(String::from("s2"), String::from("value"), true),
+                android_string: AndroidString::localizable("s2", "value"),
                 sorted_format_strings: vec![String::from("%1$s")],
             },
         ];
 
         let mut foreign_strings = vec![
-            AndroidString::new(String::from("s2"), String::from("value %1$s"), true),
-            AndroidString::new(String::from("s3"), String::from("value"), true),
+            AndroidString::localizable("s2", "value %1$s"),
+            AndroidString::localizable("s3", "value"),
         ];
 
         assert!(super::validate(&mut default_parsed_data, &mut foreign_strings).is_ok())
@@ -111,23 +111,23 @@ mod tests {
     fn validate_errors_in_presence_of_mismatches() {
         let mut default_parsed_data = vec![
             ParsedData {
-                android_string: AndroidString::new(String::from("s3"), String::from("value"), true),
+                android_string: AndroidString::localizable("s3", "value"),
                 sorted_format_strings: vec![],
             },
             ParsedData {
-                android_string: AndroidString::new(String::from("s1"), String::from("value"), true),
+                android_string: AndroidString::localizable("s1", "value"),
                 sorted_format_strings: vec![],
             },
             ParsedData {
-                android_string: AndroidString::new(String::from("s2"), String::from("value"), true),
+                android_string: AndroidString::localizable("s2", "value"),
                 sorted_format_strings: vec![String::from("%1$s")],
             },
         ];
 
         let mut foreign_strings = vec![
-            AndroidString::new(String::from("s3"), String::from("value %1$s"), true),
-            AndroidString::new(String::from("s2"), String::from("value %1$d"), true),
-            AndroidString::new(String::from("s4"), String::from("value %2$d"), true),
+            AndroidString::localizable("s3", "value %1$s"),
+            AndroidString::localizable("s2", "value %1$d"),
+            AndroidString::localizable("s4", "value %2$d"),
         ];
 
         assert_eq!(
@@ -137,37 +137,21 @@ mod tests {
             vec![
                 Mismatch {
                     default_parsed_data: ParsedData {
-                        android_string: AndroidString::new(
-                            String::from("s2"),
-                            String::from("value"),
-                            true,
-                        ),
+                        android_string: AndroidString::localizable("s2", "value"),
                         sorted_format_strings: vec![String::from("%1$s")],
                     },
                     foreign_parsed_data: ParsedData {
-                        android_string: AndroidString::new(
-                            String::from("s2"),
-                            String::from("value %1$d"),
-                            true,
-                        ),
+                        android_string: AndroidString::localizable("s2", "value %1$d"),
                         sorted_format_strings: vec![String::from("%1$d")],
                     },
                 },
                 Mismatch {
                     default_parsed_data: ParsedData {
-                        android_string: AndroidString::new(
-                            String::from("s3"),
-                            String::from("value"),
-                            true,
-                        ),
+                        android_string: AndroidString::localizable("s3", "value"),
                         sorted_format_strings: vec![],
                     },
                     foreign_parsed_data: ParsedData {
-                        android_string: AndroidString::new(
-                            String::from("s3"),
-                            String::from("value %1$s"),
-                            true,
-                        ),
+                        android_string: AndroidString::localizable("s3", "value %1$s"),
                         sorted_format_strings: vec![String::from("%1$s")],
                     },
                 },
@@ -178,12 +162,8 @@ mod tests {
     #[test]
     fn parse_builds_returns_appropriate_parsed_data() {
         let strings = vec![
-            AndroidString::new(String::from("s1"), String::from("value"), true),
-            AndroidString::new(
-                String::from("s1"),
-                String::from(r"%2$s a %1$d %2$d b %2$z c %1$s"),
-                true,
-            ),
+            AndroidString::localizable("s1", "value"),
+            AndroidString::localizable("s1", r"%2$s a %1$d %2$d b %2$z c %1$s"),
         ];
 
         let expected_output = vec![
@@ -207,21 +187,15 @@ mod tests {
 
     #[test]
     fn parse_returns_empty_list_in_case_of_no_format_strings() {
-        assert!(super::parse_format_strings(&AndroidString::new(
-            String::from("s1"),
-            String::from("value"),
-            true
-        ))
-        .is_empty())
+        assert!(super::parse_format_strings(&AndroidString::localizable("s1", "value")).is_empty())
     }
 
     #[test]
     fn parse_returns_only_valid_format_strings() {
         assert_eq!(
-            super::parse_format_strings(&AndroidString::new(
-                String::from("s1"),
-                String::from(r"%2$s a %1$d %2$d b %2$z c %1$s"),
-                true
+            super::parse_format_strings(&AndroidString::localizable(
+                "s1",
+                r"%2$s a %1$d %2$d b %2$z c %1$s"
             )),
             vec![
                 String::from("%2$s"),

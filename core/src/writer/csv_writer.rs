@@ -110,35 +110,27 @@ mod tests {
         let mut strings_list = vec![];
         strings_list.push(LocalizableStrings::new(
             String::from("french"),
-            vec![AndroidString::new(
-                String::from("string_1"),
-                String::from("english 1"),
-                true,
-            )],
+            vec![AndroidString::localizable("string_1", "english 1")],
         ));
 
         strings_list.push(LocalizableStrings::new(
             String::from("german"),
             vec![
-                AndroidString::new(String::from("string_1"), String::from("english 1"), true),
-                AndroidString::new(String::from("string_2"), String::from("english 2"), true),
+                AndroidString::localizable("string_1", "english 1"),
+                AndroidString::localizable("string_2", "english 2"),
             ],
         ));
 
         strings_list.push(LocalizableStrings::new(
             String::from("spanish"),
-            vec![AndroidString::new(
-                String::from("string_2"),
-                String::from("english 2"),
-                true,
-            )],
+            vec![AndroidString::localizable("string_2", "english 2")],
         ));
 
         strings_list.push(LocalizableStrings::new(
             String::from("dutch"),
             vec![
-                AndroidString::new(String::from("string_1"), String::from("english 1"), true),
-                AndroidString::new(String::from("string_2"), String::from("english 2"), true),
+                AndroidString::localizable("string_1", "english 1"),
+                AndroidString::localizable("string_2", "english 2"),
             ],
         ));
 

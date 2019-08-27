@@ -88,16 +88,8 @@ mod tests {
     #[test]
     fn writes_strings_to_file() {
         let android_strings = vec![
-            AndroidString::new(
-                String::from("localizable_string"),
-                String::from("localizable string value"),
-                true,
-            ),
-            AndroidString::new(
-                String::from("non_localizable_string"),
-                String::from("non localizable string value"),
-                false,
-            ),
+            AndroidString::localizable("localizable_string", "localizable string value"),
+            AndroidString::unlocalizable("non_localizable_string", "non localizable string value"),
         ];
 
         // Write strings to a vector & split o/p into lines
@@ -143,15 +135,7 @@ mod tests {
     fn test_cdata_handling(value: &str) {
         // Write string to a vector & split o/p into lines
         let mut sink: Vec<u8> = vec![];
-        super::write(
-            &mut sink,
-            vec![AndroidString::new(
-                String::from("s1"),
-                String::from(value),
-                true,
-            )],
-        )
-        .unwrap();
+        super::write(&mut sink, vec![AndroidString::localizable("s1", value)]).unwrap();
 
         let written_content = String::from_utf8(sink).unwrap();
         let mut written_lines = written_content.lines();

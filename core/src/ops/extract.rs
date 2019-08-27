@@ -41,26 +41,10 @@ mod tests {
     #[test]
     fn extracts() {
         let mut default_strings = vec![
-            AndroidString::new(
-                String::from("string_2"),
-                String::from("english 2 value"),
-                false,
-            ), // `false` to make sure the flag is carried over from here
-            AndroidString::new(
-                String::from("string_3"),
-                String::from("english 3 value"),
-                true,
-            ),
-            AndroidString::new(
-                String::from("string_4"),
-                String::from("english 4 new value"),
-                true,
-            ), // new value to make sure match is against both name & value
-            AndroidString::new(
-                String::from("string_1"),
-                String::from("english 1 value"),
-                true,
-            ),
+            AndroidString::unlocalizable("string_2", "english 2 value"), // unlocalizable to make sure the flag is carried over from here
+            AndroidString::localizable("string_3", "english 3 value"),
+            AndroidString::localizable("string_4", "english 4 new value"), // new value to make sure match is against both name & value
+            AndroidString::localizable("string_1", "english 1 value"),
         ];
 
         let mut localized_strings = vec![
@@ -89,20 +73,12 @@ mod tests {
 
         assert_eq!(
             strings.next().unwrap(),
-            AndroidString::new(
-                String::from("string_2"),
-                String::from("french 2 value"),
-                false
-            )
+            AndroidString::unlocalizable("string_2", "french 2 value")
         );
 
         assert_eq!(
             strings.next().unwrap(),
-            AndroidString::new(
-                String::from("string_3"),
-                String::from("french 3 value"),
-                true
-            )
+            AndroidString::localizable("string_3", "french 3 value")
         );
 
         assert_eq!(strings.next(), None);

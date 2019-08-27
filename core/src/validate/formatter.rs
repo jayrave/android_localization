@@ -113,11 +113,9 @@ mod tests {
 
     #[test]
     fn formats() {
-        let default_s1 =
-            AndroidString::new(String::from("s1"), String::from("default_value"), true);
-        let french_s1 = AndroidString::new(String::from("s1"), String::from("french_value"), true);
-        let spanish_s1 =
-            AndroidString::new(String::from("s1"), String::from("spanish_value"), true);
+        let default_s1 = AndroidString::localizable("s1", "default_value");
+        let french_s1 = AndroidString::localizable("s1", "french_value");
+        let spanish_s1 = AndroidString::localizable("s1", "spanish_value");
 
         let invalid_strings_file = vec![
             InvalidStringsFile {

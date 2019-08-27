@@ -53,28 +53,19 @@ mod tests {
 
         assert_eq!(
             strings.next(),
-            Some(AndroidString::new(
-                String::from("string_1"),
-                String::from("string 1 value"),
-                true
-            ))
+            Some(AndroidString::localizable("string_1", "string 1 value"))
         );
 
         assert_eq!(
             strings.next(),
-            Some(AndroidString::new(
-                String::from("string_2"),
-                String::from("string 2 value"),
-                true
-            ))
+            Some(AndroidString::localizable("string_2", "string 2 value"))
         );
 
         assert_eq!(
             strings.next(),
-            Some(AndroidString::new(
-                String::from("non_localizable_string"),
-                String::from("non localizable string value"),
-                false
+            Some(AndroidString::unlocalizable(
+                "non_localizable_string",
+                "non localizable string value"
             ))
         );
 
@@ -107,28 +98,19 @@ mod tests {
 
         assert_eq!(
             strings.next(),
-            Some(AndroidString::new(
-                String::from("string_1"),
-                String::from("string 1 value"),
-                true
-            ))
+            Some(AndroidString::localizable("string_1", "string 1 value"))
         );
 
         assert_eq!(
             strings.next(),
-            Some(AndroidString::new(
-                String::from("string_2"),
-                String::from("string 2 value"),
-                true
-            ))
+            Some(AndroidString::localizable("string_2", "string 2 value"))
         );
 
         assert_eq!(
             strings.next(),
-            Some(AndroidString::new(
-                String::from("non_localizable_string"),
-                String::from("non localizable string value"),
-                false
+            Some(AndroidString::unlocalizable(
+                "non_localizable_string",
+                "non localizable string value"
             ))
         );
 
@@ -146,11 +128,7 @@ mod tests {
 
         assert_eq!(
             strings.next(),
-            Some(AndroidString::new(
-                String::from("s1"),
-                String::from(r##"Hi there. <![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> is awesome"##),
-                true
-            ))
+            Some(AndroidString::localizable("s1", r##"Hi there. <![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> is awesome"##))
         );
 
         assert_eq!(strings.next(), None);
@@ -167,11 +145,7 @@ mod tests {
 
         assert_eq!(
             strings.next(),
-            Some(AndroidString::new(
-                String::from("s1"),
-                String::from(r##"<![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> <![CDATA[<a href=\"https://www.firefox.com\">Firefox</a>]]>"##),
-                true
-            ))
+            Some(AndroidString::localizable("s1", r##"<![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> <![CDATA[<a href=\"https://www.firefox.com\">Firefox</a>]]>"##))
         );
 
         assert_eq!(strings.next(), None);
