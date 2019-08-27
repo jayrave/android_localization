@@ -1,13 +1,13 @@
 use android_localization_helpers::DevExpt;
 use regex::Regex;
 
-pub mod command {
+pub mod commands {
     pub const LOCALIZE: &str = "localize";
     pub const LOCALIZED: &str = "localized";
     pub const VALIDATE: &str = "validate";
 }
 
-pub mod arg {
+pub mod args {
     pub const RES_DIR: &str = "res-dir";
     pub const LOCALIZE_OUTPUT_DIR: &str = "output-dir";
     pub const LOCALIZED_INPUT_FILE: &str = "input-file";

@@ -10,15 +10,15 @@ use std::fmt;
 /// Please don't let that bother you as the requirements are correctly setup in
 /// `args_parser.rs` & unwrapped values are guaranteed to be present there
 pub fn execute_for_matches(matches: ArgMatches) -> Result<(), ()> {
-    if let Some(localized_command) = matches.subcommand_matches(constants::command::LOCALIZED) {
+    if let Some(localized_command) = matches.subcommand_matches(constants::commands::LOCALIZED) {
         return localized(localized_command);
     }
 
-    if let Some(localize_command) = matches.subcommand_matches(constants::command::LOCALIZE) {
+    if let Some(localize_command) = matches.subcommand_matches(constants::commands::LOCALIZE) {
         return localize(localize_command);
     }
 
-    if let Some(validations_command) = matches.subcommand_matches(constants::command::VALIDATE) {
+    if let Some(validations_command) = matches.subcommand_matches(constants::commands::VALIDATE) {
         return validate(validations_command);
     }
 
@@ -30,11 +30,11 @@ fn localize(matches: &ArgMatches) -> Result<(), ()> {
         "Texts to be localized written to",
         android_localization_core::localize::localize(
             matches
-                .value_of(constants::arg::RES_DIR)
-                .expt(arg_missing_msg(constants::arg::RES_DIR)),
+                .value_of(constants::args::RES_DIR)
+                .expt(arg_missing_msg(constants::args::RES_DIR)),
             matches
-                .value_of(constants::arg::LOCALIZE_OUTPUT_DIR)
-                .expt(arg_missing_msg(constants::arg::LOCALIZE_OUTPUT_DIR)),
+                .value_of(constants::args::LOCALIZE_OUTPUT_DIR)
+                .expt(arg_missing_msg(constants::args::LOCALIZE_OUTPUT_DIR)),
             build_mappings(matches),
         ),
     )
@@ -45,11 +45,11 @@ fn localized(matches: &ArgMatches) -> Result<(), ()> {
         "Localized texts written to",
         android_localization_core::localized::localized(
             matches
-                .value_of(constants::arg::RES_DIR)
-                .expt(arg_missing_msg(constants::arg::RES_DIR)),
+                .value_of(constants::args::RES_DIR)
+                .expt(arg_missing_msg(constants::args::RES_DIR)),
             matches
-                .value_of(constants::arg::LOCALIZED_INPUT_FILE)
-                .expt(arg_missing_msg(constants::arg::LOCALIZED_INPUT_FILE)),
+                .value_of(constants::args::LOCALIZED_INPUT_FILE)
+                .expt(arg_missing_msg(constants::args::LOCALIZED_INPUT_FILE)),
             build_mappings(matches),
         ),
     )
@@ -58,8 +58,8 @@ fn localized(matches: &ArgMatches) -> Result<(), ()> {
 fn validate(matches: &ArgMatches) -> Result<(), ()> {
     let result = android_localization_core::validator::validate(
         matches
-            .value_of(constants::arg::RES_DIR)
-            .expt(arg_missing_msg(constants::arg::RES_DIR)),
+            .value_of(constants::args::RES_DIR)
+            .expt(arg_missing_msg(constants::args::RES_DIR)),
     );
     match result {
         Err(error) => exit_based_on_result("", Err(error)),
@@ -78,7 +78,7 @@ fn validate(matches: &ArgMatches) -> Result<(), ()> {
 }
 
 fn build_mappings(matches: &ArgMatches) -> HashMap<String, String> {
-    match matches.values_of(constants::arg::MAPPING) {
+    match matches.values_of(constants::args::MAPPING) {
         None => HashMap::new(),
         Some(values) => values
             .map(|mapping| {

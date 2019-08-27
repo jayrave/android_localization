@@ -123,7 +123,7 @@ pub fn build() -> App<'static, 'static> {
 }
 
 fn build_localize_sub_command() -> App<'static, 'static> {
-    SubCommand::with_name(constants::command::LOCALIZE)
+    SubCommand::with_name(constants::commands::LOCALIZE)
         .about(doc::localize::SHORT)
         .long_about(doc::localize::LONG)
         .arg(build_res_dir_arg())
@@ -132,16 +132,16 @@ fn build_localize_sub_command() -> App<'static, 'static> {
             doc::localize::args::mapping::LONG.trim_start(),
         ))
         .arg(
-            Arg::with_name(constants::arg::LOCALIZE_OUTPUT_DIR)
+            Arg::with_name(constants::args::LOCALIZE_OUTPUT_DIR)
                 .help(doc::localize::args::OUTPUT_DIR)
-                .long(constants::arg::LOCALIZE_OUTPUT_DIR)
+                .long(constants::args::LOCALIZE_OUTPUT_DIR)
                 .takes_value(true)
                 .required(true),
         )
 }
 
 fn build_localized_sub_command() -> App<'static, 'static> {
-    SubCommand::with_name(constants::command::LOCALIZED)
+    SubCommand::with_name(constants::commands::LOCALIZED)
         .about(doc::localized::SHORT)
         .long_about(doc::localized::LONG)
         .arg(build_res_dir_arg())
@@ -150,35 +150,35 @@ fn build_localized_sub_command() -> App<'static, 'static> {
             doc::localized::args::mapping::LONG.trim_start(),
         ))
         .arg(
-            Arg::with_name(constants::arg::LOCALIZED_INPUT_FILE)
+            Arg::with_name(constants::args::LOCALIZED_INPUT_FILE)
                 .help(doc::localized::args::INPUT_FILE)
-                .long(constants::arg::LOCALIZED_INPUT_FILE)
+                .long(constants::args::LOCALIZED_INPUT_FILE)
                 .takes_value(true)
                 .required(true),
         )
 }
 
 fn build_validate_sub_command() -> App<'static, 'static> {
-    SubCommand::with_name(constants::command::VALIDATE)
+    SubCommand::with_name(constants::commands::VALIDATE)
         .about(doc::validate::SHORT)
         .long_about(doc::validate::LONG)
         .arg(build_res_dir_arg())
 }
 
 fn build_res_dir_arg() -> Arg<'static, 'static> {
-    Arg::with_name(constants::arg::RES_DIR)
+    Arg::with_name(constants::args::RES_DIR)
         .help(doc::common::RES_DIR_SHORT)
         .long_help(doc::common::RES_DIR_LONG.trim_start())
-        .long(constants::arg::RES_DIR)
+        .long(constants::args::RES_DIR)
         .takes_value(true)
         .required(true)
 }
 
 fn build_mapping_arg(short_help: &'static str, long_help: &'static str) -> Arg<'static, 'static> {
-    Arg::with_name(constants::arg::MAPPING)
+    Arg::with_name(constants::args::MAPPING)
         .help(short_help)
         .long_help(long_help.trim_start())
-        .long(constants::arg::MAPPING)
+        .long(constants::args::MAPPING)
         .takes_value(true)
         .validator(mapping_validator)
         .multiple(true)
