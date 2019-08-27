@@ -64,26 +64,10 @@ mod tests {
     #[test]
     fn sorts_localized_strings_by_name() {
         let mut strings = vec![
-            LocalizedString::new(
-                String::from("string_2"),
-                String::from("string value"),
-                String::from("string value"),
-            ),
-            LocalizedString::new(
-                String::from("string_3"),
-                String::from("string 3 value 1"),
-                String::from("string 3 value 1"),
-            ),
-            LocalizedString::new(
-                String::from("string_3"),
-                String::from("string 3 value 2"),
-                String::from("string 3 value 2"),
-            ),
-            LocalizedString::new(
-                String::from("string_1"),
-                String::from("string value"),
-                String::from("string value"),
-            ),
+            LocalizedString::build("string_2", "string value", "string value"),
+            LocalizedString::build("string_3", "string 3 value 1", "string 3 value 1"),
+            LocalizedString::build("string_3", "string 3 value 2", "string 3 value 2"),
+            LocalizedString::build("string_1", "string value", "string value"),
         ];
 
         super::sort_localized_strings_by_name(&mut strings);
@@ -91,38 +75,22 @@ mod tests {
 
         assert_eq!(
             strings.next().unwrap(),
-            LocalizedString::new(
-                String::from("string_1"),
-                String::from("string value"),
-                String::from("string value")
-            )
+            LocalizedString::build("string_1", "string value", "string value")
         );
 
         assert_eq!(
             strings.next().unwrap(),
-            LocalizedString::new(
-                String::from("string_2"),
-                String::from("string value"),
-                String::from("string value")
-            )
+            LocalizedString::build("string_2", "string value", "string value")
         );
 
         assert_eq!(
             strings.next().unwrap(),
-            LocalizedString::new(
-                String::from("string_3"),
-                String::from("string 3 value 1"),
-                String::from("string 3 value 1")
-            )
+            LocalizedString::build("string_3", "string 3 value 1", "string 3 value 1")
         );
 
         assert_eq!(
             strings.next().unwrap(),
-            LocalizedString::new(
-                String::from("string_3"),
-                String::from("string 3 value 2"),
-                String::from("string 3 value 2")
-            )
+            LocalizedString::build("string_3", "string 3 value 2", "string 3 value 2")
         );
 
         assert_eq!(strings.next(), None);

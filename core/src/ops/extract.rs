@@ -48,21 +48,9 @@ mod tests {
         ];
 
         let mut localized_strings = vec![
-            LocalizedString::new(
-                String::from("string_3"),
-                String::from("english 3 value"),
-                String::from("french 3 value"),
-            ),
-            LocalizedString::new(
-                String::from("string_4"),
-                String::from("english 4 value"),
-                String::from("french 4 value"),
-            ),
-            LocalizedString::new(
-                String::from("string_2"),
-                String::from("english 2 value"),
-                String::from("french 2 value"),
-            ),
+            LocalizedString::build("string_3", "english 3 value", "french 3 value"),
+            LocalizedString::build("string_4", "english 4 value", "french 4 value"),
+            LocalizedString::build("string_2", "english 2 value", "french 2 value"),
         ];
 
         let mut strings = super::extract_android_strings_from_localized(

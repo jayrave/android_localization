@@ -14,6 +14,14 @@ impl LocalizedString {
         }
     }
 
+    pub fn build<N: Into<String>, D: Into<String>, L: Into<String>>(
+        name: N,
+        default: D,
+        localized: L,
+    ) -> LocalizedString {
+        LocalizedString::new(name.into(), default.into(), localized.into())
+    }
+
     pub fn name(&self) -> &str {
         &self.name
     }
