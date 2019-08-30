@@ -14,8 +14,10 @@ use crate::reader::csv_reader;
 use crate::util::foreign_locale_ids_finder;
 use crate::util::xml_helper;
 use crate::writer::xml_writer;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 
-/// Returns the list of output files created by this call. These aren't guaranteed
+/// Returns the list of output files updated by this call. These aren't guaranteed
 /// to be valid paths to files. Sometimes, if a file's path can't be expressed by
 /// `String` (in case it has non UTF-8 chars), it could just be the file's name
 pub fn localized<S: ::std::hash::BuildHasher>(
@@ -66,16 +68,19 @@ fn handle_localized<S: ::std::hash::BuildHasher>(
             .collect(),
     )?;
 
-    let mut created_files_paths = vec![];
+    let mut updated_files_paths = vec![];
     for new_localized_foreign_strings in new_localized_foreign_strings_list {
         let locale_id = locale_name_to_id_map
             .get(new_localized_foreign_strings.locale())
             .expect("Read locale doesn't have a mapping! Please let the dev know about this issue");
 
+        let existing_foreign_strings =
+            xml_helper::read_foreign_strings(res_dir_path, locale_id)?.into_strings();
+        let existing_foreign_strings_hash = compute_hash_of(&existing_foreign_strings);
+
         // Read already localized foreign strings for locale
-        let mut already_localized_foreign_strings = filter::find_localizable_strings(
-            xml_helper::read_foreign_strings(res_dir_path, locale_id)?.into_strings(),
-        );
+        let mut already_localized_foreign_strings =
+            filter::find_localizable_strings(existing_foreign_strings);
 
         // Extract android strings out of the newly localized strings
         let mut new_localized_foreign_strings = extract::extract_android_strings_from_localized(
@@ -92,16 +97,22 @@ fn handle_localized<S: ::std::hash::BuildHasher>(
         // There could be duplicates!
         dedup::dedup_grouped_strings(&mut to_be_written_foreign_strings);
 
+        let new_foreign_strings_hash = compute_hash_of(&to_be_written_foreign_strings);
+
         // Write out foreign strings back to file
         let (mut file, output_file_path) =
             writable_empty_foreign_strings_file(res_dir_path, locale_id)?;
         xml_writer::write(&mut file, to_be_written_foreign_strings)
             .with_context(output_file_path.clone())?;
 
-        created_files_paths.push(output_file_path);
+        // If the file's content isn't getting updated, needn't include it in the
+        // updated files list
+        if new_foreign_strings_hash != existing_foreign_strings_hash {
+            updated_files_paths.push(output_file_path);
+        }
     }
 
-    Ok(created_files_paths)
+    Ok(updated_files_paths)
 }
 
 /// Returns the created output file along with its path (if path computation
@@ -123,6 +134,12 @@ fn writable_empty_foreign_strings_file(
         File::create(strings_file_path).with_context(output_path_or_fb.clone())?,
         output_path_or_fb,
     ))
+}
+
+fn compute_hash_of(strings: &[AndroidString]) -> u64 {
+    let mut hasher = DefaultHasher::new();
+    strings.hash(&mut hasher);
+    hasher.finish()
 }
 
 #[cfg(test)]
@@ -182,6 +199,11 @@ mod tests {
         let mut de_strings_file_path = de_values_dir_path.clone();
         de_strings_file_path.push("strings.xml");
 
+        let mut zh_values_dir_path = res_dir_path.clone();
+        zh_values_dir_path.push("values-zh");
+        let mut zh_strings_file_path = zh_values_dir_path.clone();
+        zh_strings_file_path.push("strings.xml");
+
         let mut localized_dir_path = temp_dir.path().to_path_buf();
         localized_dir_path.push("localized");
         let mut localized_file_path = localized_dir_path.clone();
@@ -192,11 +214,13 @@ mod tests {
         fs::create_dir_all(fr_values_dir_path.clone()).unwrap();
         fs::create_dir_all(es_values_dir_path.clone()).unwrap();
         fs::create_dir_all(de_values_dir_path.clone()).unwrap();
+        fs::create_dir_all(zh_values_dir_path.clone()).unwrap();
         fs::create_dir_all(localized_dir_path.clone()).unwrap();
         let mut default_strings_file = File::create(default_strings_file_path).unwrap();
         let mut fr_strings_file = File::create(fr_strings_file_path.clone()).unwrap();
         let mut es_strings_file = File::create(es_strings_file_path.clone()).unwrap();
         let mut de_strings_file = File::create(de_strings_file_path.clone()).unwrap();
+        let mut zh_strings_file = File::create(zh_strings_file_path.clone()).unwrap();
         let mut localized_file = File::create(localized_file_path.clone()).unwrap();
 
         // Write out required contents into files
@@ -234,11 +258,18 @@ mod tests {
 
         xml_writer::write(&mut de_strings_file, german_android_strings.clone()).unwrap();
 
+        let chinese_android_strings = vec![
+            AndroidString::localizable("s1", "chinese old value 1"),
+            AndroidString::localizable("s2", "chinese old value 2"),
+        ];
+
+        xml_writer::write(&mut zh_strings_file, chinese_android_strings.clone()).unwrap();
+
         localized_file
             .write(
-                r#"string_name, default_locale, french, spanish, german
-s1, english value 1, french new value 1,,german new value 1
-s2, english value 2,,spanish new value 2,german new value 2"#
+                r#"string_name, default_locale, french, spanish, german, chinese
+s1, english value 1, french new value 1,,german new value 1,chinese old value 1
+s2, english value 2,,spanish new value 2,german new value 2,            "#
                     .as_bytes(),
             )
             .unwrap();
@@ -247,6 +278,7 @@ s2, english value 2,,spanish new value 2,german new value 2"#
         let mut map = HashMap::new();
         map.insert(String::from("french"), String::from("fr"));
         map.insert(String::from("spanish"), String::from("es"));
+        map.insert(String::from("chinese"), String::from("zh"));
 
         // Perform action
         let created_output_files_path = super::localized(
@@ -285,11 +317,21 @@ s2, english value 2,,spanish new value 2,german new value 2"#
             ]
         );
 
+        // German must not have changed since it wasn't included in the mapping
         assert_eq!(
             xml_helper::read_foreign_strings(&res_dir_path, "de")
                 .unwrap()
                 .into_strings(),
             german_android_strings
+        );
+
+        // Chinese must not have changed since the localized text only container blank string
+        // & already present localized value
+        assert_eq!(
+            xml_helper::read_foreign_strings(&res_dir_path, "zh")
+                .unwrap()
+                .into_strings(),
+            chinese_android_strings
         );
     }
 
