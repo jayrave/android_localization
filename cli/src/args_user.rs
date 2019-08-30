@@ -38,31 +38,45 @@ fn localize(matches: &ArgMatches) -> Result<(), ()> {
 
     match result {
         Err(error) => exit_based_on_result("", Err(error)),
-        Ok(file_names) => if file_names.is_empty() {
-            err_with_warning(String::from("Nothing found to localize"))
-        } else {
-            ok_with_success(format!(
-                "{} - \n\n{}",
-                "Texts to be localized written to",
-                file_names.join("\n")
-            ))
+        Ok(file_names) => {
+            if file_names.is_empty() {
+                err_with_warning(String::from("Nothing found to localize"))
+            } else {
+                ok_with_success(format!(
+                    "{} - \n\n{}",
+                    "Texts to be localized written to",
+                    file_names.join("\n")
+                ))
+            }
         }
     }
 }
 
 fn localized(matches: &ArgMatches) -> Result<(), ()> {
-    exit_based_on_result(
-        "Localized texts written to",
-        android_localization_core::localized::localized(
-            matches
-                .value_of(constants::args::RES_DIR)
-                .expt(arg_missing_msg(constants::args::RES_DIR)),
-            matches
-                .value_of(constants::args::LOCALIZED_INPUT_FILE)
-                .expt(arg_missing_msg(constants::args::LOCALIZED_INPUT_FILE)),
-            build_mappings(matches),
-        ),
-    )
+    let result = android_localization_core::localized::localized(
+        matches
+            .value_of(constants::args::RES_DIR)
+            .expt(arg_missing_msg(constants::args::RES_DIR)),
+        matches
+            .value_of(constants::args::LOCALIZED_INPUT_FILE)
+            .expt(arg_missing_msg(constants::args::LOCALIZED_INPUT_FILE)),
+        build_mappings(matches),
+    );
+
+    match result {
+        Err(error) => exit_based_on_result("", Err(error)),
+        Ok(file_names) => {
+            if file_names.is_empty() {
+                err_with_warning(String::from("No updated localized texts found"))
+            } else {
+                ok_with_success(format!(
+                    "{} - \n\n{}",
+                    "Localized texts written to",
+                    file_names.join("\n")
+                ))
+            }
+        }
+    }
 }
 
 fn validate(matches: &ArgMatches) -> Result<(), ()> {
@@ -71,6 +85,7 @@ fn validate(matches: &ArgMatches) -> Result<(), ()> {
             .value_of(constants::args::RES_DIR)
             .expt(arg_missing_msg(constants::args::RES_DIR)),
     );
+    
     match result {
         Err(error) => exit_based_on_result("", Err(error)),
         Ok(validation_result) => match validation_result {

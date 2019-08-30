@@ -10,47 +10,81 @@ use tempfile::TempDir;
 use test_helpers;
 
 #[test]
-fn with_mapping() {
-    execute_with_copied_sample_res(tempfile::tempdir().unwrap(), |output_res_path: String| {
-        let output = Command::new("cargo")
-            .args(vec![
-                "run",
-                "localized",
-                "--res-dir",
-                &output_res_path.clone(),
-                "--input-file",
-                "./tests_data/localized/success/input/localized_with_mapping.csv",
-                "--mapping",
-                "french=fr",
-                "--mapping",
-                "spanish=es",
-            ])
-            .output()
-            .unwrap();
+fn succeeds_with_mapping() {
+    execute_with_copied_sample_res(
+        tempfile::tempdir().unwrap(),
+        "success",
+        |output_res_path: String| {
+            let output = Command::new("cargo")
+                .args(vec![
+                    "run",
+                    "localized",
+                    "--res-dir",
+                    &output_res_path.clone(),
+                    "--input-file",
+                    "./tests_data/localized/success/input/localized_with_mapping.csv",
+                    "--mapping",
+                    "french=fr",
+                    "--mapping",
+                    "spanish=es",
+                ])
+                .output()
+                .unwrap();
 
-        assert_status_and_stdout(output);
-        assert_output_files(output_res_path);
-    })
+            assert_status_and_stdout(output);
+            assert_output_files(output_res_path);
+        },
+    )
 }
 
 #[test]
-fn without_mapping() {
-    execute_with_copied_sample_res(tempfile::tempdir().unwrap(), |output_res_path: String| {
-        let output = Command::new("cargo")
-            .args(vec![
-                "run",
-                "localized",
-                "--res-dir",
-                &output_res_path.clone(),
-                "--input-file",
-                "./tests_data/localized/success/input/localized_without_mapping.csv",
-            ])
-            .output()
-            .unwrap();
+fn succeeds_without_mapping() {
+    execute_with_copied_sample_res(
+        tempfile::tempdir().unwrap(),
+        "success",
+        |output_res_path: String| {
+            let output = Command::new("cargo")
+                .args(vec![
+                    "run",
+                    "localized",
+                    "--res-dir",
+                    &output_res_path.clone(),
+                    "--input-file",
+                    "./tests_data/localized/success/input/localized_without_mapping.csv",
+                ])
+                .output()
+                .unwrap();
 
-        assert_status_and_stdout(output);
-        assert_output_files(output_res_path);
-    })
+            assert_status_and_stdout(output);
+            assert_output_files(output_res_path);
+        },
+    )
+}
+
+#[test]
+fn warns_if_nothing_new_localized() {
+    execute_with_copied_sample_res(
+        tempfile::tempdir().unwrap(),
+        "warn",
+        |output_res_path: String| {
+            let output = Command::new("cargo")
+                .args(vec![
+                    "run",
+                    "localized",
+                    "--res-dir",
+                    &output_res_path.clone(),
+                    "--input-file",
+                    "./tests_data/localized/warn/input/localized.csv",
+                ])
+                .output()
+                .unwrap();
+
+            assert!(!output.status.success());
+            assert!(String::from_utf8(output.stderr)
+                .unwrap()
+                .contains("No updated localized texts found\n"));
+        },
+    )
 }
 
 #[test]
@@ -77,7 +111,7 @@ fn errors_are_printed_out() {
         .contains("non_existent) doesn\'t exist\n"));
 }
 
-fn execute_with_copied_sample_res<F>(temp_dir: TempDir, test: F)
+fn execute_with_copied_sample_res<F>(temp_dir: TempDir, input_type: &str, test: F)
 where
     F: FnOnce(String) -> (),
 {
@@ -112,7 +146,10 @@ where
     default_strings_file
         .write(
             helpers::read_file_contents(
-                "./tests_data/localized/success/input/sample_res/values/",
+                &format!(
+                    "./tests_data/localized/{}/input/sample_res/values/",
+                    input_type
+                ),
                 "strings.xml",
             )
             .as_bytes(),
@@ -122,7 +159,10 @@ where
     fr_strings_file
         .write(
             helpers::read_file_contents(
-                "./tests_data/localized/success/input/sample_res/values-fr/",
+                &format!(
+                    "./tests_data/localized/{}/input/sample_res/values-fr/",
+                    input_type
+                ),
                 "strings.xml",
             )
             .as_bytes(),
@@ -132,7 +172,10 @@ where
     es_strings_file
         .write(
             helpers::read_file_contents(
-                "./tests_data/localized/success/input/sample_res/values-es/",
+                &format!(
+                    "./tests_data/localized/{}/input/sample_res/values-es/",
+                    input_type
+                ),
                 "strings.xml",
             )
             .as_bytes(),

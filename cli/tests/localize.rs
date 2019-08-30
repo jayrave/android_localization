@@ -23,7 +23,10 @@ fn succeeds_with_mapping() {
         .unwrap();
 
     assert_status_and_stdout(output);
-    assert_output_files(temp_dir, "./tests_data/localize/success/output_with_mapping/");
+    assert_output_files(
+        temp_dir,
+        "./tests_data/localize/success/output_with_mapping/",
+    );
 }
 
 #[test]
@@ -42,7 +45,10 @@ fn succeeds_without_mapping() {
         .unwrap();
 
     assert_status_and_stdout(output);
-    assert_output_files(temp_dir, "./tests_data/localize/success/output_without_mapping/");
+    assert_output_files(
+        temp_dir,
+        "./tests_data/localize/success/output_without_mapping/",
+    );
 }
 
 #[test]
