@@ -19,7 +19,7 @@ fn with_mapping() {
                 "--res-dir",
                 &output_res_path.clone(),
                 "--input-file",
-                "./tests_data/localized/input/localized_with_mapping.csv",
+                "./tests_data/localized/success/input/localized_with_mapping.csv",
                 "--mapping",
                 "french=fr",
                 "--mapping",
@@ -43,7 +43,7 @@ fn without_mapping() {
                 "--res-dir",
                 &output_res_path.clone(),
                 "--input-file",
-                "./tests_data/localized/input/localized_without_mapping.csv",
+                "./tests_data/localized/success/input/localized_without_mapping.csv",
             ])
             .output()
             .unwrap();
@@ -112,7 +112,7 @@ where
     default_strings_file
         .write(
             helpers::read_file_contents(
-                "./tests_data/localized/input/sample_res/values/",
+                "./tests_data/localized/success/input/sample_res/values/",
                 "strings.xml",
             )
             .as_bytes(),
@@ -122,7 +122,7 @@ where
     fr_strings_file
         .write(
             helpers::read_file_contents(
-                "./tests_data/localized/input/sample_res/values-fr/",
+                "./tests_data/localized/success/input/sample_res/values-fr/",
                 "strings.xml",
             )
             .as_bytes(),
@@ -132,7 +132,7 @@ where
     es_strings_file
         .write(
             helpers::read_file_contents(
-                "./tests_data/localized/input/sample_res/values-es/",
+                "./tests_data/localized/success/input/sample_res/values-es/",
                 "strings.xml",
             )
             .as_bytes(),
@@ -179,14 +179,14 @@ fn assert_status_and_stdout(output: Output) {
 
 fn assert_output_files(output_res_path: String) {
     helpers::assert_eq_of_file_contents(
-        "./tests_data/localized/output/",
+        "./tests_data/localized/success/output/",
         "french_strings.xml",
         &format!("{}/values-fr/", output_res_path),
         "strings.xml",
     );
 
     helpers::assert_eq_of_file_contents(
-        "./tests_data/localized/output/",
+        "./tests_data/localized/success/output/",
         "spanish_strings.xml",
         &format!("{}/values-es/", output_res_path),
         "strings.xml",
