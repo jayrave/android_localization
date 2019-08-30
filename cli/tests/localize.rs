@@ -4,14 +4,14 @@ use tempfile::TempDir;
 mod helpers;
 
 #[test]
-fn with_mapping() {
+fn succeeds_with_mapping() {
     let temp_dir = tempfile::tempdir().unwrap();
     let output = Command::new("cargo")
         .args(vec![
             "run",
             "localize",
             "--res-dir",
-            "./tests_data/localize/input",
+            "./tests_data/localize/success/input",
             "--output-dir",
             temp_dir.path().to_str().unwrap(),
             "--mapping",
@@ -23,18 +23,18 @@ fn with_mapping() {
         .unwrap();
 
     assert_status_and_stdout(output);
-    assert_output_files(temp_dir, "./tests_data/localize/output_with_mapping/");
+    assert_output_files(temp_dir, "./tests_data/localize/success/output_with_mapping/");
 }
 
 #[test]
-fn without_mapping() {
+fn succeeds_without_mapping() {
     let temp_dir = tempfile::tempdir().unwrap();
     let output = Command::new("cargo")
         .args(vec![
             "run",
             "localize",
             "--res-dir",
-            "./tests_data/localize/input",
+            "./tests_data/localize/success/input",
             "--output-dir",
             temp_dir.path().to_str().unwrap(),
         ])
@@ -42,7 +42,28 @@ fn without_mapping() {
         .unwrap();
 
     assert_status_and_stdout(output);
-    assert_output_files(temp_dir, "./tests_data/localize/output_without_mapping/");
+    assert_output_files(temp_dir, "./tests_data/localize/success/output_without_mapping/");
+}
+
+#[test]
+fn warns_if_nothing_to_localize() {
+    let temp_dir = tempfile::tempdir().unwrap();
+    let output = Command::new("cargo")
+        .args(vec![
+            "run",
+            "localize",
+            "--res-dir",
+            "./tests_data/localize/warn/input",
+            "--output-dir",
+            temp_dir.path().to_str().unwrap(),
+        ])
+        .output()
+        .unwrap();
+
+    assert!(!output.status.success());
+    assert!(String::from_utf8(output.stderr)
+        .unwrap()
+        .contains("Nothing found to localize\n"));
 }
 
 #[test]

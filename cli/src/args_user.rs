@@ -22,22 +22,32 @@ pub fn execute_for_matches(matches: ArgMatches) -> Result<(), ()> {
         return validate(validations_command);
     }
 
-    exit_on_failure(String::from("Command couldn't be recognized"))
+    err_with_failure(String::from("Command couldn't be recognized"))
 }
 
 fn localize(matches: &ArgMatches) -> Result<(), ()> {
-    exit_based_on_result(
-        "Texts to be localized written to",
-        android_localization_core::localize::localize(
-            matches
-                .value_of(constants::args::RES_DIR)
-                .expt(arg_missing_msg(constants::args::RES_DIR)),
-            matches
-                .value_of(constants::args::LOCALIZE_OUTPUT_DIR)
-                .expt(arg_missing_msg(constants::args::LOCALIZE_OUTPUT_DIR)),
-            build_mappings(matches),
-        ),
-    )
+    let result = android_localization_core::localize::localize(
+        matches
+            .value_of(constants::args::RES_DIR)
+            .expt(arg_missing_msg(constants::args::RES_DIR)),
+        matches
+            .value_of(constants::args::LOCALIZE_OUTPUT_DIR)
+            .expt(arg_missing_msg(constants::args::LOCALIZE_OUTPUT_DIR)),
+        build_mappings(matches),
+    );
+
+    match result {
+        Err(error) => exit_based_on_result("", Err(error)),
+        Ok(file_names) => if file_names.is_empty() {
+            err_with_warning(String::from("Nothing found to localize"))
+        } else {
+            ok_with_success(format!(
+                "{} - \n\n{}",
+                "Texts to be localized written to",
+                file_names.join("\n")
+            ))
+        }
+    }
 }
 
 fn localized(matches: &ArgMatches) -> Result<(), ()> {
@@ -63,14 +73,13 @@ fn validate(matches: &ArgMatches) -> Result<(), ()> {
     );
     match result {
         Err(error) => exit_based_on_result("", Err(error)),
-
         Ok(validation_result) => match validation_result {
             Ok(file_names) => {
                 let result: Result<Vec<String>, String> = Ok(file_names);
                 exit_based_on_result("No issues found. Validated the following files", result)
             }
 
-            Err(invalid_strings_files) => exit_on_failure(
+            Err(invalid_strings_files) => err_with_failure(
                 android_localization_core::formatter::format_to_string(invalid_strings_files).unwrap_or_else(|_| String::from("Looks like this utility is experiencing issues while displaying some invalid strings! Please contact the dev (jayrave) about this error")),
             ),
         },
@@ -117,22 +126,27 @@ fn exit_based_on_result<E: fmt::Display>(
     result: Result<Vec<String>, E>,
 ) -> Result<(), ()> {
     match result {
-        Ok(file_names) => exit_on_success(format!(
+        Ok(file_names) => ok_with_success(format!(
             "{} - \n\n{}",
             success_prefix,
             file_names.join("\n")
         )),
 
-        Err(error) => exit_on_failure(error.to_string()),
+        Err(error) => err_with_failure(error.to_string()),
     }
 }
 
-fn exit_on_success(output: String) -> Result<(), ()> {
+fn ok_with_success(output: String) -> Result<(), ()> {
     println!("{}", style(output).green());
     Ok(())
 }
 
-fn exit_on_failure(error: String) -> Result<(), ()> {
+fn err_with_warning(output: String) -> Result<(), ()> {
+    eprintln!("{}", style(output).yellow());
+    Err(())
+}
+
+fn err_with_failure(error: String) -> Result<(), ()> {
     eprintln!("{}", style(error).red());
     Err(())
 }
