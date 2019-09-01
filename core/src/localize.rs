@@ -27,10 +27,10 @@ pub fn localize<S: ::std::hash::BuildHasher>(
     )?;
 
     if locale_id_to_name_map.is_empty() {
-        return Err::<_, Error>(From::from(String::from(
+        return Err(Error::new(
+            res_dir_path,
             "Res dir doesn't have any non-default values dir with strings file!",
-        )))
-        .with_context(String::from(res_dir_path));
+        ));
     }
 
     create_output_dir_if_required(output_dir_path)?;
@@ -53,10 +53,10 @@ pub fn localize<S: ::std::hash::BuildHasher>(
 fn create_output_dir_if_required(output_dir_path: &str) -> Result<(), Error> {
     let output_path = PathBuf::from(output_dir_path);
     if output_path.is_file() {
-        Err::<_, Error>(From::from(String::from(
+        Err(Error::new(
+            output_dir_path,
             "Output directory path points to a file!",
-        )))
-        .with_context(String::from(output_dir_path))
+        ))
     } else if output_path.exists() {
         Ok(())
     } else {
@@ -115,23 +115,22 @@ impl FileProvider {
 
     /// Returns the created output file along with its path (if path computation
     /// is possible; if not, it passes out a fallback value)
-    fn create_output_file(&mut self, output_file_name: &str) -> Result<File, Error> {
+    fn create_output_file(&mut self, output_file_name: &str) -> Result<(File, String), Error> {
         let mut output_path = PathBuf::from(&self.sink_dir);
         output_path.push(output_file_name);
         output_path.set_extension(constants::extn::CSV);
         let output_path_or_fb = String::from(output_path.to_str().unwrap_or(output_file_name));
 
         if output_path.exists() {
-            Err::<_, Error>(From::from(String::from("Output file already exists!")))
-                .with_context(output_path_or_fb)
+            Err(Error::new(output_path_or_fb, "Output file already exists!"))
         } else {
             match File::create(output_path) {
                 Ok(file) => {
-                    self.created_files.push(output_path_or_fb);
-                    Ok(file)
+                    self.created_files.push(output_path_or_fb.clone());
+                    Ok((file, output_path_or_fb))
                 }
 
-                Err(error) => Err::<_, Error>(From::from(error)).with_context(output_path_or_fb),
+                Err(error) => Err(Error::new(output_path_or_fb, error)),
             }
         }
     }
@@ -141,8 +140,8 @@ impl csv_writer::SinkProvider for FileProvider {
     fn execute_with_new_sink(&mut self, writer: csv_writer::Writer) -> Result<(), Error> {
         self.count_of_files_created += 1;
         let filename = format!("to_localize_{}", self.count_of_files_created);
-        let mut sink = self.create_output_file(&filename)?;
-        writer.write(&mut sink)
+        let (mut sink, path) = self.create_output_file(&filename)?;
+        writer.write(&mut sink).with_context(path)
     }
 }
 
@@ -170,7 +169,7 @@ mod tests {
             super::localize(res_dir_path.to_str().unwrap(), "", HashMap::new()).unwrap_err();
         assert_eq!(
             error.context(),
-            &Some(String::from(res_dir_path.to_str().unwrap()))
+            &String::from(res_dir_path.to_str().unwrap())
         );
         assert!(error
             .to_string()
@@ -191,7 +190,7 @@ mod tests {
         assert!(error
             .to_string()
             .ends_with("Output directory path points to a file!"));
-        assert_eq!(error.context(), &Some(String::from(output_dir_path)));
+        assert_eq!(error.context(), &String::from(output_dir_path));
     }
 
     #[test]
@@ -210,7 +209,7 @@ mod tests {
         assert!(error.to_string().ends_with("Output file already exists!"));
         assert_eq!(
             error.context(),
-            &Some(String::from(output_file_path.to_str().unwrap()))
+            &String::from(output_file_path.to_str().unwrap())
         );
     }
 

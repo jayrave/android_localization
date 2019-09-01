@@ -5,10 +5,10 @@ use xml::reader::XmlEvent;
 use xml::ParserConfig;
 
 use crate::android_string::AndroidString;
-use crate::error::Error;
+use crate::error::InnerError;
 use crate::reader::xml_reader::events_handler::EventsHandler;
 
-pub fn read<S: Read>(source: S) -> Result<Vec<AndroidString>, Error> {
+pub fn read<S: Read>(source: S) -> Result<Vec<AndroidString>, InnerError> {
     let mut events_handler = EventsHandler::new();
     let reader = ParserConfig::new().create_reader(BufReader::new(source));
 

@@ -9,9 +9,12 @@ use xml::ParserConfig;
 
 use crate::android_string::AndroidString;
 use crate::constants;
-use crate::error::Error;
+use crate::error::InnerError;
 
-pub fn write<S: Write>(sink: &mut S, android_strings: Vec<AndroidString>) -> Result<(), Error> {
+pub fn write<S: Write>(
+    sink: &mut S,
+    android_strings: Vec<AndroidString>,
+) -> Result<(), InnerError> {
     let mut writer = EmitterConfig::new()
         .perform_indent(true)
         .indent_string("    ") // 4 spaces
@@ -44,7 +47,10 @@ pub fn write<S: Write>(sink: &mut S, android_strings: Vec<AndroidString>) -> Res
     Ok(())
 }
 
-fn write_string<W: Write>(writer: &mut writer::EventWriter<W>, value: &str) -> Result<(), Error> {
+fn write_string<W: Write>(
+    writer: &mut writer::EventWriter<W>,
+    value: &str,
+) -> Result<(), InnerError> {
     // Right now, to write CDATA sections in strings properly out to the file,
     // we are creating a reader & then piping the required read events to the
     // writer. This feels wasteful! There has got to a better, more efficient
@@ -55,21 +61,17 @@ fn write_string<W: Write>(writer: &mut writer::EventWriter<W>, value: &str) -> R
     let reader = ParserConfig::new().create_reader(value.as_bytes());
     for element_or_error in reader {
         match element_or_error {
-            Err(error) => return Err::<_, Error>(From::from(error)),
+            Err(error) => return Err::<_, InnerError>(From::from(error)),
             Ok(ref element) => match element {
                 ReadXmlEvent::Characters(_) => {
                     writer.write(element.as_writer_event().ok_or_else(|| {
-                        let error: Error =
-                            From::from(format!("Can't build writer event from {}", &value));
-                        error
+                        InnerError::from(format!("Can't build writer event from {}", &value))
                     })?)
                 }
 
                 ReadXmlEvent::CData(_) => {
                     writer.write(element.as_writer_event().ok_or_else(|| {
-                        let error: Error =
-                            From::from(format!("Can't build writer event from {}", &value));
-                        error
+                        InnerError::from(format!("Can't build writer event from {}", &value))
                     })?)
                 }
 

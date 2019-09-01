@@ -108,7 +108,7 @@ fn errors_are_printed_out() {
     assert!(!output.status.success());
     assert!(String::from_utf8(output.stderr)
         .unwrap()
-        .contains("non_existent) doesn\'t exist\n"));
+        .contains("Res dir path doesn't exist or it is not a directory\n"));
 }
 
 fn execute_with_copied_sample_res<F>(temp_dir: TempDir, input_type: &str, test: F)

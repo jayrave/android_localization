@@ -3,7 +3,7 @@ use std::io::Read;
 use csv;
 use csv::ReaderBuilder;
 
-use crate::error::Error;
+use crate::error::InnerError;
 use crate::localized_string::LocalizedString;
 use crate::localized_strings::LocalizedStrings;
 use android_localization_helpers::DevExpt;
@@ -12,7 +12,7 @@ use std::collections::HashSet;
 pub fn read<S: Read>(
     source: S,
     allow_only_locales: HashSet<String>,
-) -> Result<Vec<LocalizedStrings>, Error> {
+) -> Result<Vec<LocalizedStrings>, InnerError> {
     let mut reader = ReaderBuilder::new()
         .has_headers(true) // To treat first row specially
         .flexible(false) // Takes care of making sure that all records are of the same size
@@ -60,11 +60,9 @@ pub fn read<S: Read>(
 fn extract_filtered_headers(
     record: &csv::StringRecord,
     allow_only_locales: HashSet<String>,
-) -> Result<FilteredHeaders, Error> {
+) -> Result<FilteredHeaders, InnerError> {
     if record.len() < 3 {
-        Err(String::from(
-            "Too few values in header (at least 3 required)",
-        ))?;
+        Err("Too few values in header (at least 3 required)")?;
     }
 
     let mut iterator = record.into_iter();
@@ -76,11 +74,11 @@ fn extract_filtered_headers(
         .expt("Already checked the length but still fails!");
 
     if header1 != "string_name" {
-        Err(String::from("First header should be named string_name"))?;
+        Err("First header should be named string_name")?;
     }
 
     if header2 != "default_locale" {
-        Err(String::from("Second header should be named default_locale"))?;
+        Err("Second header should be named default_locale")?;
     }
 
     let mut foreign_indices_allow_flags = vec![];
@@ -103,7 +101,7 @@ fn extract_filtered_headers(
 fn extract_localized_record(
     record: &csv::StringRecord,
     foreign_indices_allow_flags: &[bool],
-) -> Result<LocalizedRecord, Error> {
+) -> Result<LocalizedRecord, InnerError> {
     // Since `ReaderBuilder` is set to be not flexible, we can be sure
     // that the this record is going to be as long as the headers record
     let mut iterator = record.into_iter();
@@ -111,7 +109,7 @@ fn extract_localized_record(
     let default_value = iterator.next().unwrap_or("");
 
     if string_name.is_empty() {
-        Err(String::from("string_name can't be empty for any record"))?;
+        Err("string_name can't be empty for any record")?;
     }
 
     let mut foreign_values = vec![];
@@ -145,7 +143,7 @@ mod tests {
     use std::fs::File;
     use std::io::{Seek, SeekFrom, Write};
 
-    use crate::error::Error;
+    use crate::error::InnerError;
     use crate::localized_string::LocalizedString;
     use crate::localized_strings::LocalizedStrings;
 
@@ -239,7 +237,7 @@ mod tests {
     fn read_strings_from_file(
         file_content: &str,
         allow_only_locales: Vec<&str>,
-    ) -> Result<Vec<LocalizedStrings>, Error> {
+    ) -> Result<Vec<LocalizedStrings>, InnerError> {
         // Write content to file
         let mut tmpfile: File = tempfile::tempfile().unwrap();
         tmpfile.write(file_content.as_bytes()).unwrap();

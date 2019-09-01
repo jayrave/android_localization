@@ -85,7 +85,7 @@ fn validate(matches: &ArgMatches) -> Result<(), ()> {
             .value_of(constants::args::RES_DIR)
             .expt(arg_missing_msg(constants::args::RES_DIR)),
     );
-    
+
     match result {
         Err(error) => exit_based_on_result("", Err(error)),
         Ok(validation_result) => match validation_result {

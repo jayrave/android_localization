@@ -8,7 +8,7 @@ use android_localization_helpers::DevExpt;
 
 use csv;
 
-use crate::error::Error;
+use crate::error::{Error, InnerError};
 use crate::localizable_strings::LocalizableStrings;
 
 pub fn write(
@@ -46,7 +46,7 @@ pub struct Writer {
 }
 
 impl Writer {
-    pub fn write(self, sink: &mut Write) -> Result<(), Error> {
+    pub fn write(self, sink: &mut Write) -> Result<(), InnerError> {
         // Sink is automatically buffered
         let mut csv_writer = csv::Writer::from_writer(sink);
         let locale_count = self.strings_list.len();
@@ -91,6 +91,7 @@ mod tests {
     use super::Error;
     use super::SinkProvider;
     use super::Writer;
+    use crate::error::ResultExt;
 
     struct ByteSinkProvider {
         data: Vec<String>,
@@ -101,7 +102,7 @@ mod tests {
             let mut contents = vec![];
             let result = writer.write(&mut contents);
             self.data.push(String::from_utf8(contents).unwrap());
-            result
+            result.with_context("added context for tests")
         }
     }
 

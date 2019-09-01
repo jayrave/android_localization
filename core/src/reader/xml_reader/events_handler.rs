@@ -1,7 +1,7 @@
 use xml::attribute::OwnedAttribute;
 
 use crate::android_string::AndroidString;
-use crate::error::Error;
+use crate::error::InnerError;
 use crate::reader::xml_reader::event_handler::EventHandler;
 use crate::reader::xml_reader::root_event_handler::RootEventHandler;
 use android_localization_helpers::DevExpt;
@@ -23,7 +23,7 @@ impl EventsHandler {
         &mut self,
         tag_name: String,
         attributes: Vec<OwnedAttribute>,
-    ) -> Result<(), Error> {
+    ) -> Result<(), InnerError> {
         let event_handler = self
             .event_handlers
             .last_mut()

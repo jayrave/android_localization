@@ -31,10 +31,10 @@ pub fn localized<S: ::std::hash::BuildHasher>(
     )?;
 
     if locale_name_to_id_map.is_empty() {
-        return Err::<_, Error>(From::from(String::from(
+        return Err(Error::new(
+            res_dir_path,
             "Res dir doesn't have any non-default values dir with strings file!",
-        )))
-        .with_context(String::from(res_dir_path));
+        ));
     }
 
     // Read default strings
@@ -66,7 +66,8 @@ fn handle_localized<S: ::std::hash::BuildHasher>(
             .keys()
             .map(|s: &String| String::clone(s))
             .collect(),
-    )?;
+    )
+    .with_context(localized_text_file_path)?;
 
     let mut updated_files_paths = vec![];
     for new_localized_foreign_strings in new_localized_foreign_strings_list {
@@ -165,7 +166,7 @@ mod tests {
             super::localized(res_dir_path.to_str().unwrap(), "", HashMap::new()).unwrap_err();
         assert_eq!(
             error.context(),
-            &Some(String::from(res_dir_path.to_str().unwrap()))
+            &String::from(res_dir_path.to_str().unwrap())
         );
         assert!(error
             .to_string()

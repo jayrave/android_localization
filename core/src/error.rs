@@ -2,9 +2,11 @@ use std::error;
 use std::fmt;
 use std::io;
 
+/// Do not implement any `From` for `Error` since we want all `Error`s to carry
+/// some context (which most usually is the path of the file with issues)
 #[derive(Debug)]
 pub struct Error {
-    pub(crate) context: Option<String>,
+    pub(crate) context: String,
     pub(crate) kind: ErrorKind,
 }
 
@@ -17,68 +19,20 @@ pub enum ErrorKind {
     XmlWrite(xml::writer::Error),
 }
 
+/// Components that don't know the path, should return this which could be
+/// converted into an `Error` with the appropriate context
+#[derive(Debug)]
+pub struct InnerError {
+    kind: ErrorKind,
+}
+
 impl Error {
-    pub fn context(&self) -> &Option<String> {
+    pub fn new<S: Into<String>, E: Into<InnerError>>(context: S, error: E) -> Error {
+        error.into().into_error(context)
+    }
+
+    pub fn context(&self) -> &str {
         &self.context
-    }
-}
-
-/// To easily add context to errors
-pub trait ResultExt<T> {
-    fn with_context(self, context: String) -> Result<T, Error>;
-}
-
-impl<T, E: Into<Error>> ResultExt<T> for Result<T, E> {
-    fn with_context(self, context: String) -> Result<T, Error> {
-        self.map_err(Into::into).map_err(|err| Error {
-            context: Some(context),
-            ..err
-        })
-    }
-}
-
-impl From<csv::Error> for Error {
-    fn from(error: csv::Error) -> Self {
-        Error {
-            context: None,
-            kind: ErrorKind::Csv(error),
-        }
-    }
-}
-
-impl From<io::Error> for Error {
-    fn from(error: io::Error) -> Self {
-        Error {
-            context: None,
-            kind: ErrorKind::Io(error),
-        }
-    }
-}
-
-impl From<String> for Error {
-    fn from(message: String) -> Self {
-        Error {
-            context: None,
-            kind: ErrorKind::Message(message),
-        }
-    }
-}
-
-impl From<xml::reader::Error> for Error {
-    fn from(error: xml::reader::Error) -> Self {
-        Error {
-            context: None,
-            kind: ErrorKind::XmlRead(error),
-        }
-    }
-}
-
-impl From<xml::writer::Error> for Error {
-    fn from(error: xml::writer::Error) -> Self {
-        Error {
-            context: None,
-            kind: ErrorKind::XmlWrite(error),
-        }
     }
 }
 
@@ -96,16 +50,91 @@ impl error::Error for Error {
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if let Some(context) = &self.context {
-            write!(f, "{}: ", context)?;
-        }
+        write!(f, "{}: ", self.context)?;
+        fmt::Display::fmt(&self.kind, f)
+    }
+}
 
-        match &self.kind {
+impl fmt::Display for ErrorKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match &self {
             ErrorKind::Csv(error) => fmt::Display::fmt(error, f),
             ErrorKind::Io(error) => fmt::Display::fmt(error, f),
             ErrorKind::Message(message) => fmt::Display::fmt(message, f),
             ErrorKind::XmlRead(error) => fmt::Display::fmt(error, f),
             ErrorKind::XmlWrite(error) => fmt::Display::fmt(error, f),
         }
+    }
+}
+
+impl fmt::Display for InnerError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(&self.kind, f)
+    }
+}
+
+impl InnerError {
+    pub fn into_error<S: Into<String>>(self, context: S) -> Error {
+        Error {
+            context: context.into(),
+            kind: self.kind,
+        }
+    }
+}
+
+impl From<csv::Error> for InnerError {
+    fn from(error: csv::Error) -> Self {
+        InnerError {
+            kind: ErrorKind::Csv(error),
+        }
+    }
+}
+
+impl From<io::Error> for InnerError {
+    fn from(error: io::Error) -> Self {
+        InnerError {
+            kind: ErrorKind::Io(error),
+        }
+    }
+}
+
+impl From<String> for InnerError {
+    fn from(message: String) -> Self {
+        InnerError {
+            kind: ErrorKind::Message(message),
+        }
+    }
+}
+
+impl From<&str> for InnerError {
+    fn from(message: &str) -> Self {
+        InnerError::from(String::from(message))
+    }
+}
+
+impl From<xml::reader::Error> for InnerError {
+    fn from(error: xml::reader::Error) -> Self {
+        InnerError {
+            kind: ErrorKind::XmlRead(error),
+        }
+    }
+}
+
+impl From<xml::writer::Error> for InnerError {
+    fn from(error: xml::writer::Error) -> Self {
+        InnerError {
+            kind: ErrorKind::XmlWrite(error),
+        }
+    }
+}
+
+/// To easily add context to errors
+pub trait ResultExt<T> {
+    fn with_context<S: Into<String>>(self, context: S) -> Result<T, Error>;
+}
+
+impl<T, E: Into<InnerError>> ResultExt<T> for Result<T, E> {
+    fn with_context<S: Into<String>>(self, context: S) -> Result<T, Error> {
+        self.map_err(|error| error.into().into_error(context))
     }
 }

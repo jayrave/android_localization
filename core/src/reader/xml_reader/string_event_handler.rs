@@ -2,7 +2,7 @@ use xml::attribute::OwnedAttribute;
 
 use crate::android_string::AndroidString;
 use crate::constants;
-use crate::error::Error;
+use crate::error::InnerError;
 use crate::reader::xml_reader::event_handler::EventHandler;
 use crate::reader::xml_reader::sinking_event_handler::SinkingEventHandler;
 
@@ -13,7 +13,7 @@ pub struct StringEventHandler {
 }
 
 impl StringEventHandler {
-    pub fn build(attributes: Vec<OwnedAttribute>) -> Result<StringEventHandler, Error> {
+    pub fn build(attributes: Vec<OwnedAttribute>) -> Result<StringEventHandler, InnerError> {
         let mut string_name = None;
         let mut is_localizable = true;
         for attribute in attributes {
@@ -29,9 +29,7 @@ impl StringEventHandler {
         }
 
         match string_name {
-            None => Err(String::from(
-                "string element is missing required name attribute",
-            ))?,
+            None => Err("string element is missing required name attribute")?,
             Some(name) => Ok(StringEventHandler {
                 name,
                 is_localizable,
@@ -59,7 +57,7 @@ impl EventHandler for StringEventHandler {
         &self,
         _tag_name: String,
         _attributes: Vec<OwnedAttribute>,
-    ) -> Result<Box<EventHandler>, Error> {
+    ) -> Result<Box<EventHandler>, InnerError> {
         Ok(Box::new(SinkingEventHandler::new()))
     }
 

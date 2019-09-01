@@ -1,7 +1,7 @@
 use xml::attribute::OwnedAttribute;
 
 use crate::android_string::AndroidString;
-use crate::error::Error;
+use crate::error::InnerError;
 
 /// One instance of `EventHandler` is only expected to ever build one `AndroidString`
 pub trait EventHandler {
@@ -9,7 +9,7 @@ pub trait EventHandler {
         &self,
         tag_name: String,
         attributes: Vec<OwnedAttribute>,
-    ) -> Result<Box<EventHandler>, Error>;
+    ) -> Result<Box<EventHandler>, InnerError>;
 
     fn handle_characters_event(&mut self, _text: String) {
         // No op

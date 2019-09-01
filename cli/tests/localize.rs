@@ -90,7 +90,7 @@ fn errors_are_printed_out() {
     assert!(!output.status.success());
     assert!(String::from_utf8(output.stderr)
         .unwrap()
-        .contains("localize/non_existent_dir) doesn't exist\n"));
+        .contains("Res dir path doesn't exist or it is not a directory\n"));
 }
 
 fn assert_status_and_stdout(output: Output) {

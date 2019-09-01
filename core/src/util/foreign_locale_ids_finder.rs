@@ -18,10 +18,10 @@ lazy_static::lazy_static! {
 /// What is after the last `-` in the folder name is returned as the lang id
 pub fn find(res_dir_path: &str) -> Result<Vec<String>, Error> {
     if !Path::new(res_dir_path).is_dir() {
-        return Err(From::from(format!(
-            "Res dir({}) doesn't exist",
-            res_dir_path
-        )));
+        return Err(Error::new(
+            res_dir_path,
+            "Res dir path doesn't exist or it is not a directory",
+        ))?;
     }
 
     let locale_ids = fs::read_dir(res_dir_path)
@@ -87,7 +87,10 @@ mod tests {
         let error = super::find(res_dir_path.to_str().unwrap()).unwrap_err();
         assert_eq!(
             error.to_string(),
-            format!("Res dir({}) doesn't exist", res_dir_path.to_str().unwrap())
+            format!(
+                "{}: Res dir path doesn't exist or it is not a directory",
+                res_dir_path.to_str().unwrap()
+            )
         )
     }
 
