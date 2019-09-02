@@ -12,7 +12,7 @@ use crate::ops::filter;
 use crate::ops::merge;
 use crate::reader::csv_reader;
 use crate::util::foreign_locale_ids_finder;
-use crate::util::xml_helper;
+use crate::util::xml_utilities;
 use crate::writer::xml_writer;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
@@ -40,7 +40,7 @@ pub fn localized<S: ::std::hash::BuildHasher>(
     // Read default strings
     let res_dir_path = Path::new(res_dir_path);
     let mut localizable_default_strings = filter::find_localizable_strings(
-        xml_helper::read_default_strings(res_dir_path)?.into_strings(),
+        xml_utilities::read_default_strings(res_dir_path)?.into_strings(),
     );
 
     // For all languages, handle localized text
@@ -76,7 +76,7 @@ fn handle_localized<S: ::std::hash::BuildHasher>(
             .expect("Read locale doesn't have a mapping! Please let the dev know about this issue");
 
         let existing_foreign_strings =
-            xml_helper::read_foreign_strings(res_dir_path, locale_id)?.into_strings();
+            xml_utilities::read_foreign_strings(res_dir_path, locale_id)?.into_strings();
         let existing_foreign_strings_hash = compute_hash_of(&existing_foreign_strings);
 
         // Read already localized foreign strings for locale
@@ -152,7 +152,7 @@ mod tests {
     use std::io::Write;
 
     use crate::android_string::AndroidString;
-    use crate::util::xml_helper;
+    use crate::util::xml_utilities;
     use crate::writer::xml_writer;
 
     #[test]
@@ -299,7 +299,7 @@ s2, english value 2,,spanish new value 2,german new value 2,            "#
         );
 
         assert_eq!(
-            xml_helper::read_foreign_strings(&res_dir_path, "fr")
+            xml_utilities::read_foreign_strings(&res_dir_path, "fr")
                 .unwrap()
                 .into_strings(),
             vec![
@@ -309,7 +309,7 @@ s2, english value 2,,spanish new value 2,german new value 2,            "#
         );
 
         assert_eq!(
-            xml_helper::read_foreign_strings(&res_dir_path, "es")
+            xml_utilities::read_foreign_strings(&res_dir_path, "es")
                 .unwrap()
                 .into_strings(),
             vec![
@@ -320,7 +320,7 @@ s2, english value 2,,spanish new value 2,german new value 2,            "#
 
         // German must not have changed since it wasn't included in the mapping
         assert_eq!(
-            xml_helper::read_foreign_strings(&res_dir_path, "de")
+            xml_utilities::read_foreign_strings(&res_dir_path, "de")
                 .unwrap()
                 .into_strings(),
             german_android_strings
@@ -329,7 +329,7 @@ s2, english value 2,,spanish new value 2,german new value 2,            "#
         // Chinese must not have changed since the localized text only container blank string
         // & already present localized value
         assert_eq!(
-            xml_helper::read_foreign_strings(&res_dir_path, "zh")
+            xml_utilities::read_foreign_strings(&res_dir_path, "zh")
                 .unwrap()
                 .into_strings(),
             chinese_android_strings

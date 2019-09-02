@@ -10,7 +10,7 @@ use crate::error::{Error, ResultExt};
 use crate::localizable_strings::LocalizableStrings;
 use crate::ops::filter;
 use crate::util::foreign_locale_ids_finder;
-use crate::util::xml_helper;
+use crate::util::xml_utilities;
 use crate::writer::csv_writer;
 
 /// Returns the list of output files created by this call. These aren't guaranteed
@@ -38,7 +38,7 @@ pub fn localize<S: ::std::hash::BuildHasher>(
     // Read default strings
     let res_dir_path = Path::new(res_dir_path);
     let mut localizable_default_strings = filter::find_localizable_strings(
-        xml_helper::read_default_strings(res_dir_path)?.into_strings(),
+        xml_utilities::read_default_strings(res_dir_path)?.into_strings(),
     );
 
     // For all languages, write out strings requiring localization
@@ -74,7 +74,7 @@ fn write_out_strings_to_localize<S: ::std::hash::BuildHasher>(
     let mut localizable_strings_list = vec![];
     for (locale_id, locale_name) in locale_id_to_name_map {
         let mut foreign_strings =
-            xml_helper::read_foreign_strings(res_dir_path, &locale_id)?.into_strings();
+            xml_utilities::read_foreign_strings(res_dir_path, &locale_id)?.into_strings();
 
         let strings_to_localize =
             filter::find_missing_strings(&mut foreign_strings, localizable_default_strings);

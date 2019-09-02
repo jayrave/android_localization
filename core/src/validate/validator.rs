@@ -2,8 +2,8 @@ use std::path::Path;
 
 use crate::error::Error;
 use crate::util::foreign_locale_ids_finder;
-use crate::util::xml_helper;
-use crate::util::xml_helper::StringsWithPath;
+use crate::util::xml_utilities;
+use crate::util::xml_utilities::StringsWithPath;
 use crate::validate::apostrophe;
 use crate::validate::format_string;
 use crate::validate::format_string::ParsedData;
@@ -14,7 +14,7 @@ pub fn validate(res_dir_path: &str) -> Result<Result<Vec<String>, Vec<InvalidStr
     let mut path_of_validated_files = vec![];
     let mut invalid_strings_files = vec![];
 
-    let default_strings_with_path = xml_helper::read_default_strings(Path::new(res_dir_path))?;
+    let default_strings_with_path = xml_utilities::read_default_strings(Path::new(res_dir_path))?;
     let mut default_parsed_data =
         format_string::parse_and_build_data(&default_strings_with_path.strings());
     validate_default_strings(
@@ -27,7 +27,7 @@ pub fn validate(res_dir_path: &str) -> Result<Result<Vec<String>, Vec<InvalidStr
     let locale_ids = foreign_locale_ids_finder::find(res_dir_path_string)?;
     for locale_id in locale_ids {
         validate_foreign_strings(
-            xml_helper::read_foreign_strings(Path::new(res_dir_path), &locale_id)?,
+            xml_utilities::read_foreign_strings(Path::new(res_dir_path), &locale_id)?,
             &mut default_parsed_data,
             &mut path_of_validated_files,
             &mut invalid_strings_files,
