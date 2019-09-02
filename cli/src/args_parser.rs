@@ -1,5 +1,5 @@
 use crate::constants;
-use clap::App;
+use clap::{App, AppSettings};
 use clap::Arg;
 use clap::SubCommand;
 
@@ -117,6 +117,7 @@ pub fn build() -> App<'static, 'static> {
     App::new(doc::NAME)
         .about(doc::SHORT)
         .long_about(doc::LONG)
+        .setting(AppSettings::ArgRequiredElseHelp)
         .subcommand(build_localize_sub_command())
         .subcommand(build_localized_sub_command())
         .subcommand(build_validate_sub_command())
