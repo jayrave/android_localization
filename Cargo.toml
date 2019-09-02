@@ -1,2 +1,2 @@
 [workspace]
-members = ['./cli', './core', './helpers', './test_helpers']
+members = ['./cli', './core', './helpers', './test_utilities']

@@ -7,7 +7,7 @@ use std::path::PathBuf;
 use std::process::{Command, Output};
 use tempfile::TempDir;
 
-use test_helpers;
+use test_utilities;
 
 #[test]
 fn succeeds_with_mapping() {
@@ -204,13 +204,13 @@ fn assert_status_and_stdout(output: Output) {
         "Localized texts written to - "
     );
     assert_eq!(output_lines.next().unwrap(), "");
-    test_helpers::assert_eq_to_either_or_by(
+    test_utilities::assert_eq_to_either_or_by(
         output_lines.next().unwrap(),
         fr_path,
         es_path,
         |actual, expected| actual.contains(expected),
     );
-    test_helpers::assert_eq_to_either_or_by(
+    test_utilities::assert_eq_to_either_or_by(
         output_lines.next().unwrap(),
         fr_path,
         es_path,

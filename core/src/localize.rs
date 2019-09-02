@@ -154,7 +154,7 @@ mod tests {
     use std::path::{Path, PathBuf};
 
     use tempfile::TempDir;
-    use test_helpers;
+    use test_utilities;
 
     use crate::android_string::AndroidString;
 
@@ -284,7 +284,7 @@ mod tests {
             File::open(&Path::new(&file_paths.into_iter().next().unwrap())).unwrap();
         let mut output = String::new();
         output_file.read_to_string(&mut output).unwrap();
-        test_helpers::assert_eq_to_either_or(
+        test_utilities::assert_eq_to_either_or(
             output,
             String::from("string_name,default_locale,spanish,french\nstring_1,string value,,\nstring_2,string value,,\n"),
             String::from("string_name,default_locale,french,spanish\nstring_1,string value,,\nstring_2,string value,,\n")

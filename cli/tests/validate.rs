@@ -3,7 +3,7 @@ mod helpers;
 use std::path::PathBuf;
 use std::process::Command;
 
-use test_helpers;
+use test_utilities;
 
 #[test]
 fn success_is_printed_out() {
@@ -37,13 +37,13 @@ fn success_is_printed_out() {
         "No issues found. Validated the following files - "
     );
     assert_eq!(output_lines.next().unwrap(), "");
-    test_helpers::assert_eq_to_either_or_by(
+    test_utilities::assert_eq_to_either_or_by(
         output_lines.next().unwrap(),
         default_path,
         fr_path,
         |actual, expected| actual.contains(expected),
     );
-    test_helpers::assert_eq_to_either_or_by(
+    test_utilities::assert_eq_to_either_or_by(
         output_lines.next().unwrap(),
         default_path,
         fr_path,
