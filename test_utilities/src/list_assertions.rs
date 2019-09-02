@@ -17,6 +17,16 @@ where
     LT: AsRef<[T]> + Debug,
     LS: AsRef<[S]> + Debug,
 {
+    let list1 = list1.as_ref();
+    let list2 = list2.as_ref();
+    if list1.len() != list2.len() {
+        panic!(
+            r#"Expected lists to have the same size
+List 1: {:?}
+List 2: {:?}"#
+        )
+    }
+
     list1
         .as_ref()
         .iter()
