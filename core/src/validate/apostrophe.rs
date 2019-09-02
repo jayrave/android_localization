@@ -1,7 +1,8 @@
 use regex::Regex;
 
-use crate::android_string::AndroidString;
 use android_localization_utilities::DevExpt;
+
+use crate::android_string::AndroidString;
 
 lazy_static::lazy_static! {
     static ref APOSTROPHE: Regex = Regex::new("(')").expt("Invalid regex!");
@@ -34,9 +35,9 @@ pub struct InvalidStrings {
 
 #[cfg(test)]
 mod tests {
-    use crate::android_string::AndroidString;
-
     use test_utilities;
+
+    use crate::android_string::AndroidString;
 
     #[test]
     fn passes_in_absence_of_unescaped_apostrophes() {

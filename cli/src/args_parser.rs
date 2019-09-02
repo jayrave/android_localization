@@ -1,7 +1,8 @@
-use crate::constants;
 use clap::Arg;
 use clap::SubCommand;
 use clap::{App, AppSettings};
+
+use crate::constants;
 
 mod doc {
     pub static NAME: &str = "Android Localization";

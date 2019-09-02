@@ -1,5 +1,7 @@
+use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::fs::File;
+use std::hash::{Hash, Hasher};
 use std::ops::Add;
 use std::path::Path;
 
@@ -14,8 +16,6 @@ use crate::reader::csv_reader;
 use crate::util::foreign_locale_ids_finder;
 use crate::util::xml_utilities;
 use crate::writer::xml_writer;
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
 
 /// Returns the list of output files updated by this call. These aren't guaranteed
 /// to be valid paths to files. Sometimes, if a file's path can't be expressed by
@@ -151,11 +151,11 @@ mod tests {
     use std::io::Read;
     use std::io::Write;
 
+    use test_utilities;
+
     use crate::android_string::AndroidString;
     use crate::util::xml_utilities;
     use crate::writer::xml_writer;
-
-    use test_utilities;
 
     #[test]
     fn errors_for_empty_locale_name_to_id_map() {

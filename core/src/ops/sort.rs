@@ -23,10 +23,10 @@ pub fn compare_android_strings(s1: &AndroidString, s2: &AndroidString) -> Orderi
 
 #[cfg(test)]
 mod tests {
+    use test_utilities;
+
     use crate::android_string::AndroidString;
     use crate::localized_string::LocalizedString;
-
-    use test_utilities;
 
     #[test]
     fn sorts_android_strings_by_name() {

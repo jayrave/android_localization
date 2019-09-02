@@ -70,10 +70,11 @@ impl StringsWithPath {
 
 #[cfg(test)]
 mod tests {
-    use crate::error;
     use std::fs;
     use std::fs::File;
     use std::io::{Read, Write};
+
+    use crate::error;
 
     #[test]
     fn open_strings_file_errors_if_values_dir_is_missing() {

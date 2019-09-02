@@ -1,9 +1,10 @@
 use regex::Regex;
 
+use android_localization_utilities::DevExpt;
+
 use crate::android_string::AndroidString;
 use crate::ops::sort;
 use crate::util::two_pointer_comparison;
-use android_localization_utilities::DevExpt;
 
 lazy_static::lazy_static! {
     static ref FORMAT_STRING: Regex = Regex::new(r"(%\d+\$[ds])").expt("Invalid regex!");
@@ -81,12 +82,12 @@ pub struct Mismatches {
 
 #[cfg(test)]
 mod tests {
+    use test_utilities;
+
     use crate::android_string::AndroidString;
 
     use super::Mismatch;
     use super::ParsedData;
-
-    use test_utilities;
 
     #[test]
     fn validate_passes_in_absence_of_mismatches() {

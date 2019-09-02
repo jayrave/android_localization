@@ -1,6 +1,7 @@
+use android_localization_utilities::DevExpt;
+
 use crate::android_string::AndroidString;
 use crate::ops::sort;
-use android_localization_utilities::DevExpt;
 
 /// While grouping strings, strings from `strings_1` take precedence over `strings_2` in case both
 /// strings have the same name
@@ -54,9 +55,9 @@ pub fn merge_and_group_strings(
 
 #[cfg(test)]
 mod tests {
-    use crate::android_string::AndroidString;
-
     use test_utilities;
+
+    use crate::android_string::AndroidString;
 
     #[test]
     fn merges_and_groups() {

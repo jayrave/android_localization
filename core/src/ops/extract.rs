@@ -35,10 +35,10 @@ pub fn extract_android_strings_from_localized(
 
 #[cfg(test)]
 mod tests {
+    use test_utilities;
+
     use crate::android_string::AndroidString;
     use crate::localized_string::LocalizedString;
-
-    use test_utilities;
 
     #[test]
     fn extracts() {

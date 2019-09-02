@@ -1,7 +1,8 @@
+use std::ffi::OsString;
+
 mod args_parser;
 mod args_user;
 mod constants;
-use std::ffi::OsString;
 
 pub fn execute_for_commands<I, T>(itr: I) -> Result<(), ()>
 where

@@ -154,6 +154,7 @@ mod tests {
     use std::path::{Path, PathBuf};
 
     use tempfile::TempDir;
+
     use test_utilities;
 
     use crate::android_string::AndroidString;

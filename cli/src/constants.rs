@@ -1,5 +1,6 @@
-use android_localization_utilities::DevExpt;
 use regex::Regex;
+
+use android_localization_utilities::DevExpt;
 
 pub mod commands {
     pub const LOCALIZE: &str = "localize";

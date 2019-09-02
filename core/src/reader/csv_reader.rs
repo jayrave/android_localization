@@ -1,13 +1,14 @@
+use std::collections::HashSet;
 use std::io::Read;
 
 use csv;
 use csv::ReaderBuilder;
 
+use android_localization_utilities::DevExpt;
+
 use crate::error::InnerError;
 use crate::localized_string::LocalizedString;
 use crate::localized_strings::LocalizedStrings;
-use android_localization_utilities::DevExpt;
-use std::collections::HashSet;
 
 pub fn read<S: Read>(
     source: S,
@@ -143,11 +144,11 @@ mod tests {
     use std::fs::File;
     use std::io::{Seek, SeekFrom, Write};
 
+    use test_utilities;
+
     use crate::error::InnerError;
     use crate::localized_string::LocalizedString;
     use crate::localized_strings::LocalizedStrings;
-
-    use test_utilities;
 
     #[test]
     fn reads_strings_from_valid_file() {

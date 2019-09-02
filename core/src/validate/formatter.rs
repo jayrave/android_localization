@@ -1,7 +1,9 @@
-use crate::validate::validator::InvalidStringsFile;
-use android_localization_utilities::DevExpt;
 use std::fmt::Error;
 use std::fmt::Write;
+
+use android_localization_utilities::DevExpt;
+
+use crate::validate::validator::InvalidStringsFile;
 
 pub fn format_to_string(invalid_strings_files: Vec<InvalidStringsFile>) -> Result<String, Error> {
     let files_count = invalid_strings_files.len();

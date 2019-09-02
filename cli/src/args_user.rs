@@ -1,10 +1,13 @@
-use crate::constants;
-use android_localization_core;
-use android_localization_utilities::DevExpt;
-use clap::ArgMatches;
-use console::style;
 use std::collections::HashMap;
 use std::fmt;
+
+use clap::ArgMatches;
+use console::style;
+
+use android_localization_core;
+use android_localization_utilities::DevExpt;
+
+use crate::constants;
 
 /// In this file, you most probably would see wide spread usages of `Option#unwrap`.
 /// Please don't let that bother you as the requirements are correctly setup in

@@ -113,13 +113,13 @@ mod tests {
     use std::fs::File;
     use std::path::PathBuf;
 
+    use test_utilities;
+
     use crate::android_string::AndroidString;
     use crate::validate::apostrophe;
     use crate::validate::format_string;
     use crate::validate::validator::InvalidStringsFile;
     use crate::writer::xml_writer;
-
-    use test_utilities;
 
     #[test]
     fn validates() {

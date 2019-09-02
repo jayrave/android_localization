@@ -85,9 +85,9 @@ fn write_string<W: Write>(
 
 #[cfg(test)]
 mod tests {
-    use crate::android_string::AndroidString;
-
     use test_utilities;
+
+    use crate::android_string::AndroidString;
 
     #[test]
     fn writes_strings_to_file() {

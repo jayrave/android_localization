@@ -1,7 +1,8 @@
-mod file_utilities;
-
 use std::process::{Command, Output};
+
 use tempfile::TempDir;
+
+mod file_utilities;
 
 #[test]
 fn succeeds_with_mapping() {

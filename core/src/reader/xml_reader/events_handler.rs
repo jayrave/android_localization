@@ -1,10 +1,11 @@
 use xml::attribute::OwnedAttribute;
 
+use android_localization_utilities::DevExpt;
+
 use crate::android_string::AndroidString;
 use crate::error::InnerError;
 use crate::reader::xml_reader::event_handler::EventHandler;
 use crate::reader::xml_reader::root_event_handler::RootEventHandler;
-use android_localization_utilities::DevExpt;
 
 pub struct EventsHandler {
     android_strings: Vec<AndroidString>,

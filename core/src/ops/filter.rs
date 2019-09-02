@@ -55,9 +55,9 @@ pub fn find_missing_strings(
 
 #[cfg(test)]
 mod tests {
-    use crate::android_string::AndroidString;
-
     use test_utilities;
+
+    use crate::android_string::AndroidString;
 
     #[test]
     fn finds_localizable_strings() {

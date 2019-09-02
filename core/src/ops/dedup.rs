@@ -9,9 +9,9 @@ pub fn dedup_grouped_strings(android_strings: &mut Vec<AndroidString>) {
 
 #[cfg(test)]
 mod tests {
-    use crate::android_string::AndroidString;
-
     use test_utilities;
+
+    use crate::android_string::AndroidString;
 
     #[test]
     fn dedupes() {

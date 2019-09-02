@@ -35,9 +35,9 @@ mod tests {
     use std::fs::File;
     use std::io::{Seek, SeekFrom, Write};
 
-    use crate::android_string::AndroidString;
-
     use test_utilities;
+
+    use crate::android_string::AndroidString;
 
     #[test]
     fn reads_strings_from_valid_clean_file() {

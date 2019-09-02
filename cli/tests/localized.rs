@@ -1,13 +1,14 @@
-mod file_utilities;
-
 use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 use std::process::{Command, Output};
+
 use tempfile::TempDir;
 
 use test_utilities;
+
+mod file_utilities;
 
 #[test]
 fn succeeds_with_mapping() {

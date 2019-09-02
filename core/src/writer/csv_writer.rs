@@ -4,9 +4,9 @@ use std::hash::Hash;
 use std::hash::Hasher;
 use std::io::Write;
 
-use android_localization_utilities::DevExpt;
-
 use csv;
+
+use android_localization_utilities::DevExpt;
 
 use crate::error::{Error, InnerError};
 use crate::localizable_strings::LocalizableStrings;
@@ -85,15 +85,15 @@ pub trait SinkProvider {
 
 #[cfg(test)]
 mod tests {
+    use test_utilities;
+
     use crate::android_string::AndroidString;
+    use crate::error::ResultExt;
     use crate::localizable_strings::LocalizableStrings;
 
     use super::Error;
     use super::SinkProvider;
     use super::Writer;
-    use crate::error::ResultExt;
-
-    use test_utilities;
 
     struct ByteSinkProvider {
         data: Vec<String>,
