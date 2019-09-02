@@ -15,10 +15,6 @@ impl LocalizedStrings {
         &self.locale
     }
 
-    pub fn strings(&self) -> &[LocalizedString] {
-        &self.strings
-    }
-
     pub fn into_strings(self) -> Vec<LocalizedString> {
         self.strings
     }

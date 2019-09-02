@@ -105,6 +105,7 @@ fn format_errors_from_one_file(
     Ok(issues_count_in_file)
 }
 
+#[cfg(test)]
 mod tests {
     use crate::android_string::AndroidString;
     use crate::validate::apostrophe;

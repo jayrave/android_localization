@@ -163,30 +163,22 @@ mod tests {
         assert_eq!(strings_list.next(), None);
 
         assert_eq!(french_strings.locale(), "french");
-        let mut french_strings_iter = french_strings.strings().iter();
+        let mut french_strings_iter = french_strings.into_strings().into_iter();
         assert_eq!(
             french_strings_iter.next(),
-            Some(&LocalizedString::build("string_1", "english 1", "french 1"))
+            Some(LocalizedString::build("string_1", "english 1", "french 1"))
         );
         assert_eq!(french_strings_iter.next(), None);
 
         assert_eq!(spanish_strings.locale(), "spanish");
-        let mut spanish_strings_iter = spanish_strings.strings().iter();
+        let mut spanish_strings_iter = spanish_strings.into_strings().into_iter();
         assert_eq!(
             spanish_strings_iter.next(),
-            Some(&LocalizedString::build(
-                "string_1",
-                "english 1",
-                "spanish 1"
-            ))
+            Some(LocalizedString::build("string_1", "english 1", "spanish 1"))
         );
         assert_eq!(
             spanish_strings_iter.next(),
-            Some(&LocalizedString::build(
-                "string_2",
-                "english 2",
-                "spanish 2"
-            ))
+            Some(LocalizedString::build("string_2", "english 2", "spanish 2"))
         );
         assert_eq!(spanish_strings_iter.next(), None);
     }

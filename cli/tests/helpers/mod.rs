@@ -1,5 +1,3 @@
-use android_localization_helpers::DevExpt;
-use std::fmt::{Debug, Display};
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
