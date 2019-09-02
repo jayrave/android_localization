@@ -1,7 +1,7 @@
+mod file_utilities;
+
 use std::process::{Command, Output};
 use tempfile::TempDir;
-
-mod helpers;
 
 #[test]
 fn succeeds_with_mapping() {
@@ -110,7 +110,7 @@ fn assert_status_and_stdout(output: Output) {
 }
 
 fn assert_output_files(temp_dir: TempDir, expected_output_dir_path: &str) {
-    helpers::assert_eq_of_file_contents_to_either_or(
+    file_utilities::assert_eq_of_file_contents_to_either_or(
         temp_dir.path().to_str().unwrap(),
         "to_localize_1.csv",
         expected_output_dir_path,

@@ -1,4 +1,4 @@
-mod helpers;
+mod file_utilities;
 
 use std::fs;
 use std::fs::File;
@@ -145,7 +145,7 @@ where
     // Write out required contents into files
     default_strings_file
         .write(
-            helpers::read_file_contents(
+            file_utilities::read_file_contents(
                 &format!(
                     "./tests_data/localized/{}/input/sample_res/values/",
                     input_type
@@ -158,7 +158,7 @@ where
 
     fr_strings_file
         .write(
-            helpers::read_file_contents(
+            file_utilities::read_file_contents(
                 &format!(
                     "./tests_data/localized/{}/input/sample_res/values-fr/",
                     input_type
@@ -171,7 +171,7 @@ where
 
     es_strings_file
         .write(
-            helpers::read_file_contents(
+            file_utilities::read_file_contents(
                 &format!(
                     "./tests_data/localized/{}/input/sample_res/values-es/",
                     input_type
@@ -221,14 +221,14 @@ fn assert_status_and_stdout(output: Output) {
 }
 
 fn assert_output_files(output_res_path: String) {
-    helpers::assert_eq_of_file_contents(
+    file_utilities::assert_eq_of_file_contents(
         "./tests_data/localized/success/output/",
         "french_strings.xml",
         &format!("{}/values-fr/", output_res_path),
         "strings.xml",
     );
 
-    helpers::assert_eq_of_file_contents(
+    file_utilities::assert_eq_of_file_contents(
         "./tests_data/localized/success/output/",
         "spanish_strings.xml",
         &format!("{}/values-es/", output_res_path),
