@@ -1,4 +1,4 @@
-use android_localization_helpers::DevExpt;
+use android_localization_utilities::DevExpt;
 use regex::Regex;
 
 pub mod commands {

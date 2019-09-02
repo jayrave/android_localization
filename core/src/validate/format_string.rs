@@ -3,7 +3,7 @@ use regex::Regex;
 use crate::android_string::AndroidString;
 use crate::ops::sort;
 use crate::util::two_pointer_comparison;
-use android_localization_helpers::DevExpt;
+use android_localization_utilities::DevExpt;
 
 lazy_static::lazy_static! {
     static ref FORMAT_STRING: Regex = Regex::new(r"(%\d+\$[ds])").expt("Invalid regex!");

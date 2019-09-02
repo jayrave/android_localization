@@ -6,7 +6,7 @@ use csv::ReaderBuilder;
 use crate::error::InnerError;
 use crate::localized_string::LocalizedString;
 use crate::localized_strings::LocalizedStrings;
-use android_localization_helpers::DevExpt;
+use android_localization_utilities::DevExpt;
 use std::collections::HashSet;
 
 pub fn read<S: Read>(

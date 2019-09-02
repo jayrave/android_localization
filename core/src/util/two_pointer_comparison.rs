@@ -1,4 +1,4 @@
-use android_localization_helpers::DevExpt;
+use android_localization_utilities::DevExpt;
 use std::cmp::Ordering;
 
 /// Items from list1 & list2 are compared against each other using

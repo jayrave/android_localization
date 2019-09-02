@@ -1,6 +1,6 @@
 use crate::constants;
 use android_localization_core;
-use android_localization_helpers::DevExpt;
+use android_localization_utilities::DevExpt;
 use clap::ArgMatches;
 use console::style;
 use std::collections::HashMap;

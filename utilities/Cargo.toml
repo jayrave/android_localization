@@ -1,5 +1,5 @@
 [package]
-name = 'android_localization_helpers'
+name = 'android_localization_utilities'
 version = '0.1.0'
 authors = ['jayrave <jayanthan.raveendiran@gmail.com>']
 edition = '2018'

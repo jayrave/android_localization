@@ -1,6 +1,6 @@
 use crate::android_string::AndroidString;
 use crate::ops::sort;
-use android_localization_helpers::DevExpt;
+use android_localization_utilities::DevExpt;
 
 /// While grouping strings, strings from `strings_1` take precedence over `strings_2` in case both
 /// strings have the same name

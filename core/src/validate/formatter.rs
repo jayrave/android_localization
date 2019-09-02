@@ -1,5 +1,5 @@
 use crate::validate::validator::InvalidStringsFile;
-use android_localization_helpers::DevExpt;
+use android_localization_utilities::DevExpt;
 use std::fmt::Error;
 use std::fmt::Write;
 

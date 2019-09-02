@@ -1,7 +1,7 @@
 use regex::Regex;
 
 use crate::android_string::AndroidString;
-use android_localization_helpers::DevExpt;
+use android_localization_utilities::DevExpt;
 
 lazy_static::lazy_static! {
     static ref APOSTROPHE: Regex = Regex::new("(')").expt("Invalid regex!");

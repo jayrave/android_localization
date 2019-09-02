@@ -4,7 +4,7 @@ use std::hash::Hash;
 use std::hash::Hasher;
 use std::io::Write;
 
-use android_localization_helpers::DevExpt;
+use android_localization_utilities::DevExpt;
 
 use csv;
 

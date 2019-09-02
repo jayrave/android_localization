@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
-use android_localization_helpers::DevExpt;
+use android_localization_utilities::DevExpt;
 use regex::Regex;
 
 use crate::constants;

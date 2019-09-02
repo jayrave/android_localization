@@ -5,7 +5,7 @@ authors = ['jayrave <jayanthan.raveendiran@gmail.com>']
 edition = '2018'
 
 [dependencies]
-android_localization_helpers = { path = '../helpers' }
+android_localization_utilities = { path = '../utilities' }
 csv = '1'
 lazy_static = '1.1.0'
 regex = '1.0.5'
