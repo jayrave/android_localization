@@ -84,17 +84,14 @@ mod tests {
     fn builds_string_with_one_character_event() {
         let mut handler = build_event_handler();
         handler.handle_characters_event(String::from("this is a test"));
-        assert_eq!(handler.built_string().unwrap().value(), "this is a test")
+        assert_string(handler, "this is a test")
     }
 
     #[test]
     fn builds_string_with_one_cdata_event() {
         let mut handler = build_event_handler();
         handler.handle_cdata_event(String::from("this is a test"));
-        assert_eq!(
-            handler.built_string().unwrap().value(),
-            "<![CDATA[this is a test]]>"
-        )
+        assert_string(handler, "<![CDATA[this is a test]]>")
     }
 
     #[test]
@@ -102,10 +99,7 @@ mod tests {
         let mut handler = build_event_handler();
         handler.handle_characters_event(String::from("character event "));
         handler.handle_cdata_event(String::from("cdata event"));
-        assert_eq!(
-            handler.built_string().unwrap().value(),
-            "character event <![CDATA[cdata event]]>"
-        )
+        assert_string(handler, "character event <![CDATA[cdata event]]>")
     }
 
     #[test]
@@ -113,10 +107,7 @@ mod tests {
         let mut handler = build_event_handler();
         handler.handle_cdata_event(String::from("cdata event"));
         handler.handle_characters_event(String::from(" character event"));
-        assert_eq!(
-            handler.built_string().unwrap().value(),
-            "<![CDATA[cdata event]]> character event"
-        )
+        assert_string(handler, "<![CDATA[cdata event]]> character event")
     }
 
     #[test]
@@ -129,7 +120,7 @@ mod tests {
         handler.handle_characters_event(String::from(" "));
         handler.handle_cdata_event(String::from("cdata event 3"));
         handler.handle_characters_event(String::from(" character event 3"));
-        assert_eq!(handler.built_string().unwrap().value(), "character event 1 <![CDATA[cdata event 1]]> character event 2 <![CDATA[cdata event 2]]> <![CDATA[cdata event 3]]> character event 3")
+        assert_string(handler, "character event 1 <![CDATA[cdata event 1]]> character event 2 <![CDATA[cdata event 2]]> <![CDATA[cdata event 3]]> character event 3")
     }
 
     fn build_event_handler() -> StringEventHandler {
@@ -138,5 +129,9 @@ mod tests {
             is_localizable: true,
             built_android_string: None,
         }
+    }
+
+    fn assert_string(handler: StringEventHandler, expected: &str) {
+        assert_eq!(handler.built_string().unwrap().value(), expected)
     }
 }

@@ -86,6 +86,8 @@ mod tests {
     use super::Mismatch;
     use super::ParsedData;
 
+    use test_utilities;
+
     #[test]
     fn validate_passes_in_absence_of_mismatches() {
         let mut default_parsed_data = vec![
@@ -130,7 +132,7 @@ mod tests {
             AndroidString::localizable("s4", "value %2$d"),
         ];
 
-        assert_eq!(
+        test_utilities::assert_strict_list_eq(
             super::validate(&mut default_parsed_data, &mut foreign_strings)
                 .unwrap_err()
                 .mismatches,
@@ -155,7 +157,7 @@ mod tests {
                         sorted_format_strings: vec![String::from("%1$s")],
                     },
                 },
-            ]
+            ],
         )
     }
 
@@ -166,43 +168,46 @@ mod tests {
             AndroidString::localizable("s1", r"%2$s a %1$d %2$d b %2$z c %1$s"),
         ];
 
-        let expected_output = vec![
-            ParsedData {
-                android_string: strings[0].clone(),
-                sorted_format_strings: vec![],
-            },
-            ParsedData {
-                android_string: strings[1].clone(),
-                sorted_format_strings: vec![
-                    String::from("%2$s"),
-                    String::from("%1$d"),
-                    String::from("%2$d"),
-                    String::from("%1$s"),
-                ],
-            },
-        ];
-
-        assert_eq!(super::parse_and_build_data(&strings), expected_output)
+        test_utilities::assert_strict_list_eq(
+            super::parse_and_build_data(&strings),
+            vec![
+                ParsedData {
+                    android_string: strings[0].clone(),
+                    sorted_format_strings: vec![],
+                },
+                ParsedData {
+                    android_string: strings[1].clone(),
+                    sorted_format_strings: vec![
+                        String::from("%2$s"),
+                        String::from("%1$d"),
+                        String::from("%2$d"),
+                        String::from("%1$s"),
+                    ],
+                },
+            ],
+        )
     }
 
     #[test]
     fn parse_returns_empty_list_in_case_of_no_format_strings() {
-        assert!(super::parse_format_strings(&AndroidString::localizable("s1", "value")).is_empty())
+        test_utilities::assert_list_is_empty(super::parse_format_strings(
+            &AndroidString::localizable("s1", "value"),
+        ))
     }
 
     #[test]
     fn parse_returns_only_valid_format_strings() {
-        assert_eq!(
+        test_utilities::assert_strict_list_eq(
             super::parse_format_strings(&AndroidString::localizable(
                 "s1",
-                r"%2$s a %1$d %2$d b %2$z c %1$s"
+                r"%2$s a %1$d %2$d b %2$z c %1$s",
             )),
             vec![
                 String::from("%2$s"),
                 String::from("%1$d"),
                 String::from("%2$d"),
                 String::from("%1$s"),
-            ]
+            ],
         )
     }
 }

@@ -38,6 +38,8 @@ mod tests {
     use crate::android_string::AndroidString;
     use crate::localized_string::LocalizedString;
 
+    use test_utilities;
+
     #[test]
     fn extracts() {
         let mut default_strings = vec![
@@ -53,22 +55,17 @@ mod tests {
             LocalizedString::build("string_2", "english 2 value", "french 2 value"),
         ];
 
-        let mut strings = super::extract_android_strings_from_localized(
+        let strings = super::extract_android_strings_from_localized(
             &mut localized_strings,
             &mut default_strings,
+        );
+
+        test_utilities::assert_strict_list_eq(
+            strings,
+            vec![
+                AndroidString::unlocalizable("string_2", "french 2 value"),
+                AndroidString::localizable("string_3", "french 3 value"),
+            ],
         )
-        .into_iter();
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::unlocalizable("string_2", "french 2 value")
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::localizable("string_3", "french 3 value")
-        );
-
-        assert_eq!(strings.next(), None);
     }
 }

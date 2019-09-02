@@ -93,6 +93,8 @@ mod tests {
     use super::Writer;
     use crate::error::ResultExt;
 
+    use test_utilities;
+
     struct ByteSinkProvider {
         data: Vec<String>,
     }
@@ -108,34 +110,32 @@ mod tests {
 
     #[test]
     fn writes_strings_to_files() {
-        let mut strings_list = vec![];
-        strings_list.push(LocalizableStrings::new(
-            String::from("french"),
-            vec![AndroidString::localizable("string_1", "english 1")],
-        ));
+        let strings_list = vec![
+            LocalizableStrings::new(
+                String::from("french"),
+                vec![AndroidString::localizable("string_1", "english 1")],
+            ),
+            LocalizableStrings::new(
+                String::from("german"),
+                vec![
+                    AndroidString::localizable("string_1", "english 1"),
+                    AndroidString::localizable("string_2", "english 2"),
+                ],
+            ),
+            LocalizableStrings::new(
+                String::from("spanish"),
+                vec![AndroidString::localizable("string_2", "english 2")],
+            ),
+            LocalizableStrings::new(
+                String::from("dutch"),
+                vec![
+                    AndroidString::localizable("string_1", "english 1"),
+                    AndroidString::localizable("string_2", "english 2"),
+                ],
+            ),
+        ];
 
-        strings_list.push(LocalizableStrings::new(
-            String::from("german"),
-            vec![
-                AndroidString::localizable("string_1", "english 1"),
-                AndroidString::localizable("string_2", "english 2"),
-            ],
-        ));
-
-        strings_list.push(LocalizableStrings::new(
-            String::from("spanish"),
-            vec![AndroidString::localizable("string_2", "english 2")],
-        ));
-
-        strings_list.push(LocalizableStrings::new(
-            String::from("dutch"),
-            vec![
-                AndroidString::localizable("string_1", "english 1"),
-                AndroidString::localizable("string_2", "english 2"),
-            ],
-        ));
-
-        // Convert all the written bytes into strings for the different sinks
+        // Convert all the written bytes into strings
         let mut sink_provider = ByteSinkProvider { data: vec![] };
 
         super::write(strings_list, &mut sink_provider).unwrap();
@@ -144,7 +144,7 @@ mod tests {
         sink_provider.data.sort();
 
         // Time to assert
-        assert_eq!(
+        test_utilities::assert_strict_list_eq(
             sink_provider.data,
             vec![
                 String::from("string_name,default_locale,french\nstring_1,english 1,\n"),

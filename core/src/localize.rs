@@ -232,7 +232,7 @@ mod tests {
             default_strings,
         );
 
-        assert!(file_paths.is_empty());
+        test_utilities::assert_list_is_empty(file_paths);
         assert!(fs::read_dir(output_dir)
             .unwrap()
             .into_iter()
@@ -263,12 +263,12 @@ mod tests {
         );
 
         assert_eq!(file_paths.len(), 1);
-        assert_eq!(
-            file_paths,
+        test_utilities::assert_strict_list_eq(
+            &file_paths,
             fs::read_dir(output_dir)
                 .unwrap()
                 .map(|f| String::from(f.unwrap().path().to_str().unwrap()))
-                .collect::<Vec<String>>()
+                .collect::<Vec<String>>(),
         );
 
         assert_eq!(

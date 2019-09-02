@@ -36,6 +36,8 @@ pub struct InvalidStrings {
 mod tests {
     use crate::android_string::AndroidString;
 
+    use test_utilities;
+
     #[test]
     fn passes_in_absence_of_unescaped_apostrophes() {
         assert!(super::validate(&vec![
@@ -56,12 +58,12 @@ mod tests {
         ])
         .unwrap_err();
 
-        assert_eq!(
+        test_utilities::assert_strict_list_eq(
             invalid_strings.invalid_strings,
             vec![
                 AndroidString::localizable("s1", "val'ue"),
                 AndroidString::localizable("s4", "value'"),
-            ]
+            ],
         )
     }
 }

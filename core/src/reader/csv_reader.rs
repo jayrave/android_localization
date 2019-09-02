@@ -147,40 +147,34 @@ mod tests {
     use crate::localized_string::LocalizedString;
     use crate::localized_strings::LocalizedStrings;
 
+    use test_utilities;
+
     #[test]
     fn reads_strings_from_valid_file() {
-        let mut strings_list = read_strings_from_file(
+        let strings_list = read_strings_from_file(
             r#"string_name, default_locale, french, german, spanish
             string_1, english 1, french 1, german 1, spanish 1
             string_2, english 2, , german 2, spanish 2"#,
             vec!["french", "some_random_thing", "spanish"],
         )
-        .unwrap()
-        .into_iter();
+        .unwrap();
 
-        let french_strings = strings_list.next().unwrap();
-        let spanish_strings = strings_list.next().unwrap();
-        assert_eq!(strings_list.next(), None);
-
-        assert_eq!(french_strings.locale(), "french");
-        let mut french_strings_iter = french_strings.into_strings().into_iter();
-        assert_eq!(
-            french_strings_iter.next(),
-            Some(LocalizedString::build("string_1", "english 1", "french 1"))
-        );
-        assert_eq!(french_strings_iter.next(), None);
-
-        assert_eq!(spanish_strings.locale(), "spanish");
-        let mut spanish_strings_iter = spanish_strings.into_strings().into_iter();
-        assert_eq!(
-            spanish_strings_iter.next(),
-            Some(LocalizedString::build("string_1", "english 1", "spanish 1"))
-        );
-        assert_eq!(
-            spanish_strings_iter.next(),
-            Some(LocalizedString::build("string_2", "english 2", "spanish 2"))
-        );
-        assert_eq!(spanish_strings_iter.next(), None);
+        test_utilities::assert_strict_list_eq(
+            strings_list,
+            vec![
+                LocalizedStrings::build(
+                    "french",
+                    vec![LocalizedString::build("string_1", "english 1", "french 1")],
+                ),
+                LocalizedStrings::build(
+                    "spanish",
+                    vec![
+                        LocalizedString::build("string_1", "english 1", "spanish 1"),
+                        LocalizedString::build("string_2", "english 2", "spanish 2"),
+                    ],
+                ),
+            ],
+        )
     }
 
     #[test]

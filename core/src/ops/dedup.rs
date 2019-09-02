@@ -11,6 +11,8 @@ pub fn dedup_grouped_strings(android_strings: &mut Vec<AndroidString>) {
 mod tests {
     use crate::android_string::AndroidString;
 
+    use test_utilities;
+
     #[test]
     fn dedupes() {
         let mut android_strings = vec![
@@ -23,16 +25,12 @@ mod tests {
         ];
 
         super::dedup_grouped_strings(&mut android_strings);
-        let mut deduplicated_items = android_strings.into_iter();
-
-        assert_eq!(
-            deduplicated_items.next().unwrap(),
-            AndroidString::localizable("string_1", "string 1 value 1")
-        );
-        assert_eq!(
-            deduplicated_items.next().unwrap(),
-            AndroidString::unlocalizable("string_2", "string 2 value 1")
-        );
-        assert_eq!(deduplicated_items.next(), None);
+        test_utilities::assert_strict_list_eq(
+            android_strings,
+            vec![
+                AndroidString::localizable("string_1", "string 1 value 1"),
+                AndroidString::unlocalizable("string_2", "string 2 value 1"),
+            ],
+        )
     }
 }

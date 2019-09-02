@@ -26,6 +26,8 @@ mod tests {
     use crate::android_string::AndroidString;
     use crate::localized_string::LocalizedString;
 
+    use test_utilities;
+
     #[test]
     fn sorts_android_strings_by_name() {
         let mut strings = vec![
@@ -36,29 +38,15 @@ mod tests {
         ];
 
         super::sort_android_strings_by_name(&mut strings);
-        let mut strings = strings.into_iter();
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::localizable("string_1", "string value")
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::localizable("string_2", "string value")
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::localizable("string_3", "string 3 value 1")
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::localizable("string_3", "string 3 value 2")
-        );
-
-        assert_eq!(strings.next(), None);
+        test_utilities::assert_strict_list_eq(
+            strings,
+            vec![
+                AndroidString::localizable("string_1", "string value"),
+                AndroidString::localizable("string_2", "string value"),
+                AndroidString::localizable("string_3", "string 3 value 1"),
+                AndroidString::localizable("string_3", "string 3 value 2"),
+            ],
+        )
     }
 
     #[test]
@@ -71,28 +59,14 @@ mod tests {
         ];
 
         super::sort_localized_strings_by_name(&mut strings);
-        let mut strings = strings.into_iter();
-
-        assert_eq!(
-            strings.next().unwrap(),
-            LocalizedString::build("string_1", "string value", "string value")
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            LocalizedString::build("string_2", "string value", "string value")
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            LocalizedString::build("string_3", "string 3 value 1", "string 3 value 1")
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            LocalizedString::build("string_3", "string 3 value 2", "string 3 value 2")
-        );
-
-        assert_eq!(strings.next(), None);
+        test_utilities::assert_strict_list_eq(
+            strings,
+            vec![
+                LocalizedString::build("string_1", "string value", "string value"),
+                LocalizedString::build("string_2", "string value", "string value"),
+                LocalizedString::build("string_3", "string 3 value 1", "string 3 value 1"),
+                LocalizedString::build("string_3", "string 3 value 2", "string 3 value 2"),
+            ],
+        )
     }
 }

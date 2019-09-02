@@ -119,6 +119,8 @@ mod tests {
     use crate::validate::validator::InvalidStringsFile;
     use crate::writer::xml_writer;
 
+    use test_utilities;
+
     #[test]
     fn validates() {
         let tempdir = tempfile::tempdir().unwrap();
@@ -168,14 +170,14 @@ mod tests {
         // This is to make sure that `fs` iteration order doesn't matter
         actual_output.sort();
 
-        assert_eq!(
+        test_utilities::assert_strict_list_eq(
             actual_output,
             vec![
                 spanish_strings_file_path,
                 french_strings_file_path,
-                default_strings_file_path
+                default_strings_file_path,
             ],
-        );
+        )
     }
 
     #[test]
@@ -223,43 +225,43 @@ mod tests {
         // This is to make sure that `fs` iteration order doesn't matter
         invalid_strings_files.sort_by(|a, b| a.file_path.cmp(&b.file_path));
 
-        assert_eq!(
+        test_utilities::assert_strict_list_eq(
             invalid_strings_files,
             vec![
                 InvalidStringsFile {
                     file_path: spanish_strings_file_path,
                     apostrophe_error: Some(apostrophe::InvalidStrings {
-                        invalid_strings: vec![spanish_s2.clone()]
+                        invalid_strings: vec![spanish_s2.clone()],
                     }),
                     format_string_error: Some(format_string::Mismatches {
                         mismatches: vec![format_string::Mismatch {
                             default_parsed_data: format_string::ParsedData {
                                 android_string: default_s2.clone(),
-                                sorted_format_strings: vec![]
+                                sorted_format_strings: vec![],
                             },
                             foreign_parsed_data: format_string::ParsedData {
                                 android_string: spanish_s2,
-                                sorted_format_strings: vec![String::from("%1$d")]
-                            }
-                        }]
-                    })
+                                sorted_format_strings: vec![String::from("%1$d")],
+                            },
+                        }],
+                    }),
                 },
                 InvalidStringsFile {
                     file_path: french_strings_file_path,
                     apostrophe_error: Some(apostrophe::InvalidStrings {
-                        invalid_strings: vec![french_s1]
+                        invalid_strings: vec![french_s1],
                     }),
-                    format_string_error: None
+                    format_string_error: None,
                 },
                 InvalidStringsFile {
                     file_path: default_strings_file_path,
                     apostrophe_error: Some(apostrophe::InvalidStrings {
-                        invalid_strings: vec![default_s2]
+                        invalid_strings: vec![default_s2],
                     }),
-                    format_string_error: None
-                }
-            ]
-        );
+                    format_string_error: None,
+                },
+            ],
+        )
     }
 
     fn create_strings_file_in(dir_path: &PathBuf) -> (File, String) {

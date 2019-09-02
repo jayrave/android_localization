@@ -37,9 +37,11 @@ mod tests {
 
     use crate::android_string::AndroidString;
 
+    use test_utilities;
+
     #[test]
     fn reads_strings_from_valid_clean_file() {
-        let mut strings = write_to_file_and_read_strings_out(
+        let strings = write_to_file_and_read_strings_out(
             r##"
 			<?xml version="1.0" encoding="utf-8"?>
 			<resources>
@@ -48,33 +50,24 @@ mod tests {
 				<string name="non_localizable_string" translatable="false">non localizable string value</string>
 			</resources>
 		"##,
+        );
+
+        test_utilities::assert_strict_list_eq(
+            strings,
+            vec![
+                AndroidString::localizable("string_1", "string 1 value"),
+                AndroidString::localizable("string_2", "string 2 value"),
+                AndroidString::unlocalizable(
+                    "non_localizable_string",
+                    "non localizable string value",
+                ),
+            ],
         )
-        .into_iter();
-
-        assert_eq!(
-            strings.next(),
-            Some(AndroidString::localizable("string_1", "string 1 value"))
-        );
-
-        assert_eq!(
-            strings.next(),
-            Some(AndroidString::localizable("string_2", "string 2 value"))
-        );
-
-        assert_eq!(
-            strings.next(),
-            Some(AndroidString::unlocalizable(
-                "non_localizable_string",
-                "non localizable string value"
-            ))
-        );
-
-        assert_eq!(strings.next(), None);
     }
 
     #[test]
     fn reads_strings_from_valid_dirty_file() {
-        let mut strings = write_to_file_and_read_strings_out(
+        let strings = write_to_file_and_read_strings_out(
             r##"
 			<?xml version="1.0" encoding="utf-8"?>
 			<string name="dont_care_string_1">value</string>
@@ -93,62 +86,49 @@ mod tests {
 				<string name="dont_care_string_6" translatable="false">value</string>
 			</outside_container>
 		"##,
+        );
+
+        test_utilities::assert_strict_list_eq(
+            strings,
+            vec![
+                AndroidString::localizable("string_1", "string 1 value"),
+                AndroidString::localizable("string_2", "string 2 value"),
+                AndroidString::unlocalizable(
+                    "non_localizable_string",
+                    "non localizable string value",
+                ),
+            ],
         )
-        .into_iter();
-
-        assert_eq!(
-            strings.next(),
-            Some(AndroidString::localizable("string_1", "string 1 value"))
-        );
-
-        assert_eq!(
-            strings.next(),
-            Some(AndroidString::localizable("string_2", "string 2 value"))
-        );
-
-        assert_eq!(
-            strings.next(),
-            Some(AndroidString::unlocalizable(
-                "non_localizable_string",
-                "non localizable string value"
-            ))
-        );
-
-        assert_eq!(strings.next(), None);
     }
 
     #[test]
     fn reads_cdata_correctly() {
-        let mut strings = write_to_file_and_read_strings_out(r##"
+        let strings = write_to_file_and_read_strings_out(r##"
             <?xml version="1.0" encoding="utf-8"?>
             <resources>
                 <string name="s1">Hi there. <![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> is awesome</string>
             </resources>
-        "##).into_iter();
+        "##);
 
-        assert_eq!(
-            strings.next(),
-            Some(AndroidString::localizable("s1", r##"Hi there. <![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> is awesome"##))
-        );
-
-        assert_eq!(strings.next(), None);
+        test_utilities::assert_strict_list_eq(
+            strings,
+            vec![AndroidString::localizable("s1", r##"Hi there. <![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> is awesome"##)]
+        )
     }
 
     #[test]
     fn reads_string_with_whitespace_between_cdata() {
-        let mut strings = write_to_file_and_read_strings_out(r##"
+        let strings = write_to_file_and_read_strings_out(r##"
             <?xml version="1.0" encoding="utf-8"?>
             <resources>
                 <string name="s1"><![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> <![CDATA[<a href=\"https://www.firefox.com\">Firefox</a>]]></string>
             </resources>
-        "##).into_iter();
+        "##);
 
-        assert_eq!(
-            strings.next(),
-            Some(AndroidString::localizable("s1", r##"<![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> <![CDATA[<a href=\"https://www.firefox.com\">Firefox</a>]]>"##))
+        test_utilities::assert_strict_list_eq(
+            strings,
+            vec![AndroidString::localizable("s1", r##"<![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> <![CDATA[<a href=\"https://www.firefox.com\">Firefox</a>]]>"##)]
         );
-
-        assert_eq!(strings.next(), None);
     }
 
     fn write_to_file_and_read_strings_out(file_content: &str) -> Vec<AndroidString> {

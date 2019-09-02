@@ -56,9 +56,11 @@ pub fn merge_and_group_strings(
 mod tests {
     use crate::android_string::AndroidString;
 
+    use test_utilities;
+
     #[test]
     fn merges_and_groups() {
-        let mut strings = super::merge_and_group_strings(
+        let strings = super::merge_and_group_strings(
             &mut vec![
                 AndroidString::localizable("string_1", "string value"),
                 AndroidString::unlocalizable("string_4", "string value"),
@@ -67,35 +69,22 @@ mod tests {
                 AndroidString::localizable("string_3", "string value"),
                 AndroidString::unlocalizable("string_2", "string value"),
             ],
+        );
+
+        test_utilities::assert_strict_list_eq(
+            strings,
+            vec![
+                AndroidString::localizable("string_1", "string value"),
+                AndroidString::unlocalizable("string_2", "string value"),
+                AndroidString::localizable("string_3", "string value"),
+                AndroidString::unlocalizable("string_4", "string value"),
+            ],
         )
-        .into_iter();
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::localizable("string_1", "string value")
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::unlocalizable("string_2", "string value")
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::localizable("string_3", "string value")
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::unlocalizable("string_4", "string value")
-        );
-
-        assert_eq!(strings.next(), None);
     }
 
     #[test]
     fn list_1_strings_takes_precedence_over_list_2_strings_in_case_of_same_name() {
-        let mut strings = super::merge_and_group_strings(
+        let strings = super::merge_and_group_strings(
             &mut vec![
                 AndroidString::localizable("string_1", "from list 1"),
                 AndroidString::unlocalizable("string_3", "from list 1"),
@@ -105,34 +94,17 @@ mod tests {
                 AndroidString::unlocalizable("string_1", "from list 2"),
                 AndroidString::localizable("string_2", "from list 2"),
             ],
+        );
+
+        test_utilities::assert_strict_list_eq(
+            strings,
+            vec![
+                AndroidString::localizable("string_1", "from list 1"),
+                AndroidString::unlocalizable("string_1", "from list 1 again"),
+                AndroidString::unlocalizable("string_1", "from list 2"),
+                AndroidString::localizable("string_2", "from list 2"),
+                AndroidString::unlocalizable("string_3", "from list 1"),
+            ],
         )
-        .into_iter();
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::localizable("string_1", "from list 1")
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::unlocalizable("string_1", "from list 1 again")
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::unlocalizable("string_1", "from list 2")
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::localizable("string_2", "from list 2")
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::unlocalizable("string_3", "from list 1")
-        );
-
-        assert_eq!(strings.next(), None);
     }
 }

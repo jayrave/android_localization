@@ -155,6 +155,8 @@ mod tests {
     use crate::util::xml_utilities;
     use crate::writer::xml_writer;
 
+    use test_utilities;
+
     #[test]
     fn errors_for_empty_locale_name_to_id_map() {
         let temp_dir = tempfile::tempdir().unwrap();
@@ -290,49 +292,49 @@ s2, english value 2,,spanish new value 2,german new value 2,            "#
         .unwrap();
 
         // Assert appropriate output
-        assert_eq!(
+        test_utilities::assert_strict_list_eq(
             created_output_files_path,
             vec![
                 fr_strings_file_path.to_str().unwrap(),
-                es_strings_file_path.to_str().unwrap()
-            ]
+                es_strings_file_path.to_str().unwrap(),
+            ],
         );
 
-        assert_eq!(
+        test_utilities::assert_strict_list_eq(
             xml_utilities::read_foreign_strings(&res_dir_path, "fr")
                 .unwrap()
                 .into_strings(),
             vec![
                 AndroidString::localizable("s1", "french new value 1"),
                 AndroidString::localizable("s2", "french old value 2"),
-            ]
+            ],
         );
 
-        assert_eq!(
+        test_utilities::assert_strict_list_eq(
             xml_utilities::read_foreign_strings(&res_dir_path, "es")
                 .unwrap()
                 .into_strings(),
             vec![
                 AndroidString::localizable("s1", "spanish old value 1"),
                 AndroidString::localizable("s2", "spanish new value 2"),
-            ]
+            ],
         );
 
         // German must not have changed since it wasn't included in the mapping
-        assert_eq!(
+        test_utilities::assert_strict_list_eq(
             xml_utilities::read_foreign_strings(&res_dir_path, "de")
                 .unwrap()
                 .into_strings(),
-            german_android_strings
+            german_android_strings,
         );
 
         // Chinese must not have changed since the localized text only container blank string
         // & already present localized value
-        assert_eq!(
+        test_utilities::assert_strict_list_eq(
             xml_utilities::read_foreign_strings(&res_dir_path, "zh")
                 .unwrap()
                 .into_strings(),
-            chinese_android_strings
+            chinese_android_strings,
         );
     }
 

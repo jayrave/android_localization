@@ -87,6 +87,8 @@ fn write_string<W: Write>(
 mod tests {
     use crate::android_string::AndroidString;
 
+    use test_utilities;
+
     #[test]
     fn writes_strings_to_file() {
         let android_strings = vec![
@@ -98,20 +100,18 @@ mod tests {
         let mut sink: Vec<u8> = vec![];
         super::write(&mut sink, android_strings).unwrap();
         let written_content = String::from_utf8(sink).unwrap();
-        let mut written_lines = written_content.lines();
+        let written_lines = written_content.lines();
 
-        assert_eq!(
-            written_lines.next().unwrap(),
-            r##"<?xml version="1.0" encoding="utf-8"?>"##
-        );
-        assert_eq!(written_lines.next().unwrap(), r##"<resources>"##);
-        assert_eq!(
-            written_lines.next().unwrap(),
-            r##"    <string name="localizable_string">localizable string value</string>"##
-        );
-        assert_eq!(written_lines.next().unwrap(), r##"    <string name="non_localizable_string" translatable="false">non localizable string value</string>"##);
-        assert_eq!(written_lines.next().unwrap(), r##"</resources>"##);
-        assert_eq!(written_lines.next(), None);
+        test_utilities::assert_strict_list_eq(
+            written_lines.collect::<Vec<&str>>(),
+            vec![
+                r##"<?xml version="1.0" encoding="utf-8"?>"##,
+                r##"<resources>"##,
+                r##"    <string name="localizable_string">localizable string value</string>"##,
+                r##"    <string name="non_localizable_string" translatable="false">non localizable string value</string>"##,
+                r##"</resources>"##
+            ]
+        )
     }
 
     #[test]
@@ -140,15 +140,16 @@ mod tests {
         super::write(&mut sink, vec![AndroidString::localizable("s1", value)]).unwrap();
 
         let written_content = String::from_utf8(sink).unwrap();
-        let mut written_lines = written_content.lines();
+        let written_lines = written_content.lines();
 
-        written_lines.next().unwrap(); // XML header
-        written_lines.next().unwrap(); // Resources opening
-        assert_eq!(
-            written_lines.next().unwrap(),
-            format!("    <string name=\"s1\">{}</string>", value)
-        );
-        written_lines.next().unwrap(); // Resources closing
-        assert_eq!(written_lines.next(), None);
+        test_utilities::assert_strict_list_eq(
+            written_lines.collect::<Vec<&str>>(),
+            vec![
+                r##"<?xml version="1.0" encoding="utf-8"?>"##,
+                r##"<resources>"##,
+                &format!("    <string name=\"s1\">{}</string>", value),
+                r##"</resources>"##,
+            ],
+        )
     }
 }
