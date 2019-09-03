@@ -75,9 +75,6 @@ pub fn build_map_if_empty_or_return<S: ::std::hash::BuildHasher>(
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
-    use std::fs;
-    use std::fs::File;
-    use std::path::PathBuf;
 
     use test_utilities;
 
@@ -103,10 +100,10 @@ mod tests {
         let mut res_dir_path = tempdir.path().to_path_buf();
         res_dir_path.push("res");
 
-        test_utilities::res_utilities::setup_empty_strings_for_default_locale(res_dir_path.clone());
-        test_utilities::res_utilities::setup_empty_strings_for_locale(res_dir_path.clone(), "fr");
-        test_utilities::res_utilities::setup_empty_strings_for_locale(res_dir_path.clone(), "it");
-        test_utilities::res_utilities::setup_values_dir_for_locale(res_dir_path.clone(), "es");
+        test_utilities::res::setup_empty_strings_for_default_locale(res_dir_path.clone());
+        test_utilities::res::setup_empty_strings_for_locale(res_dir_path.clone(), "fr");
+        test_utilities::res::setup_empty_strings_for_locale(res_dir_path.clone(), "it");
+        test_utilities::res::setup_values_dir_for_locale(res_dir_path.clone(), "es");
 
         let mut locale_ids = super::find(res_dir_path.to_str().unwrap())
             .unwrap()
@@ -115,8 +112,8 @@ mod tests {
         let locale_id_1 = locale_ids.next().unwrap();
         let locale_id_2 = locale_ids.next().unwrap();
         assert_eq!(locale_ids.next(), None);
-        test_utilities::assert_eq_to_either_or(locale_id_1.as_str(), "fr", "it");
-        test_utilities::assert_eq_to_either_or(locale_id_2.as_str(), "fr", "it");
+        test_utilities::eq::assert_eq_to_either_or(locale_id_1.as_str(), "fr", "it");
+        test_utilities::eq::assert_eq_to_either_or(locale_id_2.as_str(), "fr", "it");
     }
 
     #[test]
@@ -135,8 +132,8 @@ mod tests {
         let mut res_dir_path = tempdir.path().to_path_buf();
         res_dir_path.push("res");
 
-        test_utilities::res_utilities::setup_empty_strings_for_locale(res_dir_path.clone(), "fr");
-        test_utilities::res_utilities::setup_empty_strings_for_locale(res_dir_path.clone(), "it");
+        test_utilities::res::setup_empty_strings_for_locale(res_dir_path.clone(), "fr");
+        test_utilities::res::setup_empty_strings_for_locale(res_dir_path.clone(), "it");
 
         let mut map = HashMap::new();
         map.insert(String::from("fr"), String::from("fr"));

@@ -22,7 +22,7 @@ pub fn assert_eq_of_file_contents_to_either_or(
     expected_filename1: &str,
     expected_filename2: &str,
 ) {
-    test_utilities::assert_eq_to_either_or(
+    test_utilities::eq::assert_eq_to_either_or(
         read_file_contents_as_lines(actual_dir_path, actual_filename),
         read_file_contents_as_lines(expected_dir_path, expected_filename1),
         read_file_contents_as_lines(expected_dir_path, expected_filename2),

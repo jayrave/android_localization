@@ -72,7 +72,7 @@ mod tests {
             ],
         );
 
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             strings,
             vec![
                 AndroidString::localizable("string_1", "string value"),
@@ -97,7 +97,7 @@ mod tests {
             ],
         );
 
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             strings,
             vec![
                 AndroidString::localizable("string_1", "from list 1"),

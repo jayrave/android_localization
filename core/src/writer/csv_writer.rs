@@ -144,7 +144,7 @@ mod tests {
         sink_provider.data.sort();
 
         // Time to assert
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             sink_provider.data,
             vec![
                 String::from("string_name,default_locale,french\nstring_1,english 1,\n"),

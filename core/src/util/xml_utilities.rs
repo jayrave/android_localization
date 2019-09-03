@@ -70,13 +70,11 @@ impl StringsWithPath {
 
 #[cfg(test)]
 mod tests {
-    use std::fs;
-    use std::fs::File;
-    use std::io::{Read, Write};
-
-    use crate::error;
+    use std::io::Read;
 
     use test_utilities;
+
+    use crate::error;
 
     #[test]
     fn open_strings_file_errors_if_values_dir_is_missing() {
@@ -91,7 +89,7 @@ mod tests {
     #[test]
     fn open_strings_file_errors_if_strings_file_is_missing() {
         let res_dir = tempfile::tempdir().unwrap();
-        test_utilities::res_utilities::setup_values_dir_for_default_locale(res_dir.path());
+        test_utilities::res::setup_values_dir_for_default_locale(res_dir.path());
 
         let error = super::open_strings_file(res_dir.path(), "values");
         match error.unwrap_err().kind {
@@ -105,8 +103,8 @@ mod tests {
         let res_dir = tempfile::tempdir().unwrap();
 
         let strings_file_path =
-            test_utilities::res_utilities::setup_empty_strings_for_default_locale(res_dir.path());
-        test_utilities::file_utilities::write_content(strings_file_path.clone(), "example content");
+            test_utilities::res::setup_empty_strings_for_default_locale(res_dir.path());
+        test_utilities::file::write_content(strings_file_path.clone(), "example content");
 
         let mut file_contents = String::new();
         let (mut file, file_path) = super::open_default_strings_file(res_dir.path()).unwrap();
@@ -121,8 +119,8 @@ mod tests {
         let res_dir = tempfile::tempdir().unwrap();
 
         let strings_file_path =
-            test_utilities::res_utilities::setup_empty_strings_for_locale(res_dir.path(), "fr");
-        test_utilities::file_utilities::write_content(strings_file_path.clone(), "example content");
+            test_utilities::res::setup_empty_strings_for_locale(res_dir.path(), "fr");
+        test_utilities::file::write_content(strings_file_path.clone(), "example content");
 
         let mut file_contents = String::new();
         let (mut file, file_path) = super::open_foreign_strings_file(res_dir.path(), "fr").unwrap();

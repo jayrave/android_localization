@@ -102,7 +102,7 @@ mod tests {
         let written_content = String::from_utf8(sink).unwrap();
         let written_lines = written_content.lines();
 
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             written_lines.collect::<Vec<&str>>(),
             vec![
                 r##"<?xml version="1.0" encoding="utf-8"?>"##,
@@ -142,7 +142,7 @@ mod tests {
         let written_content = String::from_utf8(sink).unwrap();
         let written_lines = written_content.lines();
 
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             written_lines.collect::<Vec<&str>>(),
             vec![
                 r##"<?xml version="1.0" encoding="utf-8"?>"##,

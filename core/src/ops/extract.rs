@@ -60,7 +60,7 @@ mod tests {
             &mut default_strings,
         );
 
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             strings,
             vec![
                 AndroidString::unlocalizable("string_2", "french 2 value"),

@@ -133,7 +133,7 @@ mod tests {
             AndroidString::localizable("s4", "value %2$d"),
         ];
 
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             super::validate(&mut default_parsed_data, &mut foreign_strings)
                 .unwrap_err()
                 .mismatches,
@@ -169,7 +169,7 @@ mod tests {
             AndroidString::localizable("s1", r"%2$s a %1$d %2$d b %2$z c %1$s"),
         ];
 
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             super::parse_and_build_data(&strings),
             vec![
                 ParsedData {
@@ -191,14 +191,14 @@ mod tests {
 
     #[test]
     fn parse_returns_empty_list_in_case_of_no_format_strings() {
-        test_utilities::assert_list_is_empty(super::parse_format_strings(
+        test_utilities::list::assert_list_is_empty(super::parse_format_strings(
             &AndroidString::localizable("s1", "value"),
         ))
     }
 
     #[test]
     fn parse_returns_only_valid_format_strings() {
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             super::parse_format_strings(&AndroidString::localizable(
                 "s1",
                 r"%2$s a %1$d %2$d b %2$z c %1$s",

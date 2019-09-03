@@ -59,7 +59,7 @@ mod tests {
         ])
         .unwrap_err();
 
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             invalid_strings.invalid_strings,
             vec![
                 AndroidString::localizable("s1", "val'ue"),

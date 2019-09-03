@@ -52,7 +52,7 @@ mod tests {
 		"##,
         );
 
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             strings,
             vec![
                 AndroidString::localizable("string_1", "string 1 value"),
@@ -88,7 +88,7 @@ mod tests {
 		"##,
         );
 
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             strings,
             vec![
                 AndroidString::localizable("string_1", "string 1 value"),
@@ -110,7 +110,7 @@ mod tests {
             </resources>
         "##);
 
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             strings,
             vec![AndroidString::localizable("s1", r##"Hi there. <![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> is awesome"##)]
         )
@@ -125,7 +125,7 @@ mod tests {
             </resources>
         "##);
 
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             strings,
             vec![AndroidString::localizable("s1", r##"<![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> <![CDATA[<a href=\"https://www.firefox.com\">Firefox</a>]]>"##)]
         );
@@ -139,7 +139,7 @@ mod tests {
         // Seek to start
         tmpfile.seek(SeekFrom::Start(0)).unwrap();
 
-        // Read strings from file & assert
+        // Read strings from file
         super::read(tmpfile.try_clone().unwrap()).unwrap()
     }
 }

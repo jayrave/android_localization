@@ -67,7 +67,7 @@ mod tests {
             AndroidString::localizable("localizable_string_2", "string value"),
         ]);
 
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             localizable_strings,
             vec![
                 AndroidString::localizable("localizable_string_1", "string value"),
@@ -93,7 +93,7 @@ mod tests {
         ];
 
         let missing_strings = super::find_missing_strings(&mut lacking_strings, &mut all_strings);
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             missing_strings,
             vec![
                 AndroidString::unlocalizable("only_in_all_strings_1", "string value"),

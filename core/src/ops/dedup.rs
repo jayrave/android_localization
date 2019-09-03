@@ -25,7 +25,7 @@ mod tests {
         ];
 
         super::dedup_grouped_strings(&mut android_strings);
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             android_strings,
             vec![
                 AndroidString::localizable("string_1", "string 1 value 1"),

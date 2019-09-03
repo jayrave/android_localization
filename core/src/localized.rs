@@ -292,7 +292,7 @@ s2, english value 2,,spanish new value 2,german new value 2,            "#
         .unwrap();
 
         // Assert appropriate output
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             created_output_files_path,
             vec![
                 fr_strings_file_path.to_str().unwrap(),
@@ -300,7 +300,7 @@ s2, english value 2,,spanish new value 2,german new value 2,            "#
             ],
         );
 
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             xml_utilities::read_foreign_strings(&res_dir_path, "fr")
                 .unwrap()
                 .into_strings(),
@@ -310,7 +310,7 @@ s2, english value 2,,spanish new value 2,german new value 2,            "#
             ],
         );
 
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             xml_utilities::read_foreign_strings(&res_dir_path, "es")
                 .unwrap()
                 .into_strings(),
@@ -321,7 +321,7 @@ s2, english value 2,,spanish new value 2,german new value 2,            "#
         );
 
         // German must not have changed since it wasn't included in the mapping
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             xml_utilities::read_foreign_strings(&res_dir_path, "de")
                 .unwrap()
                 .into_strings(),
@@ -330,7 +330,7 @@ s2, english value 2,,spanish new value 2,german new value 2,            "#
 
         // Chinese must not have changed since the localized text only container blank string
         // & already present localized value
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             xml_utilities::read_foreign_strings(&res_dir_path, "zh")
                 .unwrap()
                 .into_strings(),

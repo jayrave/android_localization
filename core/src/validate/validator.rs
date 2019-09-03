@@ -170,7 +170,7 @@ mod tests {
         // This is to make sure that `fs` iteration order doesn't matter
         actual_output.sort();
 
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             actual_output,
             vec![
                 spanish_strings_file_path,
@@ -225,7 +225,7 @@ mod tests {
         // This is to make sure that `fs` iteration order doesn't matter
         invalid_strings_files.sort_by(|a, b| a.file_path.cmp(&b.file_path));
 
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             invalid_strings_files,
             vec![
                 InvalidStringsFile {

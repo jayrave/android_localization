@@ -160,7 +160,7 @@ mod tests {
         )
         .unwrap();
 
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             strings_list,
             vec![
                 LocalizedStrings::build(

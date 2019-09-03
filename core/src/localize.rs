@@ -233,7 +233,7 @@ mod tests {
             default_strings,
         );
 
-        test_utilities::assert_list_is_empty(file_paths);
+        test_utilities::list::assert_list_is_empty(file_paths);
         assert!(fs::read_dir(output_dir)
             .unwrap()
             .into_iter()
@@ -264,7 +264,7 @@ mod tests {
         );
 
         assert_eq!(file_paths.len(), 1);
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             &file_paths,
             fs::read_dir(output_dir)
                 .unwrap()
@@ -285,7 +285,7 @@ mod tests {
             File::open(&Path::new(&file_paths.into_iter().next().unwrap())).unwrap();
         let mut output = String::new();
         output_file.read_to_string(&mut output).unwrap();
-        test_utilities::assert_eq_to_either_or(
+        test_utilities::eq::assert_eq_to_either_or(
             output,
             String::from("string_name,default_locale,spanish,french\nstring_1,string value,,\nstring_2,string value,,\n"),
             String::from("string_name,default_locale,french,spanish\nstring_1,string value,,\nstring_2,string value,,\n")

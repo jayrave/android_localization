@@ -35,13 +35,13 @@ fn success_is_printed_out() {
         "No issues found. Validated the following files - "
     );
     assert_eq!(output_lines.next().unwrap(), "");
-    test_utilities::assert_eq_to_either_or_by(
+    test_utilities::eq::assert_eq_to_either_or_by(
         output_lines.next().unwrap(),
         default_path,
         fr_path,
         |actual, expected| actual.contains(expected),
     );
-    test_utilities::assert_eq_to_either_or_by(
+    test_utilities::eq::assert_eq_to_either_or_by(
         output_lines.next().unwrap(),
         default_path,
         fr_path,

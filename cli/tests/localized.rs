@@ -205,13 +205,13 @@ fn assert_status_and_stdout(output: Output) {
         "Localized texts written to - "
     );
     assert_eq!(output_lines.next().unwrap(), "");
-    test_utilities::assert_eq_to_either_or_by(
+    test_utilities::eq::assert_eq_to_either_or_by(
         output_lines.next().unwrap(),
         fr_path,
         es_path,
         |actual, expected| actual.contains(expected),
     );
-    test_utilities::assert_eq_to_either_or_by(
+    test_utilities::eq::assert_eq_to_either_or_by(
         output_lines.next().unwrap(),
         fr_path,
         es_path,

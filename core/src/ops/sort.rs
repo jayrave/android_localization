@@ -38,7 +38,7 @@ mod tests {
         ];
 
         super::sort_android_strings_by_name(&mut strings);
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             strings,
             vec![
                 AndroidString::localizable("string_1", "string value"),
@@ -59,7 +59,7 @@ mod tests {
         ];
 
         super::sort_localized_strings_by_name(&mut strings);
-        test_utilities::assert_strict_list_eq(
+        test_utilities::list::assert_strict_list_eq(
             strings,
             vec![
                 LocalizedString::build("string_1", "string value", "string value"),
