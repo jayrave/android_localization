@@ -79,6 +79,8 @@ mod tests {
     use std::fs::File;
     use std::path::PathBuf;
 
+    use test_utilities;
+
     #[test]
     fn find_errors_if_res_dir_does_not_exist() {
         let tempdir = tempfile::tempdir().unwrap();
@@ -101,24 +103,10 @@ mod tests {
         let mut res_dir_path = tempdir.path().to_path_buf();
         res_dir_path.push("res");
 
-        let mut default_values_dir_path = res_dir_path.clone();
-        default_values_dir_path.push("values");
-        fs::create_dir_all(&default_values_dir_path).unwrap();
-        create_strings_file_in(&default_values_dir_path);
-
-        let mut french_values_dir_path = res_dir_path.clone();
-        french_values_dir_path.push("values-fr");
-        fs::create_dir_all(&french_values_dir_path).unwrap();
-        create_strings_file_in(&french_values_dir_path);
-
-        let mut spanish_values_dir_path = res_dir_path.clone();
-        spanish_values_dir_path.push("values-es");
-        fs::create_dir_all(&spanish_values_dir_path).unwrap();
-
-        let mut italian_values_dir_path = res_dir_path.clone();
-        italian_values_dir_path.push("values-it");
-        fs::create_dir_all(&italian_values_dir_path).unwrap();
-        create_strings_file_in(&italian_values_dir_path);
+        test_utilities::res_utilities::setup_empty_strings_for_default_locale(res_dir_path.clone());
+        test_utilities::res_utilities::setup_empty_strings_for_locale(res_dir_path.clone(), "fr");
+        test_utilities::res_utilities::setup_empty_strings_for_locale(res_dir_path.clone(), "it");
+        test_utilities::res_utilities::setup_values_dir_for_locale(res_dir_path.clone(), "es");
 
         let mut locale_ids = super::find(res_dir_path.to_str().unwrap())
             .unwrap()
@@ -127,8 +115,8 @@ mod tests {
         let locale_id_1 = locale_ids.next().unwrap();
         let locale_id_2 = locale_ids.next().unwrap();
         assert_eq!(locale_ids.next(), None);
-        assert!(locale_id_1 == "fr" || locale_id_1 == "it");
-        assert!(locale_id_2 == "fr" || locale_id_2 == "it");
+        test_utilities::assert_eq_to_either_or(locale_id_1.as_str(), "fr", "it");
+        test_utilities::assert_eq_to_either_or(locale_id_2.as_str(), "fr", "it");
     }
 
     #[test]
@@ -147,15 +135,8 @@ mod tests {
         let mut res_dir_path = tempdir.path().to_path_buf();
         res_dir_path.push("res");
 
-        let mut french_values_dir_path = res_dir_path.clone();
-        french_values_dir_path.push("values-fr");
-        fs::create_dir_all(&french_values_dir_path).unwrap();
-        create_strings_file_in(&french_values_dir_path);
-
-        let mut italian_values_dir_path = res_dir_path.clone();
-        italian_values_dir_path.push("values-it");
-        fs::create_dir_all(&italian_values_dir_path).unwrap();
-        create_strings_file_in(&italian_values_dir_path);
+        test_utilities::res_utilities::setup_empty_strings_for_locale(res_dir_path.clone(), "fr");
+        test_utilities::res_utilities::setup_empty_strings_for_locale(res_dir_path.clone(), "it");
 
         let mut map = HashMap::new();
         map.insert(String::from("fr"), String::from("fr"));
@@ -165,11 +146,5 @@ mod tests {
                 .unwrap(),
             map
         )
-    }
-
-    fn create_strings_file_in(dir_path: &PathBuf) {
-        let mut strings_file_path = dir_path.clone();
-        strings_file_path.push("strings.xml");
-        File::create(strings_file_path).unwrap();
     }
 }

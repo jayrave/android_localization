@@ -76,6 +76,8 @@ mod tests {
 
     use crate::error;
 
+    use test_utilities;
+
     #[test]
     fn open_strings_file_errors_if_values_dir_is_missing() {
         let res_dir = tempfile::tempdir().unwrap();
@@ -89,10 +91,7 @@ mod tests {
     #[test]
     fn open_strings_file_errors_if_strings_file_is_missing() {
         let res_dir = tempfile::tempdir().unwrap();
-
-        let mut values_dir_path = res_dir.path().to_path_buf();
-        values_dir_path.push("values");
-        fs::create_dir(values_dir_path).unwrap();
+        test_utilities::res_utilities::setup_values_dir_for_default_locale(res_dir.path());
 
         let error = super::open_strings_file(res_dir.path(), "values");
         match error.unwrap_err().kind {
@@ -105,43 +104,31 @@ mod tests {
     fn open_default_strings_file_opens() {
         let res_dir = tempfile::tempdir().unwrap();
 
-        let mut values_dir_path = res_dir.path().to_path_buf();
-        values_dir_path.push("values");
-
-        let mut strings_file_path = values_dir_path.clone();
-        strings_file_path.push("strings.xml");
-
-        fs::create_dir(values_dir_path).unwrap();
-        let mut tmpfile: File = File::create(strings_file_path.clone()).unwrap();
-        tmpfile.write("example content".as_bytes()).unwrap();
+        let strings_file_path =
+            test_utilities::res_utilities::setup_empty_strings_for_default_locale(res_dir.path());
+        test_utilities::file_utilities::write_content(strings_file_path.clone(), "example content");
 
         let mut file_contents = String::new();
         let (mut file, file_path) = super::open_default_strings_file(res_dir.path()).unwrap();
         file.read_to_string(&mut file_contents).unwrap();
 
         assert_eq!(file_contents, "example content");
-        assert_eq!(file_path, strings_file_path.to_str().unwrap());
+        assert_eq!(file_path, strings_file_path);
     }
 
     #[test]
     fn open_foreign_strings_file_opens() {
         let res_dir = tempfile::tempdir().unwrap();
 
-        let mut values_dir_path = res_dir.path().to_path_buf();
-        values_dir_path.push("values-fr");
-
-        let mut strings_file_path = values_dir_path.clone();
-        strings_file_path.push("strings.xml");
-
-        fs::create_dir(values_dir_path).unwrap();
-        let mut tmpfile: File = File::create(strings_file_path.clone()).unwrap();
-        tmpfile.write("example content".as_bytes()).unwrap();
+        let strings_file_path =
+            test_utilities::res_utilities::setup_empty_strings_for_locale(res_dir.path(), "fr");
+        test_utilities::file_utilities::write_content(strings_file_path.clone(), "example content");
 
         let mut file_contents = String::new();
         let (mut file, file_path) = super::open_foreign_strings_file(res_dir.path(), "fr").unwrap();
         file.read_to_string(&mut file_contents).unwrap();
 
         assert_eq!(file_contents, "example content");
-        assert_eq!(file_path, strings_file_path.to_str().unwrap());
+        assert_eq!(file_path, strings_file_path);
     }
 }
