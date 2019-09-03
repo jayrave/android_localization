@@ -40,3 +40,19 @@ impl fmt::Display for AndroidString {
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::AndroidString;
+
+    /// To expose a convenient way to build for tests
+    impl AndroidString {
+        pub fn localizable<N: Into<String>, V: Into<String>>(name: N, value: V) -> AndroidString {
+            AndroidString::new(name.into(), value.into(), true)
+        }
+
+        pub fn unlocalizable<N: Into<String>, V: Into<String>>(name: N, value: V) -> AndroidString {
+            AndroidString::new(name.into(), value.into(), false)
+        }
+    }
+}

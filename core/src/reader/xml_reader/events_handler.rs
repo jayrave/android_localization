@@ -1,7 +1,9 @@
 use xml::attribute::OwnedAttribute;
 
+use android_localization_utilities::DevExpt;
+
 use crate::android_string::AndroidString;
-use crate::error::Error;
+use crate::error::InnerError;
 use crate::reader::xml_reader::event_handler::EventHandler;
 use crate::reader::xml_reader::root_event_handler::RootEventHandler;
 
@@ -22,12 +24,12 @@ impl EventsHandler {
         &mut self,
         tag_name: String,
         attributes: Vec<OwnedAttribute>,
-    ) -> Result<(), Error> {
+    ) -> Result<(), InnerError> {
         let event_handler = self
             .event_handlers
             .last_mut()
-            .unwrap()
-            .handler_for_start_element_event(tag_name, attributes)?;
+            .expt("There must have been at least one event handler!")
+            .build_handler(tag_name, attributes)?;
         self.event_handlers.push(event_handler);
         Ok(())
     }
@@ -35,14 +37,14 @@ impl EventsHandler {
     pub fn handle_characters_event(&mut self, text: String) {
         self.event_handlers
             .last_mut()
-            .unwrap()
+            .expt("There must have been at least one event handler!")
             .handle_characters_event(text);
     }
 
     pub fn handle_cdata_event(&mut self, text: String) {
         self.event_handlers
             .last_mut()
-            .unwrap()
+            .expt("There must have been at least one event handler!")
             .handle_cdata_event(text);
     }
 

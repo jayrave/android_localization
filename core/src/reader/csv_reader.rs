@@ -1,17 +1,19 @@
+use std::collections::HashSet;
 use std::io::Read;
 
 use csv;
 use csv::ReaderBuilder;
 
-use crate::error::Error;
+use android_localization_utilities::DevExpt;
+
+use crate::error::InnerError;
 use crate::localized_string::LocalizedString;
 use crate::localized_strings::LocalizedStrings;
-use std::collections::HashSet;
 
 pub fn read<S: Read>(
     source: S,
     allow_only_locales: HashSet<String>,
-) -> Result<Vec<LocalizedStrings>, Error> {
+) -> Result<Vec<LocalizedStrings>, InnerError> {
     let mut reader = ReaderBuilder::new()
         .has_headers(true) // To treat first row specially
         .flexible(false) // Takes care of making sure that all records are of the same size
@@ -59,23 +61,25 @@ pub fn read<S: Read>(
 fn extract_filtered_headers(
     record: &csv::StringRecord,
     allow_only_locales: HashSet<String>,
-) -> Result<FilteredHeaders, Error> {
+) -> Result<FilteredHeaders, InnerError> {
     if record.len() < 3 {
-        Err(String::from(
-            "Too few values in header (at least 3 required)",
-        ))?;
+        Err("Too few values in header (at least 3 required)")?;
     }
 
     let mut iterator = record.into_iter();
-    let header1 = iterator.next().unwrap(); // Safe to unwrap since size is at least 3
-    let header2 = iterator.next().unwrap(); // Safe to unwrap since size is at least 3
+    let header1 = iterator
+        .next()
+        .expt("Already checked the length but still fails!");
+    let header2 = iterator
+        .next()
+        .expt("Already checked the length but still fails!");
 
     if header1 != "string_name" {
-        Err(String::from("First header should be named string_name"))?;
+        Err("First header should be named string_name")?;
     }
 
     if header2 != "default_locale" {
-        Err(String::from("Second header should be named default_locale"))?;
+        Err("Second header should be named default_locale")?;
     }
 
     let mut foreign_indices_allow_flags = vec![];
@@ -98,7 +102,7 @@ fn extract_filtered_headers(
 fn extract_localized_record(
     record: &csv::StringRecord,
     foreign_indices_allow_flags: &[bool],
-) -> Result<LocalizedRecord, Error> {
+) -> Result<LocalizedRecord, InnerError> {
     // Since `ReaderBuilder` is set to be not flexible, we can be sure
     // that the this record is going to be as long as the headers record
     let mut iterator = record.into_iter();
@@ -106,7 +110,7 @@ fn extract_localized_record(
     let default_value = iterator.next().unwrap_or("");
 
     if string_name.is_empty() {
-        Err(String::from("string_name can't be empty for any record"))?;
+        Err("string_name can't be empty for any record")?;
     }
 
     let mut foreign_values = vec![];
@@ -140,56 +144,38 @@ mod tests {
     use std::fs::File;
     use std::io::{Seek, SeekFrom, Write};
 
-    use crate::error::Error;
+    use test_utilities;
+
+    use crate::error::InnerError;
     use crate::localized_string::LocalizedString;
     use crate::localized_strings::LocalizedStrings;
 
     #[test]
-    fn strings_are_read_from_valid_file() {
-        let mut strings_list = read_strings_from_file(
+    fn reads_strings_from_valid_file() {
+        let strings_list = read_strings_from_file(
             r#"string_name, default_locale, french, german, spanish
             string_1, english 1, french 1, german 1, spanish 1
             string_2, english 2, , german 2, spanish 2"#,
             vec!["french", "some_random_thing", "spanish"],
         )
-        .unwrap()
-        .into_iter();
+        .unwrap();
 
-        let french_strings = strings_list.next().unwrap();
-        let spanish_strings = strings_list.next().unwrap();
-        assert_eq!(strings_list.next(), None);
-
-        assert_eq!(french_strings.locale(), "french");
-        let mut french_strings_iter = french_strings.strings().iter();
-        assert_eq!(
-            french_strings_iter.next(),
-            Some(&LocalizedString::new(
-                String::from("string_1"),
-                String::from("english 1"),
-                String::from("french 1")
-            ))
-        );
-        assert_eq!(french_strings_iter.next(), None);
-
-        assert_eq!(spanish_strings.locale(), "spanish");
-        let mut spanish_strings_iter = spanish_strings.strings().iter();
-        assert_eq!(
-            spanish_strings_iter.next(),
-            Some(&LocalizedString::new(
-                String::from("string_1"),
-                String::from("english 1"),
-                String::from("spanish 1")
-            ))
-        );
-        assert_eq!(
-            spanish_strings_iter.next(),
-            Some(&LocalizedString::new(
-                String::from("string_2"),
-                String::from("english 2"),
-                String::from("spanish 2")
-            ))
-        );
-        assert_eq!(spanish_strings_iter.next(), None);
+        test_utilities::list::assert_strict_list_eq(
+            strings_list,
+            vec![
+                LocalizedStrings::build(
+                    "french",
+                    vec![LocalizedString::build("string_1", "english 1", "french 1")],
+                ),
+                LocalizedStrings::build(
+                    "spanish",
+                    vec![
+                        LocalizedString::build("string_1", "english 1", "spanish 1"),
+                        LocalizedString::build("string_2", "english 2", "spanish 2"),
+                    ],
+                ),
+            ],
+        )
     }
 
     #[test]
@@ -238,7 +224,7 @@ mod tests {
     fn read_strings_from_file(
         file_content: &str,
         allow_only_locales: Vec<&str>,
-    ) -> Result<Vec<LocalizedStrings>, Error> {
+    ) -> Result<Vec<LocalizedStrings>, InnerError> {
         // Write content to file
         let mut tmpfile: File = tempfile::tempfile().unwrap();
         tmpfile.write(file_content.as_bytes()).unwrap();

@@ -1,5 +1,6 @@
-use regex::Regex;
 use std::process::Command;
+
+use test_utilities;
 
 #[test]
 fn success_is_printed_out() {
@@ -18,16 +19,28 @@ fn success_is_printed_out() {
     let output = String::from_utf8(output.stdout).unwrap();
     let mut output_lines = output.split("\n");
 
-    let regex =
-        Regex::new("valid_input/values/strings.xml|valid_input/values-fr/strings.xml").unwrap();
+    // To make path testing windows friendly, we just test whether the appropriate
+    // values dir are present
+    let default_values = "values";
+    let fr_values = "values-fr";
 
     assert_eq!(
         output_lines.next().unwrap(),
         "No issues found. Validated the following files - "
     );
     assert_eq!(output_lines.next().unwrap(), "");
-    assert!(regex.is_match(output_lines.next().unwrap()));
-    assert!(regex.is_match(output_lines.next().unwrap()));
+    test_utilities::eq::assert_eq_to_either_or_by(
+        output_lines.next().unwrap(),
+        &default_values,
+        &fr_values,
+        |actual, expected| actual.contains("strings.xml") && actual.contains(expected),
+    );
+    test_utilities::eq::assert_eq_to_either_or_by(
+        output_lines.next().unwrap(),
+        &default_values,
+        &fr_values,
+        |actual, expected| actual.contains("strings.xml") && actual.contains(expected),
+    );
     assert_eq!(output_lines.next().unwrap(), "");
     assert_eq!(output_lines.next(), None);
 }
@@ -47,5 +60,5 @@ fn errors_are_printed_out() {
     assert!(!output.status.success());
     assert!(String::from_utf8(output.stderr)
         .unwrap()
-        .ends_with("Found 2 issues across 2 files!\n"));
+        .contains("Found 2 issues across 2 files!\n"));
 }

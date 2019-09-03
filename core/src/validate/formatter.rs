@@ -1,6 +1,9 @@
-use crate::validate::validator::InvalidStringsFile;
 use std::fmt::Error;
 use std::fmt::Write;
+
+use android_localization_utilities::DevExpt;
+
+use crate::validate::validator::InvalidStringsFile;
 
 pub fn format_to_string(invalid_strings_files: Vec<InvalidStringsFile>) -> Result<String, Error> {
     let files_count = invalid_strings_files.len();
@@ -36,7 +39,7 @@ fn format_errors_from_one_file(
     if invalid_strings_file.apostrophe_error.is_some() {
         for invalid_string in invalid_strings_file
             .apostrophe_error
-            .unwrap()
+            .expt("Apostrophe error without invalid strings!")
             .invalid_strings
         {
             issues_count_in_file += 1;
@@ -50,7 +53,11 @@ fn format_errors_from_one_file(
     }
 
     if invalid_strings_file.format_string_error.is_some() {
-        for mismatch in invalid_strings_file.format_string_error.unwrap().mismatches {
+        for mismatch in invalid_strings_file
+            .format_string_error
+            .expt("Format string error without mismatches!")
+            .mismatches
+        {
             issues_count_in_file += 1;
 
             // To make sure that the errors array line up as much as possible
@@ -100,6 +107,7 @@ fn format_errors_from_one_file(
     Ok(issues_count_in_file)
 }
 
+#[cfg(test)]
 mod tests {
     use crate::android_string::AndroidString;
     use crate::validate::apostrophe;
@@ -108,11 +116,9 @@ mod tests {
 
     #[test]
     fn formats() {
-        let default_s1 =
-            AndroidString::new(String::from("s1"), String::from("default_value"), true);
-        let french_s1 = AndroidString::new(String::from("s1"), String::from("french_value"), true);
-        let spanish_s1 =
-            AndroidString::new(String::from("s1"), String::from("spanish_value"), true);
+        let default_s1 = AndroidString::localizable("s1", "default_value");
+        let french_s1 = AndroidString::localizable("s1", "french_value");
+        let spanish_s1 = AndroidString::localizable("s1", "spanish_value");
 
         let invalid_strings_file = vec![
             InvalidStringsFile {

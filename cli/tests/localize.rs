@@ -1,17 +1,18 @@
 use std::process::{Command, Output};
+
 use tempfile::TempDir;
 
-mod helpers;
+mod file_utilities;
 
 #[test]
-fn one_locale_per_file_with_mapping() {
+fn succeeds_with_mapping() {
     let temp_dir = tempfile::tempdir().unwrap();
     let output = Command::new("cargo")
         .args(vec![
             "run",
             "localize",
             "--res-dir",
-            "./tests_data/localize/input",
+            "./tests_data/localize/success/input",
             "--output-dir",
             temp_dir.path().to_str().unwrap(),
             "--mapping",
@@ -25,19 +26,19 @@ fn one_locale_per_file_with_mapping() {
     assert_status_and_stdout(output);
     assert_output_files(
         temp_dir,
-        "./tests_data/localize/output_one_locale_per_file_with_mapping/",
+        "./tests_data/localize/success/output_with_mapping/",
     );
 }
 
 #[test]
-fn one_locale_per_file_without_mapping() {
+fn succeeds_without_mapping() {
     let temp_dir = tempfile::tempdir().unwrap();
     let output = Command::new("cargo")
         .args(vec![
             "run",
             "localize",
             "--res-dir",
-            "./tests_data/localize/input",
+            "./tests_data/localize/success/input",
             "--output-dir",
             temp_dir.path().to_str().unwrap(),
         ])
@@ -47,8 +48,29 @@ fn one_locale_per_file_without_mapping() {
     assert_status_and_stdout(output);
     assert_output_files(
         temp_dir,
-        "./tests_data/localize/output_one_locale_per_file_without_mapping/",
+        "./tests_data/localize/success/output_without_mapping/",
     );
+}
+
+#[test]
+fn warns_if_nothing_to_localize() {
+    let temp_dir = tempfile::tempdir().unwrap();
+    let output = Command::new("cargo")
+        .args(vec![
+            "run",
+            "localize",
+            "--res-dir",
+            "./tests_data/localize/warn/input",
+            "--output-dir",
+            temp_dir.path().to_str().unwrap(),
+        ])
+        .output()
+        .unwrap();
+
+    assert!(!output.status.success());
+    assert!(String::from_utf8(output.stderr)
+        .unwrap()
+        .contains("Nothing found to localize\n"));
 }
 
 #[test]
@@ -69,7 +91,7 @@ fn errors_are_printed_out() {
     assert!(!output.status.success());
     assert!(String::from_utf8(output.stderr)
         .unwrap()
-        .ends_with("localize/non_existent_dir) doesn't exist\n"));
+        .contains("Res dir path doesn't exist or it is not a directory\n"));
 }
 
 fn assert_status_and_stdout(output: Output) {
@@ -89,11 +111,9 @@ fn assert_status_and_stdout(output: Output) {
 }
 
 fn assert_output_files(temp_dir: TempDir, expected_output_dir_path: &str) {
-    helpers::assert_eq_of_file_contents_to_either_or(
-        temp_dir.path().to_str().unwrap(),
-        "to_localize_1.csv",
-        expected_output_dir_path,
-        "es_fr.csv",
-        "fr_es.csv",
+    file_utilities::assert_eq_of_file_contents_to_either_or(
+        &format!("{}/to_localize_1.csv", temp_dir.path().to_str().unwrap()),
+        &format!("{}/es_fr.csv", expected_output_dir_path),
+        &format!("{}/fr_es.csv", expected_output_dir_path),
     );
 }

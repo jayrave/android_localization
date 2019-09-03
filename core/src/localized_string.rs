@@ -26,3 +26,19 @@ impl LocalizedString {
         &self.localized
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::LocalizedString;
+
+    /// To expose a convenient way to build for tests
+    impl LocalizedString {
+        pub fn build<N: Into<String>, D: Into<String>, L: Into<String>>(
+            name: N,
+            default: D,
+            localized: L,
+        ) -> LocalizedString {
+            LocalizedString::new(name.into(), default.into(), localized.into())
+        }
+    }
+}

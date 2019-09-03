@@ -1,11 +1,13 @@
+use android_localization_utilities::DevExpt;
+
 use crate::android_string::AndroidString;
 use crate::ops::sort;
 
 /// While grouping strings, strings from `strings_1` take precedence over `strings_2` in case both
 /// strings have the same name
 pub fn merge_and_group_strings(
-    strings_1: &mut Vec<AndroidString>,
-    strings_2: &mut Vec<AndroidString>,
+    strings_1: &mut [AndroidString],
+    strings_2: &mut [AndroidString],
 ) -> Vec<AndroidString> {
     // Sort both the list to group list-wise
     sort::sort_android_strings_by_name(strings_1);
@@ -24,12 +26,26 @@ pub fn merge_and_group_strings(
         // Our iteration condition will make sure that either string_1 or string_2
         // will be a valid string always
         if string_1.is_some()
-            && (string_2.is_none() || string_1.unwrap().name() <= string_2.unwrap().name())
+            && (string_2.is_none()
+                || string_1
+                    .expt("Already checked for is_some but still fails!")
+                    .name()
+                    <= string_2
+                        .expt("Already checked for is_some but still fails!")
+                        .name())
         {
-            result.push(string_1.unwrap().clone());
+            result.push(
+                string_1
+                    .expt("Already checked for is_some but still fails!")
+                    .clone(),
+            );
             strings_1_index += 1;
         } else {
-            result.push(string_2.unwrap().clone());
+            result.push(
+                string_2
+                    .expt("Already checked for is_some but still fails!")
+                    .clone(),
+            );
             strings_2_index += 1;
         }
     }
@@ -39,110 +55,57 @@ pub fn merge_and_group_strings(
 
 #[cfg(test)]
 mod tests {
+    use test_utilities;
+
     use crate::android_string::AndroidString;
 
     #[test]
-    fn merged_and_grouped() {
-        let mut strings = super::merge_and_group_strings(
+    fn merges_and_groups() {
+        let strings = super::merge_and_group_strings(
             &mut vec![
-                AndroidString::new(String::from("string_1"), String::from("string value"), true),
-                AndroidString::new(
-                    String::from("string_4"),
-                    String::from("string value"),
-                    false,
-                ),
+                AndroidString::localizable("string_1", "string value"),
+                AndroidString::unlocalizable("string_4", "string value"),
             ],
             &mut vec![
-                AndroidString::new(String::from("string_3"), String::from("string value"), true),
-                AndroidString::new(
-                    String::from("string_2"),
-                    String::from("string value"),
-                    false,
-                ),
+                AndroidString::localizable("string_3", "string value"),
+                AndroidString::unlocalizable("string_2", "string value"),
+            ],
+        );
+
+        test_utilities::list::assert_strict_list_eq(
+            strings,
+            vec![
+                AndroidString::localizable("string_1", "string value"),
+                AndroidString::unlocalizable("string_2", "string value"),
+                AndroidString::localizable("string_3", "string value"),
+                AndroidString::unlocalizable("string_4", "string value"),
             ],
         )
-        .into_iter();
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::new(String::from("string_1"), String::from("string value"), true)
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::new(
-                String::from("string_2"),
-                String::from("string value"),
-                false
-            )
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::new(String::from("string_3"), String::from("string value"), true)
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::new(
-                String::from("string_4"),
-                String::from("string value"),
-                false
-            )
-        );
-
-        assert_eq!(strings.next(), None);
     }
 
     #[test]
-    fn merged_and_grouped_with_list_1_strings_taking_precedence_over_list_2_strings_in_case_of_same_name(
-    ) {
-        let mut strings = super::merge_and_group_strings(
+    fn list_1_strings_takes_precedence_over_list_2_strings_in_case_of_same_name() {
+        let strings = super::merge_and_group_strings(
             &mut vec![
-                AndroidString::new(String::from("string_1"), String::from("from list 1"), true),
-                AndroidString::new(String::from("string_3"), String::from("from list 1"), false),
-                AndroidString::new(
-                    String::from("string_1"),
-                    String::from("from list 1 again"),
-                    false,
-                ),
+                AndroidString::localizable("string_1", "from list 1"),
+                AndroidString::unlocalizable("string_3", "from list 1"),
+                AndroidString::unlocalizable("string_1", "from list 1 again"),
             ],
             &mut vec![
-                AndroidString::new(String::from("string_1"), String::from("from list 2"), false),
-                AndroidString::new(String::from("string_2"), String::from("from list 2"), true),
+                AndroidString::unlocalizable("string_1", "from list 2"),
+                AndroidString::localizable("string_2", "from list 2"),
+            ],
+        );
+
+        test_utilities::list::assert_strict_list_eq(
+            strings,
+            vec![
+                AndroidString::localizable("string_1", "from list 1"),
+                AndroidString::unlocalizable("string_1", "from list 1 again"),
+                AndroidString::unlocalizable("string_1", "from list 2"),
+                AndroidString::localizable("string_2", "from list 2"),
+                AndroidString::unlocalizable("string_3", "from list 1"),
             ],
         )
-        .into_iter();
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::new(String::from("string_1"), String::from("from list 1"), true)
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::new(
-                String::from("string_1"),
-                String::from("from list 1 again"),
-                false
-            )
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::new(String::from("string_1"), String::from("from list 2"), false)
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::new(String::from("string_2"), String::from("from list 2"), true)
-        );
-
-        assert_eq!(
-            strings.next().unwrap(),
-            AndroidString::new(String::from("string_3"), String::from("from list 1"), false)
-        );
-
-        assert_eq!(strings.next(), None);
     }
 }

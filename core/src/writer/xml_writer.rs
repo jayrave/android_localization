@@ -9,9 +9,12 @@ use xml::ParserConfig;
 
 use crate::android_string::AndroidString;
 use crate::constants;
-use crate::error::Error;
+use crate::error::InnerError;
 
-pub fn write<S: Write>(sink: &mut S, android_strings: Vec<AndroidString>) -> Result<(), Error> {
+pub fn write<S: Write>(
+    sink: &mut S,
+    android_strings: Vec<AndroidString>,
+) -> Result<(), InnerError> {
     let mut writer = EmitterConfig::new()
         .perform_indent(true)
         .indent_string("    ") // 4 spaces
@@ -44,7 +47,10 @@ pub fn write<S: Write>(sink: &mut S, android_strings: Vec<AndroidString>) -> Res
     Ok(())
 }
 
-fn write_string<W: Write>(writer: &mut writer::EventWriter<W>, value: &str) -> Result<(), Error> {
+fn write_string<W: Write>(
+    writer: &mut writer::EventWriter<W>,
+    value: &str,
+) -> Result<(), InnerError> {
     // Right now, to write CDATA sections in strings properly out to the file,
     // we are creating a reader & then piping the required read events to the
     // writer. This feels wasteful! There has got to a better, more efficient
@@ -55,21 +61,17 @@ fn write_string<W: Write>(writer: &mut writer::EventWriter<W>, value: &str) -> R
     let reader = ParserConfig::new().create_reader(value.as_bytes());
     for element_or_error in reader {
         match element_or_error {
-            Err(error) => return Err::<_, Error>(From::from(error)),
+            Err(error) => return Err::<_, InnerError>(From::from(error)),
             Ok(ref element) => match element {
                 ReadXmlEvent::Characters(_) => {
                     writer.write(element.as_writer_event().ok_or_else(|| {
-                        let error: Error =
-                            From::from(format!("Can't build writer event from {}", &value));
-                        error
+                        InnerError::from(format!("Can't build writer event from {}", &value))
                     })?)
                 }
 
                 ReadXmlEvent::CData(_) => {
                     writer.write(element.as_writer_event().ok_or_else(|| {
-                        let error: Error =
-                            From::from(format!("Can't build writer event from {}", &value));
-                        error
+                        InnerError::from(format!("Can't build writer event from {}", &value))
                     })?)
                 }
 
@@ -83,41 +85,33 @@ fn write_string<W: Write>(writer: &mut writer::EventWriter<W>, value: &str) -> R
 
 #[cfg(test)]
 mod tests {
+    use test_utilities;
+
     use crate::android_string::AndroidString;
 
     #[test]
-    fn strings_are_written_to_file() {
+    fn writes_strings_to_file() {
         let android_strings = vec![
-            AndroidString::new(
-                String::from("localizable_string"),
-                String::from("localizable string value"),
-                true,
-            ),
-            AndroidString::new(
-                String::from("non_localizable_string"),
-                String::from("non localizable string value"),
-                false,
-            ),
+            AndroidString::localizable("localizable_string", "localizable string value"),
+            AndroidString::unlocalizable("non_localizable_string", "non localizable string value"),
         ];
 
         // Write strings to a vector & split o/p into lines
         let mut sink: Vec<u8> = vec![];
         super::write(&mut sink, android_strings).unwrap();
         let written_content = String::from_utf8(sink).unwrap();
-        let mut written_lines = written_content.lines();
+        let written_lines = written_content.lines();
 
-        assert_eq!(
-            written_lines.next().unwrap(),
-            r##"<?xml version="1.0" encoding="utf-8"?>"##
-        );
-        assert_eq!(written_lines.next().unwrap(), r##"<resources>"##);
-        assert_eq!(
-            written_lines.next().unwrap(),
-            r##"    <string name="localizable_string">localizable string value</string>"##
-        );
-        assert_eq!(written_lines.next().unwrap(), r##"    <string name="non_localizable_string" translatable="false">non localizable string value</string>"##);
-        assert_eq!(written_lines.next().unwrap(), r##"</resources>"##);
-        assert_eq!(written_lines.next(), None);
+        test_utilities::list::assert_strict_list_eq(
+            written_lines.collect::<Vec<&str>>(),
+            vec![
+                r##"<?xml version="1.0" encoding="utf-8"?>"##,
+                r##"<resources>"##,
+                r##"    <string name="localizable_string">localizable string value</string>"##,
+                r##"    <string name="non_localizable_string" translatable="false">non localizable string value</string>"##,
+                r##"</resources>"##
+            ]
+        )
     }
 
     #[test]
@@ -143,26 +137,19 @@ mod tests {
     fn test_cdata_handling(value: &str) {
         // Write string to a vector & split o/p into lines
         let mut sink: Vec<u8> = vec![];
-        super::write(
-            &mut sink,
-            vec![AndroidString::new(
-                String::from("s1"),
-                String::from(value),
-                true,
-            )],
-        )
-        .unwrap();
+        super::write(&mut sink, vec![AndroidString::localizable("s1", value)]).unwrap();
 
         let written_content = String::from_utf8(sink).unwrap();
-        let mut written_lines = written_content.lines();
+        let written_lines = written_content.lines();
 
-        written_lines.next().unwrap(); // XML header
-        written_lines.next().unwrap(); // Resources opening
-        assert_eq!(
-            written_lines.next().unwrap(),
-            format!("    <string name=\"s1\">{}</string>", value)
-        );
-        written_lines.next().unwrap(); // Resources closing
-        assert_eq!(written_lines.next(), None);
+        test_utilities::list::assert_strict_list_eq(
+            written_lines.collect::<Vec<&str>>(),
+            vec![
+                r##"<?xml version="1.0" encoding="utf-8"?>"##,
+                r##"<resources>"##,
+                &format!("    <string name=\"s1\">{}</string>", value),
+                r##"</resources>"##,
+            ],
+        )
     }
 }

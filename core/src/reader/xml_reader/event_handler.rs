@@ -1,15 +1,15 @@
 use xml::attribute::OwnedAttribute;
 
 use crate::android_string::AndroidString;
-use crate::error::Error;
+use crate::error::InnerError;
 
 /// One instance of `EventHandler` is only expected to ever build one `AndroidString`
 pub trait EventHandler {
-    fn handler_for_start_element_event(
+    fn build_handler(
         &self,
         tag_name: String,
         attributes: Vec<OwnedAttribute>,
-    ) -> Result<Box<EventHandler>, Error>;
+    ) -> Result<Box<EventHandler>, InnerError>;
 
     fn handle_characters_event(&mut self, _text: String) {
         // No op
@@ -19,7 +19,7 @@ pub trait EventHandler {
         // No op
     }
 
-    // It would be great it a way can be found to make this consume self instead of
+    // It would be great if a way can be found to make this consume self instead of
     // just take in a reference. Compiler complains if this is made a consumer as
     // `EventHandler` is used as a trait object & boxed, un-sized objects can't be
     // moved out :(

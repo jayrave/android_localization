@@ -2,7 +2,7 @@ use xml::attribute::OwnedAttribute;
 
 use crate::android_string::AndroidString;
 use crate::constants;
-use crate::error::Error;
+use crate::error::InnerError;
 use crate::reader::xml_reader::event_handler::EventHandler;
 use crate::reader::xml_reader::sinking_event_handler::SinkingEventHandler;
 
@@ -13,7 +13,7 @@ pub struct StringEventHandler {
 }
 
 impl StringEventHandler {
-    pub fn build(attributes: Vec<OwnedAttribute>) -> Result<StringEventHandler, Error> {
+    pub fn build(attributes: Vec<OwnedAttribute>) -> Result<StringEventHandler, InnerError> {
         let mut string_name = None;
         let mut is_localizable = true;
         for attribute in attributes {
@@ -29,9 +29,7 @@ impl StringEventHandler {
         }
 
         match string_name {
-            None => Err(String::from(
-                "string element is missing required name attribute",
-            ))?,
+            None => Err("string element is missing required name attribute")?,
             Some(name) => Ok(StringEventHandler {
                 name,
                 is_localizable,
@@ -55,11 +53,11 @@ impl StringEventHandler {
 }
 
 impl EventHandler for StringEventHandler {
-    fn handler_for_start_element_event(
+    fn build_handler(
         &self,
         _tag_name: String,
         _attributes: Vec<OwnedAttribute>,
-    ) -> Result<Box<EventHandler>, Error> {
+    ) -> Result<Box<EventHandler>, InnerError> {
         Ok(Box::new(SinkingEventHandler::new()))
     }
 
@@ -86,17 +84,14 @@ mod tests {
     fn builds_string_with_one_character_event() {
         let mut handler = build_event_handler();
         handler.handle_characters_event(String::from("this is a test"));
-        assert_eq!(handler.built_string().unwrap().value(), "this is a test")
+        assert_string(handler, "this is a test")
     }
 
     #[test]
     fn builds_string_with_one_cdata_event() {
         let mut handler = build_event_handler();
         handler.handle_cdata_event(String::from("this is a test"));
-        assert_eq!(
-            handler.built_string().unwrap().value(),
-            "<![CDATA[this is a test]]>"
-        )
+        assert_string(handler, "<![CDATA[this is a test]]>")
     }
 
     #[test]
@@ -104,10 +99,7 @@ mod tests {
         let mut handler = build_event_handler();
         handler.handle_characters_event(String::from("character event "));
         handler.handle_cdata_event(String::from("cdata event"));
-        assert_eq!(
-            handler.built_string().unwrap().value(),
-            "character event <![CDATA[cdata event]]>"
-        )
+        assert_string(handler, "character event <![CDATA[cdata event]]>")
     }
 
     #[test]
@@ -115,10 +107,7 @@ mod tests {
         let mut handler = build_event_handler();
         handler.handle_cdata_event(String::from("cdata event"));
         handler.handle_characters_event(String::from(" character event"));
-        assert_eq!(
-            handler.built_string().unwrap().value(),
-            "<![CDATA[cdata event]]> character event"
-        )
+        assert_string(handler, "<![CDATA[cdata event]]> character event")
     }
 
     #[test]
@@ -131,7 +120,7 @@ mod tests {
         handler.handle_characters_event(String::from(" "));
         handler.handle_cdata_event(String::from("cdata event 3"));
         handler.handle_characters_event(String::from(" character event 3"));
-        assert_eq!(handler.built_string().unwrap().value(), "character event 1 <![CDATA[cdata event 1]]> character event 2 <![CDATA[cdata event 2]]> <![CDATA[cdata event 3]]> character event 3")
+        assert_string(handler, "character event 1 <![CDATA[cdata event 1]]> character event 2 <![CDATA[cdata event 2]]> <![CDATA[cdata event 3]]> character event 3")
     }
 
     fn build_event_handler() -> StringEventHandler {
@@ -140,5 +129,9 @@ mod tests {
             is_localizable: true,
             built_android_string: None,
         }
+    }
+
+    fn assert_string(handler: StringEventHandler, expected: &str) {
+        assert_eq!(handler.built_string().unwrap().value(), expected)
     }
 }

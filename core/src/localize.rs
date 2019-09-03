@@ -10,13 +10,13 @@ use crate::error::{Error, ResultExt};
 use crate::localizable_strings::LocalizableStrings;
 use crate::ops::filter;
 use crate::util::foreign_locale_ids_finder;
-use crate::util::xml_helper;
+use crate::util::xml_utilities;
 use crate::writer::csv_writer;
 
 /// Returns the list of output files created by this call. These aren't guaranteed
 /// to be valid paths to files. Sometimes, if a file's path can't be expressed by
 /// `String` (in case it has non UTF-8 chars), it could just be the file's name
-pub fn do_the_thing<S: ::std::hash::BuildHasher>(
+pub fn localize<S: ::std::hash::BuildHasher>(
     res_dir_path: &str,
     output_dir_path: &str,
     locale_id_to_name_map: HashMap<String, String, S>,
@@ -27,10 +27,10 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
     )?;
 
     if locale_id_to_name_map.is_empty() {
-        return Err::<_, Error>(From::from(String::from(
+        return Err(Error::new(
+            res_dir_path,
             "Res dir doesn't have any non-default values dir with strings file!",
-        )))
-        .with_context(String::from(res_dir_path));
+        ));
     }
 
     create_output_dir_if_required(output_dir_path)?;
@@ -38,7 +38,7 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
     // Read default strings
     let res_dir_path = Path::new(res_dir_path);
     let mut localizable_default_strings = filter::find_localizable_strings(
-        xml_helper::read_default_strings(res_dir_path)?.into_strings(),
+        xml_utilities::read_default_strings(res_dir_path)?.into_strings(),
     );
 
     // For all languages, write out strings requiring localization
@@ -53,10 +53,10 @@ pub fn do_the_thing<S: ::std::hash::BuildHasher>(
 fn create_output_dir_if_required(output_dir_path: &str) -> Result<(), Error> {
     let output_path = PathBuf::from(output_dir_path);
     if output_path.is_file() {
-        Err::<_, Error>(From::from(String::from(
+        Err(Error::new(
+            output_dir_path,
             "Output directory path points to a file!",
-        )))
-        .with_context(String::from(output_dir_path))
+        ))
     } else if output_path.exists() {
         Ok(())
     } else {
@@ -69,12 +69,12 @@ fn write_out_strings_to_localize<S: ::std::hash::BuildHasher>(
     res_dir_path: &Path,
     output_dir_path: &str,
     locale_id_to_name_map: HashMap<String, String, S>,
-    localizable_default_strings: &mut Vec<AndroidString>,
+    localizable_default_strings: &mut [AndroidString],
 ) -> Result<Vec<String>, Error> {
     let mut localizable_strings_list = vec![];
     for (locale_id, locale_name) in locale_id_to_name_map {
         let mut foreign_strings =
-            xml_helper::read_foreign_strings(res_dir_path, &locale_id)?.into_strings();
+            xml_utilities::read_foreign_strings(res_dir_path, &locale_id)?.into_strings();
 
         let strings_to_localize =
             filter::find_missing_strings(&mut foreign_strings, localizable_default_strings);
@@ -115,66 +115,62 @@ impl FileProvider {
 
     /// Returns the created output file along with its path (if path computation
     /// is possible; if not, it passes out a fallback value)
-    fn create_output_file(&mut self, output_file_name: &str) -> Result<File, Error> {
+    fn create_output_file(&mut self, output_file_name: &str) -> Result<(File, String), Error> {
         let mut output_path = PathBuf::from(&self.sink_dir);
         output_path.push(output_file_name);
         output_path.set_extension(constants::extn::CSV);
         let output_path_or_fb = String::from(output_path.to_str().unwrap_or(output_file_name));
 
         if output_path.exists() {
-            Err::<_, Error>(From::from(String::from("Output file already exists!")))
-                .with_context(output_path_or_fb)
+            Err(Error::new(output_path_or_fb, "Output file already exists!"))
         } else {
             match File::create(output_path) {
                 Ok(file) => {
-                    self.created_files.push(output_path_or_fb);
-                    Ok(file)
+                    self.created_files.push(output_path_or_fb.clone());
+                    Ok((file, output_path_or_fb))
                 }
 
-                Err(error) => Err::<_, Error>(From::from(error)).with_context(output_path_or_fb),
+                Err(error) => Err(Error::new(output_path_or_fb, error)),
             }
         }
     }
 }
 
 impl csv_writer::SinkProvider for FileProvider {
-    fn execute_with_new_sink(
-        &mut self,
-        for_locales: Vec<String>,
-        writer: csv_writer::Writer,
-    ) -> Result<(), Error> {
+    fn execute_with_new_sink(&mut self, writer: csv_writer::Writer) -> Result<(), Error> {
         self.count_of_files_created += 1;
         let filename = format!("to_localize_{}", self.count_of_files_created);
-        let mut sink = self.create_output_file(&filename).unwrap();
-        writer.write(&mut sink)
+        let (mut sink, path) = self.create_output_file(&filename)?;
+        writer.write(&mut sink).with_context(path)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
-    use std::fmt::Display;
     use std::fs;
     use std::fs::File;
-    use std::io::{Read, Write};
+    use std::io::Write;
     use std::path::{Path, PathBuf};
 
     use tempfile::TempDir;
 
+    use test_utilities;
+
     use crate::android_string::AndroidString;
 
     #[test]
-    fn do_the_thing_errors_for_empty_locale_id_to_name_map() {
+    fn errors_for_empty_locale_id_to_name_map() {
         let temp_dir = tempfile::tempdir().unwrap();
         let mut res_dir_path = temp_dir.path().to_path_buf();
         res_dir_path.push("res");
         fs::create_dir(res_dir_path.clone()).unwrap();
 
         let error =
-            super::do_the_thing(res_dir_path.to_str().unwrap(), "", HashMap::new()).unwrap_err();
+            super::localize(res_dir_path.to_str().unwrap(), "", HashMap::new()).unwrap_err();
         assert_eq!(
             error.context(),
-            &Some(String::from(res_dir_path.to_str().unwrap()))
+            &String::from(res_dir_path.to_str().unwrap())
         );
         assert!(error
             .to_string()
@@ -195,7 +191,7 @@ mod tests {
         assert!(error
             .to_string()
             .ends_with("Output directory path points to a file!"));
-        assert_eq!(error.context(), &Some(String::from(output_dir_path)));
+        assert_eq!(error.context(), &String::from(output_dir_path));
     }
 
     #[test]
@@ -214,7 +210,7 @@ mod tests {
         assert!(error.to_string().ends_with("Output file already exists!"));
         assert_eq!(
             error.context(),
-            &Some(String::from(output_file_path.to_str().unwrap()))
+            &String::from(output_file_path.to_str().unwrap())
         );
     }
 
@@ -227,21 +223,17 @@ mod tests {
 			</resources>
 		"##;
 
-        let default_strings = vec![AndroidString::new(
-            String::from("string"),
-            String::from("string value"),
-            true,
-        )];
-
+        let default_strings = vec![AndroidString::localizable("string", "string value")];
         let temp_dir = tempfile::tempdir().unwrap();
         let (file_paths, output_dir) = test_write_out_strings_to_localize(
             &temp_dir,
+            &contents.clone(),
             &contents.clone(),
             &contents,
             default_strings,
         );
 
-        assert!(file_paths.is_empty());
+        test_utilities::list::assert_list_is_empty(file_paths);
         assert!(fs::read_dir(output_dir)
             .unwrap()
             .into_iter()
@@ -258,25 +250,26 @@ mod tests {
 		"##;
 
         let default_strings = vec![
-            AndroidString::new(String::from("string_1"), String::from("string value"), true),
-            AndroidString::new(String::from("string_2"), String::from("string value"), true),
+            AndroidString::localizable("string_1", "string value"),
+            AndroidString::localizable("string_2", "string value"),
         ];
 
         let temp_dir = tempfile::tempdir().unwrap();
         let (file_paths, output_dir) = test_write_out_strings_to_localize(
             &temp_dir,
             &contents.clone(),
+            &contents.clone(),
             &contents,
             default_strings,
         );
 
         assert_eq!(file_paths.len(), 1);
-        assert_eq!(
-            file_paths,
+        test_utilities::list::assert_strict_list_eq(
+            &file_paths,
             fs::read_dir(output_dir)
                 .unwrap()
                 .map(|f| String::from(f.unwrap().path().to_str().unwrap()))
-                .collect::<Vec<String>>()
+                .collect::<Vec<String>>(),
         );
 
         assert_eq!(
@@ -288,12 +281,8 @@ mod tests {
             "to_localize_1.csv"
         );
 
-        let mut output_file =
-            File::open(&Path::new(&file_paths.into_iter().next().unwrap())).unwrap();
-        let mut output = String::new();
-        output_file.read_to_string(&mut output).unwrap();
-        assert_eq_to_either_or(
-            output,
+        test_utilities::eq::assert_eq_to_either_or(
+            test_utilities::file::read_content(&Path::new(&file_paths.into_iter().next().unwrap())),
             String::from("string_name,default_locale,spanish,french\nstring_1,string value,,\nstring_2,string value,,\n"),
             String::from("string_name,default_locale,french,spanish\nstring_1,string value,,\nstring_2,string value,,\n")
         );
@@ -305,42 +294,46 @@ mod tests {
         temp_dir: &TempDir,
         french_values_file_content: &str,
         spanish_values_file_content: &str,
+        unmapped_german_values_file_content: &str,
         mut default_strings: Vec<AndroidString>,
     ) -> (Vec<String>, PathBuf) {
         // Build paths
-        let mut res_dir_path = temp_dir.path().to_path_buf();
-        res_dir_path.push("res");
-        let mut fr_values_dir_path = res_dir_path.clone();
-        fr_values_dir_path.push("values-fr");
-        let mut fr_strings_file_path = fr_values_dir_path.clone();
-        fr_strings_file_path.push("strings.xml");
-        let mut es_values_dir_path = res_dir_path.clone();
-        es_values_dir_path.push("values-es");
-        let mut es_strings_file_path = es_values_dir_path.clone();
-        es_strings_file_path.push("strings.xml");
+        let mut res_path = temp_dir.path().to_path_buf();
+        res_path.push("res");
+
+        let mut fr_strings =
+            test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "fr");
+        let mut es_strings =
+            test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "es");
+        let mut de_strings =
+            test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "de");
+
         let mut output_dir_path = temp_dir.path().to_path_buf();
         output_dir_path.push("output");
-
-        // Create required dirs & files with content
-        fs::create_dir_all(fr_values_dir_path.clone()).unwrap();
-        fs::create_dir_all(es_values_dir_path.clone()).unwrap();
         fs::create_dir_all(output_dir_path.clone()).unwrap();
-        let mut fr_strings_file = File::create(fr_strings_file_path).unwrap();
-        fr_strings_file
+
+        // Write out required contents into files
+        fr_strings
+            .file
             .write(french_values_file_content.as_bytes())
             .unwrap();
-        let mut es_strings_file = File::create(es_strings_file_path).unwrap();
-        es_strings_file
+        es_strings
+            .file
             .write(spanish_values_file_content.as_bytes())
             .unwrap();
+        de_strings
+            .file
+            .write(unmapped_german_values_file_content.as_bytes())
+            .unwrap();
 
+        // Not including german in this map to make sure that mappings also work as a filter
         let mut locale_id_to_name_map = HashMap::new();
         locale_id_to_name_map.insert(String::from("fr"), String::from("french"));
         locale_id_to_name_map.insert(String::from("es"), String::from("spanish"));
 
         // Perform action
         let result = super::write_out_strings_to_localize(
-            &res_dir_path,
+            &res_path,
             output_dir_path.to_str().unwrap(),
             locale_id_to_name_map,
             &mut default_strings,
@@ -348,25 +341,5 @@ mod tests {
         .unwrap();
 
         (result, output_dir_path)
-    }
-
-    fn assert_eq_to_either_or<T>(actual: T, expected1: T, expected2: T)
-    where
-        T: PartialEq,
-        T: Display,
-    {
-        let result1 = actual == expected1;
-        let result2 = actual == expected2;
-        assert!(
-            result1 || result2,
-            r#"Actual: {};
-        Expected either
-        {}
-        or
-        {}"#,
-            actual,
-            expected1,
-            expected2
-        )
     }
 }

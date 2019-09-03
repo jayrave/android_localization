@@ -6,7 +6,9 @@ use std::io::Write;
 
 use csv;
 
-use crate::error::Error;
+use android_localization_utilities::DevExpt;
+
+use crate::error::{Error, InnerError};
 use crate::localizable_strings::LocalizableStrings;
 
 pub fn write(
@@ -25,15 +27,9 @@ pub fn write(
     // We may need multiple sinks to write locale requiring
     // different strings to be localized
     for (_, some_strings_list) in grouped_strings_list.into_iter() {
-        let for_locales = some_strings_list
-            .iter()
-            .map(|s| String::from(s.to_locale()))
-            .collect();
-
-        let writer = Writer {
+        sink_provider.execute_with_new_sink(Writer {
             strings_list: some_strings_list,
-        };
-        sink_provider.execute_with_new_sink(for_locales, writer)?;
+        })?;
     }
 
     Ok(())
@@ -50,11 +46,11 @@ pub struct Writer {
 }
 
 impl Writer {
-    pub fn write(self, sink: &mut Write) -> Result<(), Error> {
+    pub fn write(self, sink: &mut Write) -> Result<(), InnerError> {
         // Sink is automatically buffered
         let mut csv_writer = csv::Writer::from_writer(sink);
         let locale_count = self.strings_list.len();
-        let localizable_strings = self.strings_list.first().unwrap();
+        let localizable_strings = self.strings_list.first().expt("Empty strings list!");
         let value_count = localizable_strings.default_locale_strings().len();
 
         // Write header record
@@ -69,7 +65,10 @@ impl Writer {
         // Write values
         let mut record = vec![""; locale_count + 2];
         for i in 0..value_count {
-            let localizable_string = localizable_strings.default_locale_strings().get(i).unwrap();
+            let localizable_string = localizable_strings
+                .default_locale_strings()
+                .get(i)
+                .expt("Already checked the size but it still fails!");
             record[0] = localizable_string.name();
             record[1] = localizable_string.value();
             csv_writer.write_record(&record)?;
@@ -81,16 +80,15 @@ impl Writer {
 }
 
 pub trait SinkProvider {
-    fn execute_with_new_sink(
-        &mut self,
-        for_locales: Vec<String>,
-        writer: Writer,
-    ) -> Result<(), Error>;
+    fn execute_with_new_sink(&mut self, writer: Writer) -> Result<(), Error>;
 }
 
 #[cfg(test)]
 mod tests {
+    use test_utilities;
+
     use crate::android_string::AndroidString;
+    use crate::error::ResultExt;
     use crate::localizable_strings::LocalizableStrings;
 
     use super::Error;
@@ -98,62 +96,46 @@ mod tests {
     use super::Writer;
 
     struct ByteSinkProvider {
-        data: Vec<(Vec<String>, String)>,
+        data: Vec<String>,
     }
 
     impl SinkProvider for ByteSinkProvider {
-        fn execute_with_new_sink(
-            &mut self,
-            for_locales: Vec<String>,
-            writer: Writer,
-        ) -> Result<(), Error> {
+        fn execute_with_new_sink(&mut self, writer: Writer) -> Result<(), Error> {
             let mut contents = vec![];
             let result = writer.write(&mut contents);
-            self.data
-                .push((for_locales, String::from_utf8(contents).unwrap()));
-
-            result
+            self.data.push(String::from_utf8(contents).unwrap());
+            result.with_context("added context for tests")
         }
     }
 
     #[test]
-    fn strings_are_written_to_files() {
-        let mut strings_list = vec![];
-        strings_list.push(LocalizableStrings::new(
-            String::from("french"),
-            vec![AndroidString::new(
-                String::from("string_1"),
-                String::from("english 1"),
-                true,
-            )],
-        ));
+    fn writes_strings_to_files() {
+        let strings_list = vec![
+            LocalizableStrings::new(
+                String::from("french"),
+                vec![AndroidString::localizable("string_1", "english 1")],
+            ),
+            LocalizableStrings::new(
+                String::from("german"),
+                vec![
+                    AndroidString::localizable("string_1", "english 1"),
+                    AndroidString::localizable("string_2", "english 2"),
+                ],
+            ),
+            LocalizableStrings::new(
+                String::from("spanish"),
+                vec![AndroidString::localizable("string_2", "english 2")],
+            ),
+            LocalizableStrings::new(
+                String::from("dutch"),
+                vec![
+                    AndroidString::localizable("string_1", "english 1"),
+                    AndroidString::localizable("string_2", "english 2"),
+                ],
+            ),
+        ];
 
-        strings_list.push(LocalizableStrings::new(
-            String::from("german"),
-            vec![
-                AndroidString::new(String::from("string_1"), String::from("english 1"), true),
-                AndroidString::new(String::from("string_2"), String::from("english 2"), true),
-            ],
-        ));
-
-        strings_list.push(LocalizableStrings::new(
-            String::from("spanish"),
-            vec![AndroidString::new(
-                String::from("string_2"),
-                String::from("english 2"),
-                true,
-            )],
-        ));
-
-        strings_list.push(LocalizableStrings::new(
-            String::from("dutch"),
-            vec![
-                AndroidString::new(String::from("string_1"), String::from("english 1"), true),
-                AndroidString::new(String::from("string_2"), String::from("english 2"), true),
-            ],
-        ));
-
-        // Convert all the written bytes into strings for the different sinks
+        // Convert all the written bytes into strings
         let mut sink_provider = ByteSinkProvider { data: vec![] };
 
         super::write(strings_list, &mut sink_provider).unwrap();
@@ -162,12 +144,12 @@ mod tests {
         sink_provider.data.sort();
 
         // Time to assert
-        assert_eq!(
+        test_utilities::list::assert_strict_list_eq(
             sink_provider.data,
             vec![
-                (vec![String::from("french")], String::from("string_name,default_locale,french\nstring_1,english 1,\n")),
-                (vec![String::from("german"), String::from("dutch")], String::from("string_name,default_locale,german,dutch\nstring_1,english 1,,\nstring_2,english 2,,\n")),
-                (vec![String::from("spanish")], String::from("string_name,default_locale,spanish\nstring_2,english 2,\n"))
+                String::from("string_name,default_locale,french\nstring_1,english 1,\n"),
+                String::from("string_name,default_locale,german,dutch\nstring_1,english 1,,\nstring_2,english 2,,\n"),
+                String::from("string_name,default_locale,spanish\nstring_2,english 2,\n")
             ]
         );
     }

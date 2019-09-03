@@ -15,11 +15,23 @@ impl LocalizedStrings {
         &self.locale
     }
 
-    pub fn strings(&self) -> &Vec<LocalizedString> {
-        &self.strings
-    }
-
     pub fn into_strings(self) -> Vec<LocalizedString> {
         self.strings
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::LocalizedString;
+    use super::LocalizedStrings;
+
+    /// To expose a convenient way to build for tests
+    impl LocalizedStrings {
+        pub fn build<N: Into<String>>(
+            locale: N,
+            strings: Vec<LocalizedString>,
+        ) -> LocalizedStrings {
+            LocalizedStrings::new(locale.into(), strings)
+        }
     }
 }
