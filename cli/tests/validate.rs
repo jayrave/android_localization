@@ -20,15 +20,8 @@ fn success_is_printed_out() {
     let output = String::from_utf8(output.stdout).unwrap();
     let mut output_lines = output.split("\n");
 
-    let mut default_path = PathBuf::from("valid_input");
-    default_path.push("values");
-    default_path.push("strings.xml");
-    let default_path = default_path.to_str().unwrap();
-
-    let mut fr_path = PathBuf::from("valid_input");
-    fr_path.push("values-fr");
-    fr_path.push("strings.xml");
-    let fr_path = fr_path.to_str().unwrap();
+    let default_path = String::from(PathBuf::from("valid_input/values/strings.xml").to_str().unwrap());
+    let fr_path = String::from(PathBuf::from("valid_input/values-fr/strings.xml").to_str().unwrap());
 
     assert_eq!(
         output_lines.next().unwrap(),
@@ -37,14 +30,14 @@ fn success_is_printed_out() {
     assert_eq!(output_lines.next().unwrap(), "");
     test_utilities::eq::assert_eq_to_either_or_by(
         output_lines.next().unwrap(),
-        default_path,
-        fr_path,
+        &default_path,
+        &fr_path,
         |actual, expected| actual.contains(expected),
     );
     test_utilities::eq::assert_eq_to_either_or_by(
         output_lines.next().unwrap(),
-        default_path,
-        fr_path,
+        &default_path,
+        &fr_path,
         |actual, expected| actual.contains(expected),
     );
     assert_eq!(output_lines.next().unwrap(), "");

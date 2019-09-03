@@ -112,10 +112,8 @@ fn assert_status_and_stdout(output: Output) {
 
 fn assert_output_files(temp_dir: TempDir, expected_output_dir_path: &str) {
     file_utilities::assert_eq_of_file_contents_to_either_or(
-        temp_dir.path().to_str().unwrap(),
-        "to_localize_1.csv",
-        expected_output_dir_path,
-        "es_fr.csv",
-        "fr_es.csv",
+        &format!("{}/to_localize_1.csv", temp_dir.path().to_str().unwrap()),
+        &format!("{}/es_fr.csv", expected_output_dir_path),
+        &format!("{}/fr_es.csv", expected_output_dir_path),
     );
 }
