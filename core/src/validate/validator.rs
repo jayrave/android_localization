@@ -124,46 +124,35 @@ mod tests {
     #[test]
     fn validates() {
         let tempdir = tempfile::tempdir().unwrap();
-        let mut res_dir_path = tempdir.path().to_path_buf();
-        res_dir_path.push("res");
+        let mut res_path = tempdir.path().to_path_buf();
+        res_path.push("res");
 
-        let mut default_values_dir_path = res_dir_path.clone();
-        default_values_dir_path.push("values");
-        fs::create_dir_all(&default_values_dir_path).unwrap();
-        let (mut default_strings_file, default_strings_file_path) =
-            create_strings_file_in(&default_values_dir_path);
-
-        let mut french_values_dir_path = res_dir_path.clone();
-        french_values_dir_path.push("values-fr");
-        fs::create_dir_all(&french_values_dir_path).unwrap();
-        let (mut french_strings_file, french_strings_file_path) =
-            create_strings_file_in(&french_values_dir_path);
-
-        let mut spanish_values_dir_path = res_dir_path.clone();
-        spanish_values_dir_path.push("values-es");
-        fs::create_dir_all(&spanish_values_dir_path).unwrap();
-        let (mut spanish_strings_file, spanish_strings_file_path) =
-            create_strings_file_in(&spanish_values_dir_path);
+        let mut default_strings =
+            test_utilities::res::setup_empty_strings_for_default_locale(res_path.clone());
+        let mut french_strings =
+            test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "fr");
+        let mut spanish_strings =
+            test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "es");
 
         xml_writer::write(
-            &mut default_strings_file,
+            &mut default_strings.file,
             vec![AndroidString::localizable("s1", "value")],
         )
         .unwrap();
 
         xml_writer::write(
-            &mut french_strings_file,
+            &mut french_strings.file,
             vec![AndroidString::localizable("s1", "value")],
         )
         .unwrap();
 
         xml_writer::write(
-            &mut spanish_strings_file,
+            &mut spanish_strings.file,
             vec![AndroidString::localizable("s1", "value")],
         )
         .unwrap();
 
-        let mut actual_output = super::validate(res_dir_path.to_str().unwrap())
+        let mut actual_output = super::validate(res_path.to_str().unwrap())
             .unwrap()
             .unwrap();
 
@@ -173,9 +162,9 @@ mod tests {
         test_utilities::list::assert_strict_list_eq(
             actual_output,
             vec![
-                spanish_strings_file_path,
-                french_strings_file_path,
-                default_strings_file_path,
+                spanish_strings.path,
+                french_strings.path,
+                default_strings.path,
             ],
         )
     }
@@ -183,42 +172,31 @@ mod tests {
     #[test]
     fn errors() {
         let tempdir = tempfile::tempdir().unwrap();
-        let mut res_dir_path = tempdir.path().to_path_buf();
-        res_dir_path.push("res");
+        let mut res_path = tempdir.path().to_path_buf();
+        res_path.push("res");
 
-        let mut default_values_dir_path = res_dir_path.clone();
-        default_values_dir_path.push("values");
-        fs::create_dir_all(&default_values_dir_path).unwrap();
-        let (mut default_strings_file, default_strings_file_path) =
-            create_strings_file_in(&default_values_dir_path);
-
-        let mut french_values_dir_path = res_dir_path.clone();
-        french_values_dir_path.push("values-fr");
-        fs::create_dir_all(&french_values_dir_path).unwrap();
-        let (mut french_strings_file, french_strings_file_path) =
-            create_strings_file_in(&french_values_dir_path);
-
-        let mut spanish_values_dir_path = res_dir_path.clone();
-        spanish_values_dir_path.push("values-es");
-        fs::create_dir_all(&spanish_values_dir_path).unwrap();
-        let (mut spanish_strings_file, spanish_strings_file_path) =
-            create_strings_file_in(&spanish_values_dir_path);
+        let mut default_strings =
+            test_utilities::res::setup_empty_strings_for_default_locale(res_path.clone());
+        let mut french_strings =
+            test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "fr");
+        let mut spanish_strings =
+            test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "es");
 
         let default_s1 = AndroidString::localizable("s1", "value");
         let default_s2 = AndroidString::localizable("s2", "v'alue");
         xml_writer::write(
-            &mut default_strings_file,
+            &mut default_strings.file,
             vec![default_s1.clone(), default_s2.clone()],
         )
         .unwrap();
 
         let french_s1 = AndroidString::localizable("s1", "v'alue");
-        xml_writer::write(&mut french_strings_file, vec![french_s1.clone()]).unwrap();
+        xml_writer::write(&mut french_strings.file, vec![french_s1.clone()]).unwrap();
 
         let spanish_s2 = AndroidString::localizable("s2", "v'alue %1$d");
-        xml_writer::write(&mut spanish_strings_file, vec![spanish_s2.clone()]).unwrap();
+        xml_writer::write(&mut spanish_strings.file, vec![spanish_s2.clone()]).unwrap();
 
-        let mut invalid_strings_files = super::validate(res_dir_path.to_str().unwrap())
+        let mut invalid_strings_files = super::validate(res_path.to_str().unwrap())
             .unwrap()
             .unwrap_err();
 
@@ -229,7 +207,7 @@ mod tests {
             invalid_strings_files,
             vec![
                 InvalidStringsFile {
-                    file_path: spanish_strings_file_path,
+                    file_path: spanish_strings.path,
                     apostrophe_error: Some(apostrophe::InvalidStrings {
                         invalid_strings: vec![spanish_s2.clone()],
                     }),
@@ -247,29 +225,20 @@ mod tests {
                     }),
                 },
                 InvalidStringsFile {
-                    file_path: french_strings_file_path,
+                    file_path: french_strings.path,
                     apostrophe_error: Some(apostrophe::InvalidStrings {
                         invalid_strings: vec![french_s1],
                     }),
                     format_string_error: None,
                 },
                 InvalidStringsFile {
-                    file_path: default_strings_file_path,
+                    file_path: default_strings.path,
                     apostrophe_error: Some(apostrophe::InvalidStrings {
                         invalid_strings: vec![default_s2],
                     }),
                     format_string_error: None,
                 },
             ],
-        )
-    }
-
-    fn create_strings_file_in(dir_path: &PathBuf) -> (File, String) {
-        let mut strings_file_path = dir_path.clone();
-        strings_file_path.push("strings.xml");
-        (
-            File::create(strings_file_path.clone()).unwrap(),
-            String::from(strings_file_path.clone().to_str().unwrap()),
         )
     }
 }

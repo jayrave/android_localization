@@ -103,7 +103,7 @@ mod tests {
         let res_dir = tempfile::tempdir().unwrap();
 
         let strings_file_path =
-            test_utilities::res::setup_empty_strings_for_default_locale(res_dir.path());
+            test_utilities::res::setup_empty_strings_for_default_locale(res_dir.path()).path;
         test_utilities::file::write_content(strings_file_path.clone(), "example content");
 
         let mut file_contents = String::new();
@@ -119,7 +119,7 @@ mod tests {
         let res_dir = tempfile::tempdir().unwrap();
 
         let strings_file_path =
-            test_utilities::res::setup_empty_strings_for_locale(res_dir.path(), "fr");
+            test_utilities::res::setup_empty_strings_for_locale(res_dir.path(), "fr").path;
         test_utilities::file::write_content(strings_file_path.clone(), "example content");
 
         let mut file_contents = String::new();

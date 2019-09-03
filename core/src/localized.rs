@@ -177,58 +177,30 @@ mod tests {
 
     #[test]
     fn updates_strings_files() {
-        let temp_dir = tempfile::tempdir().unwrap();
-
         // Build paths
-        let mut res_dir_path = temp_dir.path().to_path_buf();
-        res_dir_path.push("res");
-        let mut default_values_dir_path = res_dir_path.clone();
-        default_values_dir_path.push("values");
-        let mut default_strings_file_path = default_values_dir_path.clone();
-        default_strings_file_path.push("strings.xml");
+        let temp_dir = tempfile::tempdir().unwrap();
+        let mut res_path = temp_dir.path().to_path_buf();
+        res_path.push("res");
 
-        let mut fr_values_dir_path = res_dir_path.clone();
-        fr_values_dir_path.push("values-fr");
-        let mut fr_strings_file_path = fr_values_dir_path.clone();
-        fr_strings_file_path.push("strings.xml");
-
-        let mut es_values_dir_path = res_dir_path.clone();
-        es_values_dir_path.push("values-es");
-        let mut es_strings_file_path = es_values_dir_path.clone();
-        es_strings_file_path.push("strings.xml");
-
-        let mut de_values_dir_path = res_dir_path.clone();
-        de_values_dir_path.push("values-de");
-        let mut de_strings_file_path = de_values_dir_path.clone();
-        de_strings_file_path.push("strings.xml");
-
-        let mut zh_values_dir_path = res_dir_path.clone();
-        zh_values_dir_path.push("values-zh");
-        let mut zh_strings_file_path = zh_values_dir_path.clone();
-        zh_strings_file_path.push("strings.xml");
+        let mut default_strings =
+            test_utilities::res::setup_empty_strings_for_default_locale(res_path.clone());
+        let mut fr_strings =
+            test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "fr");
+        let mut es_strings =
+            test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "es");
+        let mut de_strings =
+            test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "de");
+        let mut zh_strings =
+            test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "zh");
 
         let mut localized_dir_path = temp_dir.path().to_path_buf();
         localized_dir_path.push("localized");
         let mut localized_file_path = localized_dir_path.clone();
         localized_file_path.push("localized.csv");
 
-        // Create required dirs & files with content
-        fs::create_dir_all(default_values_dir_path.clone()).unwrap();
-        fs::create_dir_all(fr_values_dir_path.clone()).unwrap();
-        fs::create_dir_all(es_values_dir_path.clone()).unwrap();
-        fs::create_dir_all(de_values_dir_path.clone()).unwrap();
-        fs::create_dir_all(zh_values_dir_path.clone()).unwrap();
-        fs::create_dir_all(localized_dir_path.clone()).unwrap();
-        let mut default_strings_file = File::create(default_strings_file_path).unwrap();
-        let mut fr_strings_file = File::create(fr_strings_file_path.clone()).unwrap();
-        let mut es_strings_file = File::create(es_strings_file_path.clone()).unwrap();
-        let mut de_strings_file = File::create(de_strings_file_path.clone()).unwrap();
-        let mut zh_strings_file = File::create(zh_strings_file_path.clone()).unwrap();
-        let mut localized_file = File::create(localized_file_path.clone()).unwrap();
-
         // Write out required contents into files
         xml_writer::write(
-            &mut default_strings_file,
+            &mut default_strings.file,
             vec![
                 AndroidString::localizable("s1", "english value 1"),
                 AndroidString::localizable("s2", "english value 2"),
@@ -237,7 +209,7 @@ mod tests {
         .unwrap();
 
         xml_writer::write(
-            &mut fr_strings_file,
+            &mut fr_strings.file,
             vec![
                 AndroidString::localizable("s1", "french old value 1"),
                 AndroidString::localizable("s2", "french old value 2"),
@@ -246,7 +218,7 @@ mod tests {
         .unwrap();
 
         xml_writer::write(
-            &mut es_strings_file,
+            &mut es_strings.file,
             vec![
                 AndroidString::localizable("s1", "spanish old value 1"),
                 AndroidString::localizable("s2", "spanish old value 2"),
@@ -259,15 +231,17 @@ mod tests {
             AndroidString::localizable("s2", "german old value 2"),
         ];
 
-        xml_writer::write(&mut de_strings_file, german_android_strings.clone()).unwrap();
+        xml_writer::write(&mut de_strings.file, german_android_strings.clone()).unwrap();
 
         let chinese_android_strings = vec![
             AndroidString::localizable("s1", "chinese old value 1"),
             AndroidString::localizable("s2", "chinese old value 2"),
         ];
 
-        xml_writer::write(&mut zh_strings_file, chinese_android_strings.clone()).unwrap();
+        xml_writer::write(&mut zh_strings.file, chinese_android_strings.clone()).unwrap();
 
+        fs::create_dir_all(localized_dir_path.clone()).unwrap();
+        let mut localized_file = File::create(localized_file_path.clone()).unwrap();
         localized_file
             .write(
                 r#"string_name, default_locale, french, spanish, german, chinese
@@ -285,7 +259,7 @@ s2, english value 2,,spanish new value 2,german new value 2,            "#
 
         // Perform action
         let created_output_files_path = super::localized(
-            res_dir_path.clone().to_str().unwrap(),
+            res_path.clone().to_str().unwrap(),
             localized_file_path.to_str().unwrap(),
             map,
         )
@@ -294,14 +268,11 @@ s2, english value 2,,spanish new value 2,german new value 2,            "#
         // Assert appropriate output
         test_utilities::list::assert_strict_list_eq(
             created_output_files_path,
-            vec![
-                fr_strings_file_path.to_str().unwrap(),
-                es_strings_file_path.to_str().unwrap(),
-            ],
+            vec![fr_strings.path, es_strings.path],
         );
 
         test_utilities::list::assert_strict_list_eq(
-            xml_utilities::read_foreign_strings(&res_dir_path, "fr")
+            xml_utilities::read_foreign_strings(&res_path, "fr")
                 .unwrap()
                 .into_strings(),
             vec![
@@ -311,7 +282,7 @@ s2, english value 2,,spanish new value 2,german new value 2,            "#
         );
 
         test_utilities::list::assert_strict_list_eq(
-            xml_utilities::read_foreign_strings(&res_dir_path, "es")
+            xml_utilities::read_foreign_strings(&res_path, "es")
                 .unwrap()
                 .into_strings(),
             vec![
@@ -322,7 +293,7 @@ s2, english value 2,,spanish new value 2,german new value 2,            "#
 
         // German must not have changed since it wasn't included in the mapping
         test_utilities::list::assert_strict_list_eq(
-            xml_utilities::read_foreign_strings(&res_dir_path, "de")
+            xml_utilities::read_foreign_strings(&res_path, "de")
                 .unwrap()
                 .into_strings(),
             german_android_strings,
@@ -331,7 +302,7 @@ s2, english value 2,,spanish new value 2,german new value 2,            "#
         // Chinese must not have changed since the localized text only container blank string
         // & already present localized value
         test_utilities::list::assert_strict_list_eq(
-            xml_utilities::read_foreign_strings(&res_dir_path, "zh")
+            xml_utilities::read_foreign_strings(&res_path, "zh")
                 .unwrap()
                 .into_strings(),
             chinese_android_strings,
@@ -340,33 +311,27 @@ s2, english value 2,,spanish new value 2,german new value 2,            "#
 
     #[test]
     fn writable_empty_foreign_strings_file_creates_file() {
-        let res_dir = tempfile::tempdir().unwrap();
+        let res_path = tempfile::tempdir().unwrap();
 
-        let mut values_dir_path = res_dir.path().to_path_buf();
-        values_dir_path.push("values-fr");
-
-        let mut strings_file_path = values_dir_path.clone();
-        strings_file_path.push("strings.xml");
-
-        fs::create_dir(values_dir_path).unwrap();
-        let mut file_with_old_content: File = File::create(strings_file_path.clone()).unwrap();
-        file_with_old_content
+        let mut fr_strings = test_utilities::res::setup_empty_strings_for_locale(&res_path, "fr");
+        fr_strings
+            .file
             .write("example old content".as_bytes())
             .unwrap();
 
         let (mut file_with_new_content, file_path) =
-            super::writable_empty_foreign_strings_file(res_dir.path(), "fr").unwrap();
+            super::writable_empty_foreign_strings_file(res_path.path(), "fr").unwrap();
         file_with_new_content
             .write("example new content".as_bytes())
             .unwrap();
 
         let mut file_contents = String::new();
-        File::open(strings_file_path.clone())
+        File::open(&fr_strings.path)
             .unwrap()
             .read_to_string(&mut file_contents)
             .unwrap();
 
         assert_eq!(file_contents, "example new content");
-        assert_eq!(file_path, strings_file_path.to_str().unwrap())
+        assert_eq!(file_path, fr_strings.path)
     }
 }

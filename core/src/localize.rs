@@ -281,12 +281,8 @@ mod tests {
             "to_localize_1.csv"
         );
 
-        let mut output_file =
-            File::open(&Path::new(&file_paths.into_iter().next().unwrap())).unwrap();
-        let mut output = String::new();
-        output_file.read_to_string(&mut output).unwrap();
         test_utilities::eq::assert_eq_to_either_or(
-            output,
+            test_utilities::file::read_content(&Path::new(&file_paths.into_iter().next().unwrap())),
             String::from("string_name,default_locale,spanish,french\nstring_1,string value,,\nstring_2,string value,,\n"),
             String::from("string_name,default_locale,french,spanish\nstring_1,string value,,\nstring_2,string value,,\n")
         );
@@ -302,38 +298,31 @@ mod tests {
         mut default_strings: Vec<AndroidString>,
     ) -> (Vec<String>, PathBuf) {
         // Build paths
-        let mut res_dir_path = temp_dir.path().to_path_buf();
-        res_dir_path.push("res");
-        let mut fr_values_dir_path = res_dir_path.clone();
-        fr_values_dir_path.push("values-fr");
-        let mut fr_strings_file_path = fr_values_dir_path.clone();
-        fr_strings_file_path.push("strings.xml");
-        let mut es_values_dir_path = res_dir_path.clone();
-        es_values_dir_path.push("values-es");
-        let mut es_strings_file_path = es_values_dir_path.clone();
-        es_strings_file_path.push("strings.xml");
-        let mut de_values_dir_path = res_dir_path.clone();
-        de_values_dir_path.push("values-de");
-        let mut de_strings_file_path = de_values_dir_path.clone();
-        de_strings_file_path.push("strings.xml");
+        let mut res_path = temp_dir.path().to_path_buf();
+        res_path.push("res");
+
+        let mut fr_strings =
+            test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "fr");
+        let mut es_strings =
+            test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "es");
+        let mut de_strings =
+            test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "de");
+
         let mut output_dir_path = temp_dir.path().to_path_buf();
         output_dir_path.push("output");
-
-        // Create required dirs & files with content
-        fs::create_dir_all(fr_values_dir_path.clone()).unwrap();
-        fs::create_dir_all(es_values_dir_path.clone()).unwrap();
-        fs::create_dir_all(de_values_dir_path.clone()).unwrap();
         fs::create_dir_all(output_dir_path.clone()).unwrap();
-        let mut fr_strings_file = File::create(fr_strings_file_path).unwrap();
-        fr_strings_file
+
+        // Write out required contents into files
+        fr_strings
+            .file
             .write(french_values_file_content.as_bytes())
             .unwrap();
-        let mut es_strings_file = File::create(es_strings_file_path).unwrap();
-        es_strings_file
+        es_strings
+            .file
             .write(spanish_values_file_content.as_bytes())
             .unwrap();
-        let mut de_strings_file = File::create(de_strings_file_path).unwrap();
-        de_strings_file
+        de_strings
+            .file
             .write(unmapped_german_values_file_content.as_bytes())
             .unwrap();
 
@@ -344,7 +333,7 @@ mod tests {
 
         // Perform action
         let result = super::write_out_strings_to_localize(
-            &res_dir_path,
+            &res_path,
             output_dir_path.to_str().unwrap(),
             locale_id_to_name_map,
             &mut default_strings,
