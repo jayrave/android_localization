@@ -1,5 +1,4 @@
 use std::io::Write;
-use std::path::PathBuf;
 use std::process::{Command, Output};
 
 use tempfile::TempDir;
@@ -168,8 +167,10 @@ fn assert_status_and_stdout(output: Output) {
     let output = String::from_utf8(output.stdout).unwrap();
     let mut output_lines = output.split("\n");
 
-    let fr_path = String::from(PathBuf::from("values-fr/strings.xml").to_str().unwrap());
-    let es_path = String::from(PathBuf::from("values-es/strings.xml").to_str().unwrap());
+    // To make path testing windows friendly, we just test whether the appropriate
+    // values dir are present
+    let fr_values = "values-fr";
+    let es_values = "values-es";
 
     assert_eq!(
         output_lines.next().unwrap(),
@@ -178,15 +179,15 @@ fn assert_status_and_stdout(output: Output) {
     assert_eq!(output_lines.next().unwrap(), "");
     test_utilities::eq::assert_eq_to_either_or_by(
         output_lines.next().unwrap(),
-        &fr_path,
-        &es_path,
-        |actual, expected| actual.contains(expected),
+        &fr_values,
+        &es_values,
+        |actual, expected| actual.contains("strings.xml") && actual.contains(expected),
     );
     test_utilities::eq::assert_eq_to_either_or_by(
         output_lines.next().unwrap(),
-        &fr_path,
-        &es_path,
-        |actual, expected| actual.contains(expected),
+        &fr_values,
+        &es_values,
+        |actual, expected| actual.contains("strings.xml") && actual.contains(expected),
     );
     assert_eq!(output_lines.next().unwrap(), "");
     assert_eq!(output_lines.next(), None);
