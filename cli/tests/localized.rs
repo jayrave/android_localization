@@ -1,5 +1,3 @@
-use std::fs;
-use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 use std::process::{Command, Output};
@@ -120,12 +118,16 @@ where
     let mut res_path = temp_dir.path().to_path_buf();
     res_path.push("res");
 
-    let mut default_strings = test_utilities::res::setup_empty_strings_for_default_locale(res_path.clone());
-    let mut fr_strings = test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "fr");
-    let mut es_strings = test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "es");
+    let mut default_strings =
+        test_utilities::res::setup_empty_strings_for_default_locale(res_path.clone());
+    let mut fr_strings =
+        test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "fr");
+    let mut es_strings =
+        test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "es");
 
     // Write out required contents into files
-    default_strings.file
+    default_strings
+        .file
         .write(
             test_utilities::file::read_content(format!(
                 "./tests_data/localized/{}/input/sample_res/values/strings.xml",
@@ -135,7 +137,8 @@ where
         )
         .unwrap();
 
-    fr_strings.file
+    fr_strings
+        .file
         .write(
             test_utilities::file::read_content(format!(
                 "./tests_data/localized/{}/input/sample_res/values-fr/strings.xml",
@@ -145,7 +148,8 @@ where
         )
         .unwrap();
 
-    es_strings.file
+    es_strings
+        .file
         .write(
             test_utilities::file::read_content(format!(
                 "./tests_data/localized/{}/input/sample_res/values-es/strings.xml",

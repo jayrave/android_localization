@@ -109,10 +109,6 @@ pub struct InvalidStringsFile {
 
 #[cfg(test)]
 mod tests {
-    use std::fs;
-    use std::fs::File;
-    use std::path::PathBuf;
-
     use test_utilities;
 
     use crate::android_string::AndroidString;

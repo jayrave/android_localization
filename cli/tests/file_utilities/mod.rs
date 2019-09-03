@@ -1,7 +1,3 @@
-use std::fs::File;
-use std::io::Read;
-use std::path::PathBuf;
-
 use test_utilities;
 
 pub fn assert_eq_of_file_contents(actual_file_path: &str, expected_file_path: &str) {

@@ -20,8 +20,16 @@ fn success_is_printed_out() {
     let output = String::from_utf8(output.stdout).unwrap();
     let mut output_lines = output.split("\n");
 
-    let default_path = String::from(PathBuf::from("valid_input/values/strings.xml").to_str().unwrap());
-    let fr_path = String::from(PathBuf::from("valid_input/values-fr/strings.xml").to_str().unwrap());
+    let default_path = String::from(
+        PathBuf::from("valid_input/values/strings.xml")
+            .to_str()
+            .unwrap(),
+    );
+    let fr_path = String::from(
+        PathBuf::from("valid_input/values-fr/strings.xml")
+            .to_str()
+            .unwrap(),
+    );
 
     assert_eq!(
         output_lines.next().unwrap(),
