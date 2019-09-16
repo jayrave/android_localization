@@ -15,7 +15,7 @@ matrix:
       env: TARGET=x86_64-apple-darwin
     - os: windows
       rust: stable
-      env: TARGET=x86_64-pc-windows-gnu
+      env: TARGET=x86_64-pc-windows-msvc
 
 cache: cargo
 
