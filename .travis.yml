@@ -32,7 +32,7 @@ deploy:
   provider: releases
   api_key: $GITHUB_TOKEN
   file_glob: true
-  file: android_localization-$TRAVIS_TAG-$TARGET(?:\.exe)?
+  file: android_localization-$TRAVIS_TAG-$TARGET*
   skip_cleanup: true
   draft: true
   overwrite: false
