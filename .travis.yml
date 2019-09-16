@@ -45,6 +45,7 @@ branches:
     # Pushes and PR to the master & develop branch
     - master
     - develop
+    - /^\d+\.\d+\.\d+$/
 
 notifications:
   email:
