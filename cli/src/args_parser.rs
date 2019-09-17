@@ -18,9 +18,9 @@ welcome at https://github.com/jayrave/android_localization
     "#;
 
     pub mod localize {
-        pub static SHORT: &str = "Creates CSVs of text that need to be localized";
+        pub static SHORT: &str = "Creates CSVs of texts that need to be localized";
         pub static LONG: &str = r#"
-Creates CSVs of text that need to be localized. When writing out the CSV,
+Creates CSVs of texts that need to be localized. When writing out the CSV,
 foreign locales that don't have the same set of strings are grouped
 together in the same file. An example file would be -
 
@@ -51,9 +51,9 @@ the CSV file with their appropriate locale IDs as headers
     }
 
     pub mod localized {
-        pub static SHORT: &str = "Populates strings XML files from localized text in CSVs";
+        pub static SHORT: &str = "Populates strings XML files from localized texts in CSVs";
         pub static LONG: &str = r#"
-Populates strings XML files from localized text in CSVs. The input CSV
+Populates strings XML files from localized texts in CSVs. The input CSV
 file is expected to be in a particular format. This format is the same
 as what would be written by the `localize` command but with localized
 texts filled in. An example file would be -
@@ -68,7 +68,7 @@ locale
 "#;
 
         pub mod args {
-            pub static INPUT_FILE: &str = "Specifies input CSV file to read localized text from";
+            pub static INPUT_FILE: &str = "Specifies input CSV file to read localized texts from";
             pub mod mapping {
                 pub static SHORT: &str = "CSV file name (french) to locale ID (fr); Eg., french=fr";
                 pub static LONG: &str = r#"
