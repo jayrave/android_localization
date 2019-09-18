@@ -6,6 +6,7 @@ use crate::constants;
 
 mod doc {
     pub static NAME: &str = "Android Localization";
+    pub static BINARY_NAME: &str = "android_localization";
     pub static SHORT: &str = "To help with localization & common validations";
     pub static LONG: &str = r#"
 Helps in automating shipping off texts to be localized (by writing out CSVs
@@ -116,6 +117,7 @@ values folders => values, values-fr & values-es
 
 pub fn build() -> App<'static, 'static> {
     App::new(doc::NAME)
+        .bin_name(doc::BINARY_NAME)
         .about(doc::SHORT)
         .long_about(doc::LONG)
         .author(clap::crate_authors!())
