@@ -118,6 +118,8 @@ pub fn build() -> App<'static, 'static> {
     App::new(doc::NAME)
         .about(doc::SHORT)
         .long_about(doc::LONG)
+        .author(clap::crate_authors!())
+        .version(clap::crate_version!())
         .setting(AppSettings::ArgRequiredElseHelp)
         .subcommand(build_localize_sub_command())
         .subcommand(build_localized_sub_command())
