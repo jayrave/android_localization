@@ -24,20 +24,9 @@ cargo build --release
 # Quick tour
 You are working on your Android app or library & now it is time to localize to non-defaults locales. Probably you wanna find the texts that are yet to be localized, ship them off to a localization service, put the texts in when it comes back & make sure that it didn't get messed up in any way. This CLI helps you automate everything except the actual localization.
 
-Finding the texts to localize from the default `strings.xml` is as easy as -
 ```bash
-./android_localization localize --output-dir ~/Desktop/to_localize_20190917 --res-dir ~/workspace/android/my_android_project/app/src/main/res
+./android_localization localize --output-dir ~/to_localize --res-dir ~/my_app/app/src/main/res
+./android_localization localized --input-file ~/localized/texts.csv --res-dir ~/my_app/app/src/main/res
+./android_localization validate --res-dir ~/my_app/app/src/main/res
 ```
-![](assets/localize.png)
-
-Populating non-default `strings.xml` from localized texts is as easy as -
-```bash
-./android_localization localized --input-file ~/Desktop/localized_20190917/localized.csv --res-dir ~/workspace/android/my_android_project/app/src/main/res
-```
-![](assets/localized.png)
-
-Validating all the `strings.xml` is as easy as -
-```bash
-./android_localization validate --res-dir ~/workspace/android/my_android_project/app/src/main/res
-```
-![](assets/validate.png)
+![](assets/demo.png)
