@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/jayrave/android_localization.svg?branch=develop)](https://travis-ci.org/jayrave/android_localization)
+[![Build Status](https://travis-ci.org/jayrave/android_localization.svg?branch=develop)](https://travis-ci.org/jayrave/android_localization) [![Release](https://img.shields.io/github/v/release/jayrave/android_localization?sort=semver)](https://github.com/jayrave/android_localization/releases/latest)
 
 android_localization is a command line program to ease working with `strings.xml` for localizing to non-default locales
 
