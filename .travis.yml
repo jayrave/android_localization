@@ -31,8 +31,7 @@ before_deploy:
 deploy:
   provider: releases
   api_key: $GITHUB_TOKEN
-  file_glob: true
-  file: android_localization-$TRAVIS_TAG-$TARGET*
+  file: android_localization-$TRAVIS_TAG-$TARGET.tar.gz
   skip_cleanup: true
   draft: true
   overwrite: false
