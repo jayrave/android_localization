@@ -1,3 +1,7 @@
+# 0.1.5
+- Better documentation
+- Host gzipped executable in github releases
+
 # 0.1.1 to 0.1.4
 Automating Github releases using TravisCI (took some attempts :))
 
