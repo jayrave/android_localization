@@ -2,20 +2,6 @@
 
 android_localization is a command line program to ease working with `strings.xml` for localizing to non-default locales
 
-# Installation
-Pre-built binaries can be found for the following platforms in the [release tab](https://github.com/jayrave/android_localization/releases/latest)
-- Linux (64-bit)
-- OSX (64-bit)
-- Windows (64-bit)
-
-Compiling from source under the assumption that the appropriate [rust toolchain is already installed](https://rustup.rs/):
-
-```bash
-git clone git@github.com:jayrave/android_localization.git
-cd android_localization
-cargo build --release
-```
-
 # Commands
 - **localize** - Creates CSVs of texts that need to be localized
 - **localized** - Populates strings XML files from localized texts in CSVs
@@ -30,3 +16,17 @@ You are working on your Android app or library & now it is time to localize to n
 ./android_localization validate --res-dir ~/my_app/app/src/main/res
 ```
 ![](assets/demo.png)
+
+# Installation
+Pre-built binaries can be found for the following platforms in the [release tab](https://github.com/jayrave/android_localization/releases/latest)
+- Linux (64-bit)
+- OSX (64-bit)
+- Windows (64-bit)
+
+Compiling from source under the assumption that the appropriate [rust toolchain is already installed](https://rustup.rs/):
+
+```bash
+git clone git@github.com:jayrave/android_localization.git
+cd android_localization
+cargo build --release
+```
