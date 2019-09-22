@@ -46,6 +46,7 @@ Let's say we start with these `strings.xml` files -
 ```
 
 On running `./android_localization localize --output-dir ~/to_localize --res-dir ~/my_app/app/src/main/res`, the created CSV would look like this -
+
 | string_name | default_locale          | es | fr |
 |-------------|-------------------------|----|----|
 | string_1    | string_1 default locale |    |    |
@@ -54,6 +55,7 @@ On running `./android_localization localize --output-dir ~/to_localize --res-dir
 
 ### Localized
 Carrying on from the o/p of the `localize` command, once we put in the localized strings, the input CSV would look like this -
+
 | string_name | default_locale          | es               | fr              |
 |-------------|-------------------------|------------------|-----------------|
 | string_1    | string_1 default locale | string_1 spanish | string_1 french |
