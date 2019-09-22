@@ -1,3 +1,7 @@
+# 0.1.6
+- Add sample i/p & o/p to readme
+- Carry along the extension for Windows binary
+
 # 0.1.5
 - Better documentation
 - Host gzipped executable in github releases
