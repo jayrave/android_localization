@@ -1,6 +1,9 @@
+# 0.1.7
+- Update Cargo.toml to say 0.1.7 too
+- Carry along the extension for Windows binary
+
 # 0.1.6
 - Add sample i/p & o/p to readme
-- Carry along the extension for Windows binary
 
 # 0.1.5
 - Better documentation
