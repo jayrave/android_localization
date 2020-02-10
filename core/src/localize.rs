@@ -50,6 +50,40 @@ pub fn localize<S: ::std::hash::BuildHasher>(
     )
 }
 
+/// Returns the list of output files created by this call. These aren't guaranteed
+/// to be valid paths to files. Sometimes, if a file's path can't be expressed by
+/// `String` (in case it has non UTF-8 chars), it could just be the file's name
+pub fn check_localization<S: ::std::hash::BuildHasher>(
+    res_dir_path: &str,
+    output_dir_path: &str,
+    locale_id_to_name_map: HashMap<String, String, S>,
+) -> Result<Vec<String>, Error> {
+    let locale_id_to_name_map = foreign_locale_ids_finder::build_map_if_empty_or_return(
+        locale_id_to_name_map,
+        res_dir_path,
+    )?;
+
+    if locale_id_to_name_map.is_empty() {
+        return Ok(vec![]);
+    }
+
+    create_output_dir_if_required(output_dir_path)?;
+
+    // Read default strings
+    let res_dir_path = Path::new(res_dir_path);
+    let mut localizable_default_strings = filter::find_localizable_strings(
+        xml_utilities::read_default_strings(res_dir_path)?.into_strings(),
+    );
+
+    // For all languages, write out strings requiring localization
+    write_out_strings_to_localize(
+        res_dir_path,
+        output_dir_path,
+        locale_id_to_name_map,
+        &mut localizable_default_strings,
+    )
+}
+
 fn create_output_dir_if_required(output_dir_path: &str) -> Result<(), Error> {
     let output_path = PathBuf::from(output_dir_path);
     if output_path.is_file() {
@@ -160,7 +194,19 @@ mod tests {
     use crate::android_string::AndroidString;
 
     #[test]
-    fn errors_for_empty_locale_id_to_name_map() {
+    fn check_localization_succeeds_with_empty_vec_for_empty_locale_id_to_name_map() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let mut res_dir_path = temp_dir.path().to_path_buf();
+        res_dir_path.push("res");
+        fs::create_dir(res_dir_path.clone()).unwrap();
+
+        let output=
+            super::check_localization(res_dir_path.to_str().unwrap(), "", HashMap::new()).unwrap();
+        assert!(output.is_empty());
+    }
+
+    #[test]
+    fn localize_errors_for_empty_locale_id_to_name_map() {
         let temp_dir = tempfile::tempdir().unwrap();
         let mut res_dir_path = temp_dir.path().to_path_buf();
         res_dir_path.push("res");

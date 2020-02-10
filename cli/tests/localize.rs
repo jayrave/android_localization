@@ -5,7 +5,7 @@ use tempfile::TempDir;
 mod file_utilities;
 
 #[test]
-fn succeeds_with_mapping() {
+fn localize_succeeds_with_mapping() {
     let temp_dir = tempfile::tempdir().unwrap();
     let output = Command::new("cargo")
         .args(vec![
@@ -31,7 +31,7 @@ fn succeeds_with_mapping() {
 }
 
 #[test]
-fn succeeds_without_mapping() {
+fn localize_succeeds_without_mapping() {
     let temp_dir = tempfile::tempdir().unwrap();
     let output = Command::new("cargo")
         .args(vec![
@@ -50,6 +50,48 @@ fn succeeds_without_mapping() {
         temp_dir,
         "./tests_data/localize/success/output_without_mapping/",
     );
+}
+
+#[test]
+fn check_localization_succeeds_if_nothing_to_localize() {
+    let temp_dir = tempfile::tempdir().unwrap();
+    let output = Command::new("cargo")
+        .args(vec![
+            "run",
+            "check_localization",
+            "--res-dir",
+            "./tests_data/localize/warn/input",
+            "--output-dir",
+            temp_dir.path().to_str().unwrap(),
+        ])
+        .output()
+        .unwrap();
+
+    assert!(output.status.success());
+    assert!(String::from_utf8(output.stdout)
+        .unwrap()
+        .contains("All strings have already been localized"));
+}
+
+#[test]
+fn check_localization_fails_if_found_unlocalized_strings() {
+    let temp_dir = tempfile::tempdir().unwrap();
+    let output = Command::new("cargo")
+        .args(vec![
+            "run",
+            "check_localization",
+            "--res-dir",
+            "./tests_data/localize/success/input",
+            "--output-dir",
+            temp_dir.path().to_str().unwrap(),
+        ])
+        .output()
+        .unwrap();
+
+    assert!(!output.status.success());
+    assert!(String::from_utf8(output.stderr)
+        .unwrap()
+        .contains("Found strings that are missing localization"));
 }
 
 #[test]

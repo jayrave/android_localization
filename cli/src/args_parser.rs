@@ -104,6 +104,17 @@ of the `strings.xml` files. This uses some naive regex to validate
         "#;
     }
 
+    pub mod check_localization {
+        pub static SHORT: &str = "Checks that all strings have been localized";
+        pub static LONG: &str = r#"
+Looks for strings in the default values directory that may require localization,
+then checks that all of those strings have already been localized
+
+Exits successfully if all existing strings are already localized
+"#;
+
+    }
+
     pub mod common {
         pub static RES_DIR_SHORT: &str = "Points to the `res` dir of an Android module";
         pub static RES_DIR_LONG: &str = r#"
@@ -126,6 +137,7 @@ pub fn build() -> App<'static, 'static> {
         .subcommand(build_localize_sub_command())
         .subcommand(build_localized_sub_command())
         .subcommand(build_validate_sub_command())
+        .subcommand(build_check_localization_sub_command())
 }
 
 fn build_localize_sub_command() -> App<'static, 'static> {
@@ -169,6 +181,24 @@ fn build_validate_sub_command() -> App<'static, 'static> {
         .about(doc::validate::SHORT)
         .long_about(doc::validate::LONG)
         .arg(build_res_dir_arg())
+}
+
+fn build_check_localization_sub_command() -> App<'static, 'static> {
+    SubCommand::with_name(constants::commands::CHECK_LOCALIZATION)
+        .about(doc::check_localization::SHORT)
+        .long_about(doc::check_localization::LONG)
+        .arg(build_res_dir_arg())
+        .arg(build_mapping_arg(
+            doc::localize::args::mapping::SHORT,
+            doc::localize::args::mapping::LONG.trim_start(),
+        ))
+        .arg(
+            Arg::with_name(constants::args::LOCALIZE_OUTPUT_DIR)
+                .help(doc::localize::args::OUTPUT_DIR)
+                .long(constants::args::LOCALIZE_OUTPUT_DIR)
+                .takes_value(true)
+                .required(true),
+        )
 }
 
 fn build_res_dir_arg() -> Arg<'static, 'static> {

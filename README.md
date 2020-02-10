@@ -7,6 +7,7 @@ android_localization is a command line program to ease working with `strings.xml
 - **localize** - Creates CSVs of texts that need to be localized
 - **localized** - Populates strings XML files from localized texts in CSVs
 - **validate** - Runs some common validations on XML string files
+- **check_localization** - Validates that there are no unlocalized strings
 
 
 # Quick tour
@@ -16,6 +17,7 @@ You are working on your Android app or library & now it is time to localize to n
 ./android_localization localize --output-dir ~/to_localize --res-dir ~/my_app/app/src/main/res
 ./android_localization localized --input-file ~/localized/texts.csv --res-dir ~/my_app/app/src/main/res
 ./android_localization validate --res-dir ~/my_app/app/src/main/res
+./android_localization check_localization --output-dir ~/to_localize --res-dir ~/my_app/app/src/main/res
 ```
 ![](assets/demo.png)
 

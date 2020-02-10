@@ -9,7 +9,7 @@ pub trait EventHandler {
         &self,
         tag_name: String,
         attributes: Vec<OwnedAttribute>,
-    ) -> Result<Box<EventHandler>, InnerError>;
+    ) -> Result<Box<dyn EventHandler>, InnerError>;
 
     fn handle_characters_event(&mut self, _text: String) {
         // No op

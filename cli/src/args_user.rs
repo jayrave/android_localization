@@ -25,6 +25,10 @@ pub fn execute_for_matches(matches: ArgMatches) -> Result<(), ()> {
         return validate(validations_command);
     }
 
+    if let Some(check_validations_command) = matches.subcommand_matches(constants::commands::CHECK_LOCALIZATION) {
+        return check_localization(check_validations_command);
+    }
+
     err_with_failure(String::from("Command couldn't be recognized"))
 }
 
@@ -101,6 +105,36 @@ fn validate(matches: &ArgMatches) -> Result<(), ()> {
                 android_localization_core::formatter::format_to_string(invalid_strings_files).unwrap_or_else(|_| String::from("Looks like this utility is experiencing issues while displaying some invalid strings! Please contact the dev (jayrave) about this error")),
             ),
         },
+    }
+}
+
+/// Does pretty much the same thing as `localize`, but with opposite return codes:
+/// Returns successfully if there is nothing to localize, or an error if there are strings to
+/// localize
+fn check_localization(matches: &ArgMatches) -> Result<(), ()> {
+    let result = android_localization_core::localize::check_localization(
+        matches
+            .value_of(constants::args::RES_DIR)
+            .expt(arg_missing_msg(constants::args::RES_DIR)),
+        matches
+            .value_of(constants::args::LOCALIZE_OUTPUT_DIR)
+            .expt(arg_missing_msg(constants::args::LOCALIZE_OUTPUT_DIR)),
+        build_mappings(matches),
+    );
+
+    match result {
+        Err(error) => exit_based_on_result("", Err(error)),
+        Ok(file_names) => {
+            if file_names.is_empty() {
+                ok_with_success(String::from("All strings have already been localized"))
+            } else {
+                err_with_failure(format!(
+                    "{} - \n\n{}",
+                    "Found strings that are missing localization, they have been written to",
+                    file_names.join("\n")
+                ))
+            }
+        }
     }
 }
 

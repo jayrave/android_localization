@@ -1,6 +1,6 @@
 [package]
 name = 'android_localization_cli'
-version = '0.1.7'
+version = '0.1.8'
 authors = ['jayrave <jayanthan.raveendiran@gmail.com>']
 edition = '2018'
 

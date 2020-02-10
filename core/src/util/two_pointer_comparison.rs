@@ -32,8 +32,8 @@ pub fn compare<ITEM1, ITEM2, COMPARATOR, HANDLER>(
         if item1.is_none() || item2.is_none() {
             break;
         } else {
-            let item1 = item1.expt("Already checked for is_some but still fails!");;
-            let item2 = item2.expt("Already checked for is_some but still fails!");;
+            let item1 = item1.expt("Already checked for is_some but still fails!");
+            let item2 = item2.expt("Already checked for is_some but still fails!");
             match comparator(item1, item2) {
                 Ordering::Less => list1_index += 1,
                 Ordering::Greater => list2_index += 1,

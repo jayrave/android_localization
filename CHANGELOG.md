@@ -1,3 +1,6 @@
+# 0.1.8
+- Add new command "check_localization" which succeeds when there is nothing to localize and fails when there are unlocalized strings
+
 # 0.1.7
 - Update Cargo.toml to say 0.1.7 too
 - Carry along the extension for Windows binary

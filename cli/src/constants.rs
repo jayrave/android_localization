@@ -6,6 +6,7 @@ pub mod commands {
     pub const LOCALIZE: &str = "localize";
     pub const LOCALIZED: &str = "localized";
     pub const VALIDATE: &str = "validate";
+    pub const CHECK_LOCALIZATION: &str = "check_localization";
 }
 
 pub mod args {
