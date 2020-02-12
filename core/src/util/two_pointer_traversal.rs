@@ -7,7 +7,7 @@ pub fn compare<ITEM1, ITEM2, COMPARATOR, HANDLER>(
     list1: &[ITEM1],
     list2: &[ITEM2],
     comparator: COMPARATOR,
-    mut equal_items_handler: HANDLER,
+    equal_items_handler: HANDLER,
 ) where
     COMPARATOR: Fn(&ITEM1, &ITEM2) -> Ordering,
     HANDLER: FnMut(&ITEM1, &ITEM2),
@@ -31,8 +31,8 @@ pub fn diff<ITEM1, ITEM2, COMPARATOR, EXTRA_IN_LIST1_HANDER, EXTRA_IN_LIST2_HAND
     list1: &[ITEM1],
     list2: &[ITEM2],
     comparator: COMPARATOR,
-    mut extra_in_list1_handler: EXTRA_IN_LIST1_HANDER,
-    mut extra_in_list2_handler: EXTRA_IN_LIST2_HANDER,
+    extra_in_list1_handler: EXTRA_IN_LIST1_HANDER,
+    extra_in_list2_handler: EXTRA_IN_LIST2_HANDER,
 ) where
     COMPARATOR: Fn(&ITEM1, &ITEM2) -> Ordering,
     EXTRA_IN_LIST1_HANDER: FnMut(&ITEM1),

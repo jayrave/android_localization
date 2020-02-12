@@ -16,7 +16,7 @@ impl EventHandler for SinkingEventHandler {
         &self,
         _tag_name: String,
         _attributes: Vec<OwnedAttribute>,
-    ) -> Result<Box<EventHandler>, InnerError> {
+    ) -> Result<Box<dyn EventHandler>, InnerError> {
         Ok(Box::new(SinkingEventHandler::new()))
     }
 }
