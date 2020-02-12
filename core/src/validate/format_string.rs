@@ -4,7 +4,7 @@ use android_localization_utilities::DevExpt;
 
 use crate::android_string::AndroidString;
 use crate::ops::sort;
-use crate::util::two_pointer_comparison;
+use crate::util::two_pointer_traversal;
 
 lazy_static::lazy_static! {
     static ref FORMAT_STRING: Regex = Regex::new(r"(%\d+\$[ds])").expt("Invalid regex!");
@@ -21,7 +21,7 @@ pub fn validate(
     });
 
     let mut mismatches = vec![];
-    two_pointer_comparison::compare(
+    two_pointer_traversal::compare(
         default_parsed_data,
         foreign_strings,
         |parsed_data, android_string| parsed_data.android_string.name().cmp(android_string.name()),
