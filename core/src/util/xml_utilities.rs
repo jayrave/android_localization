@@ -7,6 +7,7 @@ use crate::constants;
 use crate::error::Error;
 use crate::error::ResultExt;
 use crate::reader::xml_reader;
+use std::collections::HashMap;
 
 type FileWithPath = (File, String);
 
@@ -65,6 +66,14 @@ impl StringsWithPath {
 
     pub fn into_strings(self) -> Vec<AndroidString> {
         self.strings
+    }
+
+    pub fn to_map(&self) -> HashMap<String, String> {
+        let mut map = HashMap::new();
+        for string in &self.strings {
+            map.insert(string.name().to_string(), string.value().to_string());
+        }
+        return map;
     }
 }
 

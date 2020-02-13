@@ -19,7 +19,7 @@ impl EventHandler for ResourcesEventHandler {
         &self,
         tag_name: String,
         attributes: Vec<OwnedAttribute>,
-    ) -> Result<Box<EventHandler>, InnerError> {
+    ) -> Result<Box<dyn EventHandler>, InnerError> {
         match tag_name.as_str() {
             constants::elements::STRING => Ok(Box::new(StringEventHandler::build(attributes)?)),
             _ => Ok(Box::new(SinkingEventHandler::new())),

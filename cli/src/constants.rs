@@ -13,6 +13,7 @@ pub mod args {
     pub const LOCALIZE_OUTPUT_DIR: &str = "output-dir";
     pub const LOCALIZED_INPUT_FILE: &str = "input-file";
     pub const MAPPING: &str = "mapping";
+    pub const STRICT: &str = "strict";
 }
 
 lazy_static::lazy_static! {

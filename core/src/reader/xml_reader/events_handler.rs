@@ -9,7 +9,7 @@ use crate::reader::xml_reader::root_event_handler::RootEventHandler;
 
 pub struct EventsHandler {
     android_strings: Vec<AndroidString>,
-    event_handlers: Vec<Box<EventHandler>>,
+    event_handlers: Vec<Box<dyn EventHandler>>,
 }
 
 impl EventsHandler {

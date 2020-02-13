@@ -7,6 +7,8 @@ use crate::util::xml_utilities::StringsWithPath;
 use crate::validate::apostrophe;
 use crate::validate::format_string;
 use crate::validate::format_string::ParsedData;
+use std::collections::HashMap;
+use crate::android_string::AndroidString;
 
 /// Runs all validations for default & all foreign strings & returns a collection
 /// of file names on which the validations were run
@@ -18,7 +20,7 @@ pub fn validate(res_dir_path: &str) -> Result<Result<Vec<String>, Vec<InvalidStr
     let mut default_parsed_data =
         format_string::parse_and_build_data(&default_strings_with_path.strings());
     validate_default_strings(
-        default_strings_with_path,
+        &default_strings_with_path,
         &mut path_of_validated_files,
         &mut invalid_strings_files,
     );
@@ -41,13 +43,68 @@ pub fn validate(res_dir_path: &str) -> Result<Result<Vec<String>, Vec<InvalidStr
     }
 }
 
+/// Runs all validations for default & all foreign strings & returns a collection
+/// of file names on which the validations were run
+pub fn validate_strict(res_dir_path: &str) -> Result<Result<Vec<String>, Vec<InvalidStringsFile>>, Error> {
+
+    let default_strings_with_path = xml_utilities::read_default_strings(Path::new(res_dir_path))?;
+
+    let mut all_foreign_strings = HashMap::new();
+    let res_dir_path_string = res_dir_path;
+    let locale_ids = foreign_locale_ids_finder::find(res_dir_path_string)?;
+    for locale_id in locale_ids {
+        let foreign_strings_with_path = xml_utilities::read_foreign_strings(Path::new(res_dir_path), &locale_id)?;
+        all_foreign_strings.insert(
+            String::from(foreign_strings_with_path.path()),
+            foreign_strings_with_path.to_map());
+    }
+
+    validate_localization(
+        &default_strings_with_path.strings(),
+        all_foreign_strings)
+
+}
+
+fn validate_localization(
+    default_strings: &[AndroidString],
+    foreign_strings: HashMap<String, HashMap<String, String>>,
+) -> Result<Result<Vec<String>, Vec<InvalidStringsFile>>, Error> {
+    let mut unlocalized_strings = vec![];
+
+    // iterate through each locale
+    for path in foreign_strings.keys() {
+
+        // check that all entries in default_strings have been translated
+        for android_string in default_strings {
+
+            // found untranslated string
+            if !(foreign_strings.get(path).unwrap().contains_key(android_string.name())) {
+
+                // log path to offending localization file, and move on to the next one
+                unlocalized_strings.push(InvalidStringsFile {
+                    file_path: path.to_string(),
+                    apostrophe_error: None,
+                    format_string_error: None,
+                });
+                break
+            }
+        }
+    }
+
+    if unlocalized_strings.is_empty() {
+        Ok(Ok(vec![]))
+    } else {
+        Ok(Err(unlocalized_strings))
+    }
+}
+
 fn validate_default_strings(
-    strings_with_path: StringsWithPath,
+    strings_with_path: &StringsWithPath,
     path_of_validated_files: &mut Vec<String>,
     invalid_strings_files: &mut Vec<InvalidStringsFile>,
 ) {
     let default_strings_file_path = String::from(strings_with_path.path());
-    let apos_result = apostrophe::validate(&strings_with_path.into_strings());
+    let apos_result = apostrophe::validate(strings_with_path.strings());
     if apos_result.is_err() {
         invalid_strings_files.push(InvalidStringsFile {
             file_path: default_strings_file_path,

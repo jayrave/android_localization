@@ -93,8 +93,34 @@ fn validate(matches: &ArgMatches) -> Result<(), ()> {
         Err(error) => exit_based_on_result("", Err(error)),
         Ok(validation_result) => match validation_result {
             Ok(file_names) => {
-                let result: Result<Vec<String>, String> = Ok(file_names);
-                exit_based_on_result("No issues found. Validated the following files", result)
+                if matches.is_present(constants::args::STRICT) {
+                    let result = android_localization_core::validator::validate_strict(
+                        matches
+                            .value_of(constants::args::RES_DIR)
+                            .expt(arg_missing_msg(constants::args::RES_DIR)),
+                    );
+
+                    match result {
+                        Err(error) => exit_based_on_result("", Err(error)),
+                        Ok(validation_result) => match validation_result {
+                            Ok(file_names) => {
+                                let result: Result<Vec<String>, String> = Ok(file_names);
+                                exit_based_on_result("No issues found. Validated the following files", result)
+                            }
+
+                            Err(invalid_strings_files) => err_with_failure(
+                                format!("{}\n\n{}\n\n{}", "Found unlocalized strings in the following files",
+                                android_localization_core::formatter::format_to_string(invalid_strings_files)
+                                    .unwrap_or_else(|_| String::from("Looks like this utility is experiencing issues while displaying some invalid strings! Please contact the dev (jayrave) about this error")),
+                                "Please run the `localize` command to get the full list of unlocalized strings"),
+                            ),
+                            //todo: count the number of unlocalized strings into InvalidStringsFile?
+                        }
+                    }
+                } else {
+                    let result: Result<Vec<String>, String> = Ok(file_names);
+                    exit_based_on_result("No issues found. Validated the following files", result)
+                }
             }
 
             Err(invalid_strings_files) => err_with_failure(

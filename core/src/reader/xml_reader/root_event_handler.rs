@@ -19,7 +19,7 @@ impl EventHandler for RootEventHandler {
         &self,
         tag_name: String,
         _attributes: Vec<OwnedAttribute>,
-    ) -> Result<Box<EventHandler>, InnerError> {
+    ) -> Result<Box<dyn EventHandler>, InnerError> {
         match tag_name.as_str() {
             constants::elements::RESOURCES => Ok(Box::new(ResourcesEventHandler::new())),
             _ => Ok(Box::new(SinkingEventHandler::new())),

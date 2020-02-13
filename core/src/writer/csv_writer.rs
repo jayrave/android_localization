@@ -13,7 +13,7 @@ use crate::localizable_strings::LocalizableStrings;
 
 pub fn write(
     strings_list: Vec<LocalizableStrings>,
-    sink_provider: &mut SinkProvider,
+    sink_provider: &mut dyn SinkProvider,
 ) -> Result<(), Error> {
     // Split strings into groups requiring localization for the same strings
     let mut grouped_strings_list: HashMap<u64, Vec<LocalizableStrings>> = HashMap::new();
@@ -46,7 +46,7 @@ pub struct Writer {
 }
 
 impl Writer {
-    pub fn write(self, sink: &mut Write) -> Result<(), InnerError> {
+    pub fn write(self, sink: &mut dyn Write) -> Result<(), InnerError> {
         // Sink is automatically buffered
         let mut csv_writer = csv::Writer::from_writer(sink);
         let locale_count = self.strings_list.len();

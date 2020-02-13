@@ -1,9 +1,7 @@
-use std::fmt::Debug;
-use std::fs;
 use std::fs::File;
 use std::io::Read;
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 pub fn read_content<P: AsRef<Path>>(file_path: P) -> String {
     let mut content = String::new();

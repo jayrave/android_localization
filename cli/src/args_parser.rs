@@ -102,6 +102,10 @@ Note: There are known corner cases whether these validations would be failing
 incorrectly. As of now, this validation is not aware of the allowed grammar
 of the `strings.xml` files. This uses some naive regex to validate
         "#;
+
+        pub mod args {
+            pub static STRICT: &str = "Set this to also validate that all strings have been localized";
+        }
     }
 
     pub mod common {
@@ -169,6 +173,12 @@ fn build_validate_sub_command() -> App<'static, 'static> {
         .about(doc::validate::SHORT)
         .long_about(doc::validate::LONG)
         .arg(build_res_dir_arg())
+        .arg(Arg::with_name(constants::args::STRICT)
+            .help(doc::validate::args::STRICT)
+            .long(constants::args::STRICT)
+            .takes_value(false)
+            .required(false)
+        )
 }
 
 fn build_res_dir_arg() -> Arg<'static, 'static> {
