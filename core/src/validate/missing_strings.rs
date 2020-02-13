@@ -44,8 +44,6 @@ pub struct MissingStrings {
 
 #[cfg(test)]
 mod tests {
-    use test_utilities;
-
     use crate::android_string::AndroidString;
 
     use super::MissingStrings;

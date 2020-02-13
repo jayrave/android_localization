@@ -27,16 +27,16 @@ pub fn compare<ITEM1, ITEM2, COMPARATOR, HANDLER>(
 }
 
 /// Look @ the docs for [traverse]
-pub fn diff<ITEM1, ITEM2, COMPARATOR, EXTRA_IN_LIST1_HANDER, EXTRA_IN_LIST2_HANDER>(
+pub fn diff<ITEM1, ITEM2, COMPARATOR, ExtraInList1Hander, ExtraInList2Hander>(
     list1: &[ITEM1],
     list2: &[ITEM2],
     comparator: COMPARATOR,
-    extra_in_list1_handler: EXTRA_IN_LIST1_HANDER,
-    extra_in_list2_handler: EXTRA_IN_LIST2_HANDER,
+    extra_in_list1_handler: ExtraInList1Hander,
+    extra_in_list2_handler: ExtraInList2Hander,
 ) where
     COMPARATOR: Fn(&ITEM1, &ITEM2) -> Ordering,
-    EXTRA_IN_LIST1_HANDER: FnMut(&ITEM1),
-    EXTRA_IN_LIST2_HANDER: FnMut(&ITEM2),
+    ExtraInList1Hander: FnMut(&ITEM1),
+    ExtraInList2Hander: FnMut(&ITEM2),
 {
     // Each closure has a unique signature & so need to have this
     // dummy ones to help the compiler
@@ -57,18 +57,18 @@ pub fn diff<ITEM1, ITEM2, COMPARATOR, EXTRA_IN_LIST1_HANDER, EXTRA_IN_LIST2_HAND
 /// This works under a couple of assumptions
 ///     - Lists are sorted
 ///     - No repetitions in the lists
-fn traverse<ITEM1, ITEM2, COMPARATOR, EQUAL_HANDLER, EXTRA_IN_LIST1_HANDER, EXTRA_IN_LIST2_HANDER>(
+fn traverse<ITEM1, ITEM2, COMPARATOR, EqualHandler, ExtraInList1Hander, ExtraInList2Hander>(
     list1: &[ITEM1],
     list2: &[ITEM2],
     comparator: COMPARATOR,
-    mut equal_items_handler: Option<EQUAL_HANDLER>,
-    mut extra_in_list1_handler: Option<EXTRA_IN_LIST1_HANDER>,
-    mut extra_in_list2_handler: Option<EXTRA_IN_LIST2_HANDER>,
+    mut equal_items_handler: Option<EqualHandler>,
+    mut extra_in_list1_handler: Option<ExtraInList1Hander>,
+    mut extra_in_list2_handler: Option<ExtraInList2Hander>,
 ) where
     COMPARATOR: Fn(&ITEM1, &ITEM2) -> Ordering,
-    EQUAL_HANDLER: FnMut(&ITEM1, &ITEM2),
-    EXTRA_IN_LIST1_HANDER: FnMut(&ITEM1),
-    EXTRA_IN_LIST2_HANDER: FnMut(&ITEM2),
+    EqualHandler: FnMut(&ITEM1, &ITEM2),
+    ExtraInList1Hander: FnMut(&ITEM1),
+    ExtraInList2Hander: FnMut(&ITEM2),
 {
     let mut list1_index = 0;
     let mut list2_index = 0;
