@@ -94,6 +94,7 @@ the consideration that the headers are the locale IDs
         pub static SHORT: &str = "Runs some common validations on XML string files";
         pub static LONG: &str = r#"
 The following validations are run on the `strings.xml` files
+    - Checking for unlocalized strings
     - Unescaped apostrophe (`'` without a preceeding `\`)
     - Format string mismatch with default locale (this could be either the
       number of format strings or the type of data they refer to)

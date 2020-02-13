@@ -1,3 +1,6 @@
+# 0.1.8
+- Make validate fail if there is unlocalized text with an option to turn it off
+
 # 0.1.7
 - Update Cargo.toml to say 0.1.7 too
 - Carry along the extension for Windows binary
