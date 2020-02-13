@@ -12,7 +12,10 @@ use crate::validate::missing_strings;
 
 /// Runs all validations for default & all foreign strings & returns a collection
 /// of file names on which the validations were run
-pub fn validate(res_dir_path: &str) -> Result<Result<Vec<String>, Vec<InvalidStringsFile>>, Error> {
+pub fn validate(
+    res_dir_path: &str,
+    fail_on_unlocalized: bool,
+) -> Result<Result<Vec<String>, Vec<InvalidStringsFile>>, Error> {
     let mut path_of_validated_files = vec![];
     let mut invalid_strings_files = vec![];
 
@@ -34,6 +37,7 @@ pub fn validate(res_dir_path: &str) -> Result<Result<Vec<String>, Vec<InvalidStr
             xml_utilities::read_foreign_strings(Path::new(res_dir_path), &locale_id)?,
             &mut default_strings,
             &mut default_parsed_data,
+            fail_on_unlocalized,
             &mut path_of_validated_files,
             &mut invalid_strings_files,
         )
@@ -69,6 +73,7 @@ fn validate_foreign_strings(
     strings_with_path: StringsWithPath,
     mut default_strings: &mut [AndroidString],
     mut default_parsed_data: &mut [ParsedData],
+    fail_on_unlocalized: bool,
     path_of_validated_files: &mut Vec<String>,
     invalid_strings_files: &mut Vec<InvalidStringsFile>,
 ) {
@@ -89,8 +94,10 @@ fn validate_foreign_strings(
         potential_invalid_file.format_string_error = Some(fs_error);
     }
 
-    if let Err(ms_error) = ms_result {
-        potential_invalid_file.missing_strings_error = Some(ms_error);
+    if fail_on_unlocalized {
+        if let Err(ms_error) = ms_result {
+            potential_invalid_file.missing_strings_error = Some(ms_error);
+        }
     }
 
     if potential_invalid_file.has_errors() {
@@ -165,7 +172,7 @@ mod tests {
         )
         .unwrap();
 
-        let mut actual_output = super::validate(res_path.to_str().unwrap())
+        let mut actual_output = super::validate(res_path.to_str().unwrap(), true)
             .unwrap()
             .unwrap();
 
@@ -183,7 +190,16 @@ mod tests {
     }
 
     #[test]
-    fn errors() {
+    fn errors_without_skipping_missing_errors() {
+        test_errors(true)
+    }
+
+    #[test]
+    fn errors_skipping_missing_errors() {
+        test_errors(false)
+    }
+
+    fn test_errors(fail_on_unlocalized: bool) {
         let tempdir = tempfile::tempdir().unwrap();
         let mut res_path = tempdir.path().to_path_buf();
         res_path.push("res");
@@ -209,9 +225,27 @@ mod tests {
         let spanish_s2 = AndroidString::localizable("s2", "v'alue %1$d");
         xml_writer::write(&mut spanish_strings.file, vec![spanish_s2.clone()]).unwrap();
 
-        let mut invalid_strings_files = super::validate(res_path.to_str().unwrap())
-            .unwrap()
-            .unwrap_err();
+        let mut invalid_strings_files =
+            super::validate(res_path.to_str().unwrap(), fail_on_unlocalized)
+                .unwrap()
+                .unwrap_err();
+
+        let missing_strings_error_for_fr: Option<missing_strings::MissingStrings>;
+        let missing_strings_error_for_es: Option<missing_strings::MissingStrings>;
+        if fail_on_unlocalized {
+            missing_strings_error_for_fr = Some(missing_strings::MissingStrings {
+                extra_in_foreign_locale: vec![],
+                extra_in_default_locale: vec![default_s2.clone()],
+            });
+
+            missing_strings_error_for_es = Some(missing_strings::MissingStrings {
+                extra_in_foreign_locale: vec![],
+                extra_in_default_locale: vec![default_s1.clone()],
+            });
+        } else {
+            missing_strings_error_for_fr = None;
+            missing_strings_error_for_es = None;
+        }
 
         // This is to make sure that `fs` iteration order doesn't matter
         invalid_strings_files.sort_by(|a, b| a.file_path.cmp(&b.file_path));
@@ -236,10 +270,7 @@ mod tests {
                             },
                         }],
                     }),
-                    missing_strings_error: Some(missing_strings::MissingStrings {
-                        extra_in_foreign_locale: vec![],
-                        extra_in_default_locale: vec![default_s1.clone()],
-                    }),
+                    missing_strings_error: missing_strings_error_for_es,
                 },
                 InvalidStringsFile {
                     file_path: french_strings.path,
@@ -247,10 +278,7 @@ mod tests {
                         invalid_strings: vec![french_s1],
                     }),
                     format_string_error: None,
-                    missing_strings_error: Some(missing_strings::MissingStrings {
-                        extra_in_foreign_locale: vec![],
-                        extra_in_default_locale: vec![default_s2.clone()],
-                    }),
+                    missing_strings_error: missing_strings_error_for_fr,
                 },
                 InvalidStringsFile {
                     file_path: default_strings.path,
