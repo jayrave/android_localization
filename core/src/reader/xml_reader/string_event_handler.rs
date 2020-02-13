@@ -29,7 +29,7 @@ impl StringEventHandler {
         }
 
         match string_name {
-            None => Err("string element is missing required name attribute")?,
+            None => Err("string element is missing required name attribute".into()),
             Some(name) => Ok(StringEventHandler {
                 name,
                 is_localizable,

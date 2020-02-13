@@ -22,7 +22,7 @@ pub fn find(res_dir_path: &str) -> Result<Vec<String>, Error> {
         return Err(Error::new(
             res_dir_path,
             "Res dir path doesn't exist or it is not a directory",
-        ))?;
+        ));
     }
 
     let locale_ids = fs::read_dir(res_dir_path)

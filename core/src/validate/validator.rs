@@ -57,10 +57,10 @@ fn validate_default_strings(
 ) {
     let default_strings_file_path = String::from(strings_with_path.path());
     let apos_result = apostrophe::validate(strings_with_path.strings());
-    if apos_result.is_err() {
+    if let Err(apos_error) = apos_result {
         invalid_strings_files.push(InvalidStringsFile {
             file_path: default_strings_file_path,
-            apostrophe_error: Some(apos_result.unwrap_err()),
+            apostrophe_error: Some(apos_error),
             format_string_error: None,
             missing_strings_error: None,
         })

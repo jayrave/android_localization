@@ -63,7 +63,7 @@ fn extract_filtered_headers(
     allow_only_locales: HashSet<String>,
 ) -> Result<FilteredHeaders, InnerError> {
     if record.len() < 3 {
-        Err("Too few values in header (at least 3 required)")?;
+        return Err("Too few values in header (at least 3 required)".into());
     }
 
     let mut iterator = record.into_iter();
@@ -75,11 +75,11 @@ fn extract_filtered_headers(
         .expt("Already checked the length but still fails!");
 
     if header1 != "string_name" {
-        Err("First header should be named string_name")?;
+        return Err("First header should be named string_name".into());
     }
 
     if header2 != "default_locale" {
-        Err("Second header should be named default_locale")?;
+        return Err("Second header should be named default_locale".into());
     }
 
     let mut foreign_indices_allow_flags = vec![];
@@ -110,7 +110,7 @@ fn extract_localized_record(
     let default_value = iterator.next().unwrap_or("");
 
     if string_name.is_empty() {
-        Err("string_name can't be empty for any record")?;
+        return Err("string_name can't be empty for any record".into());
     }
 
     let mut foreign_values = vec![];
