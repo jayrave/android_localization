@@ -49,6 +49,9 @@ pub fn validate_strict(res_dir_path: &str) -> Result<Result<Vec<String>, Vec<Inv
 
     let default_strings_with_path = xml_utilities::read_default_strings(Path::new(res_dir_path))?;
 
+    let mut path_of_validated_files = vec![];
+    path_of_validated_files.push(String::from(default_strings_with_path.path()));
+
     let mut all_foreign_strings = HashMap::new();
     let res_dir_path_string = res_dir_path;
     let locale_ids = foreign_locale_ids_finder::find(res_dir_path_string)?;
@@ -61,15 +64,17 @@ pub fn validate_strict(res_dir_path: &str) -> Result<Result<Vec<String>, Vec<Inv
 
     validate_localization(
         &default_strings_with_path.strings(),
-        all_foreign_strings)
+        all_foreign_strings,
+        &mut path_of_validated_files)
 
 }
 
 fn validate_localization(
     default_strings: &[AndroidString],
     foreign_strings: HashMap<String, HashMap<String, String>>,
+    path_of_validated_files: &mut Vec<String>,
 ) -> Result<Result<Vec<String>, Vec<InvalidStringsFile>>, Error> {
-    let mut unlocalized_strings = vec![];
+    let mut unlocalized_strings_files = vec![];
 
     // iterate through each locale
     for path in foreign_strings.keys() {
@@ -81,7 +86,7 @@ fn validate_localization(
             if !(foreign_strings.get(path).unwrap().contains_key(android_string.name())) {
 
                 // log path to offending localization file, and move on to the next one
-                unlocalized_strings.push(InvalidStringsFile {
+                unlocalized_strings_files.push(InvalidStringsFile {
                     file_path: path.to_string(),
                     apostrophe_error: None,
                     format_string_error: None,
@@ -89,12 +94,13 @@ fn validate_localization(
                 break
             }
         }
+        path_of_validated_files.push(path.to_string())
     }
 
-    if unlocalized_strings.is_empty() {
-        Ok(Ok(vec![]))
+    if unlocalized_strings_files.is_empty() {
+        Ok(Ok(path_of_validated_files.clone()))
     } else {
-        Ok(Err(unlocalized_strings))
+        Ok(Err(unlocalized_strings_files))
     }
 }
 
@@ -218,6 +224,121 @@ mod tests {
                 spanish_strings.path,
                 french_strings.path,
                 default_strings.path,
+            ],
+        )
+    }
+
+    #[test]
+    fn strict_validates() {
+        let tempdir = tempfile::tempdir().unwrap();
+        let mut res_path = tempdir.path().to_path_buf();
+        res_path.push("res");
+
+        let mut default_strings =
+            test_utilities::res::setup_empty_strings_for_default_locale(res_path.clone());
+        let mut french_strings =
+            test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "fr");
+        let mut spanish_strings =
+            test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "es");
+
+        xml_writer::write(
+            &mut default_strings.file,
+            vec![AndroidString::localizable("s1", "value")],
+        ).unwrap();
+
+        xml_writer::write(
+            &mut french_strings.file,
+            vec![AndroidString::localizable("s1", "value")],
+        ).unwrap();
+
+        xml_writer::write(
+            &mut spanish_strings.file,
+            vec![AndroidString::localizable("s1", "value")],
+        ).unwrap();
+
+        let mut actual_output = super::validate_strict(res_path.to_str().unwrap())
+            .unwrap()
+            .unwrap();
+
+        // This is to make sure that `fs` iteration order doesn't matter
+        actual_output.sort();
+
+        test_utilities::list::assert_strict_list_eq(
+            actual_output,
+            vec![
+                spanish_strings.path,
+                french_strings.path,
+                default_strings.path,
+            ],
+        )
+    }
+
+    #[test]
+    fn strict_validate_finds_unlocalized_strings() {
+        let tempdir = tempfile::tempdir().unwrap();
+        let mut res_path = tempdir.path().to_path_buf();
+        res_path.push("res");
+
+        let mut default_strings =
+            test_utilities::res::setup_empty_strings_for_default_locale(res_path.clone());
+        let mut french_strings =
+            test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "fr");
+        let mut spanish_strings =
+            test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "es");
+        let mut german_strings =
+            test_utilities::res::setup_empty_strings_for_locale(res_path.clone(), "de");
+
+        xml_writer::write(
+            &mut default_strings.file,
+            vec![
+                AndroidString::localizable("s1", "value"),
+                AndroidString::localizable("s2", "value"),
+                AndroidString::localizable("s3", "value")
+            ],
+        ).unwrap();
+
+        xml_writer::write(
+            &mut french_strings.file,
+            vec![
+                AndroidString::localizable("s1", "value"),
+                AndroidString::localizable("s2", "value")
+            ],
+        ).unwrap();
+
+        xml_writer::write(
+            &mut spanish_strings.file,
+            vec![AndroidString::localizable("s1", "value")],
+        ).unwrap();
+
+        xml_writer::write(
+            &mut german_strings.file,
+            vec![
+                AndroidString::localizable("s1", "value"),
+                AndroidString::localizable("s2", "value"),
+                AndroidString::localizable("s3", "value")
+            ],
+        ).unwrap();
+
+        let mut actual_output = super::validate_strict(res_path.to_str().unwrap())
+            .unwrap()
+            .unwrap_err();
+
+        // This is to make sure that `fs` iteration order doesn't matter
+        actual_output.sort_by(|a, b| a.file_path.cmp(&b.file_path));
+
+        test_utilities::list::assert_strict_list_eq(
+            actual_output,
+            vec![
+                InvalidStringsFile {
+                    file_path: spanish_strings.path,
+                    apostrophe_error: None,
+                    format_string_error: None,
+                },
+                InvalidStringsFile {
+                    file_path: french_strings.path,
+                    apostrophe_error: None,
+                    format_string_error: None,
+                },
             ],
         )
     }
