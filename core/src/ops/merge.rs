@@ -62,11 +62,11 @@ mod tests {
     #[test]
     fn merges_and_groups() {
         let strings = super::merge_and_group_strings(
-            &mut vec![
+            &mut [
                 AndroidString::localizable("string_1", "string value"),
                 AndroidString::unlocalizable("string_4", "string value"),
             ],
-            &mut vec![
+            &mut [
                 AndroidString::localizable("string_3", "string value"),
                 AndroidString::unlocalizable("string_2", "string value"),
             ],
@@ -86,12 +86,12 @@ mod tests {
     #[test]
     fn list_1_strings_takes_precedence_over_list_2_strings_in_case_of_same_name() {
         let strings = super::merge_and_group_strings(
-            &mut vec![
+            &mut [
                 AndroidString::localizable("string_1", "from list 1"),
                 AndroidString::unlocalizable("string_3", "from list 1"),
                 AndroidString::unlocalizable("string_1", "from list 1 again"),
             ],
-            &mut vec![
+            &mut [
                 AndroidString::unlocalizable("string_1", "from list 2"),
                 AndroidString::localizable("string_2", "from list 2"),
             ],

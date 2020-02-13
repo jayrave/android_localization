@@ -98,7 +98,7 @@ fn assert_status_and_stdout(output: Output) {
     assert!(output.status.success());
 
     let output = String::from_utf8(output.stdout).unwrap();
-    let mut output_lines = output.split("\n");
+    let mut output_lines = output.split('\n');
 
     assert_eq!(
         output_lines.next().unwrap(),

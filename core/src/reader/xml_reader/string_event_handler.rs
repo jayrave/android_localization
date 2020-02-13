@@ -29,7 +29,7 @@ impl StringEventHandler {
         }
 
         match string_name {
-            None => Err("string element is missing required name attribute")?,
+            None => Err("string element is missing required name attribute".into()),
             Some(name) => Ok(StringEventHandler {
                 name,
                 is_localizable,
@@ -57,7 +57,7 @@ impl EventHandler for StringEventHandler {
         &self,
         _tag_name: String,
         _attributes: Vec<OwnedAttribute>,
-    ) -> Result<Box<EventHandler>, InnerError> {
+    ) -> Result<Box<dyn EventHandler>, InnerError> {
         Ok(Box::new(SinkingEventHandler::new()))
     }
 

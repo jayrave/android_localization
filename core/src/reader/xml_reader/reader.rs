@@ -14,7 +14,7 @@ pub fn read<S: Read>(source: S) -> Result<Vec<AndroidString>, InnerError> {
 
     for element_or_error in reader {
         match element_or_error {
-            Err(error) => return Err(error)?,
+            Err(error) => return Err(error.into()),
             Ok(element) => match element {
                 XmlEvent::StartElement {
                     name, attributes, ..
@@ -103,38 +103,48 @@ mod tests {
 
     #[test]
     fn reads_cdata_correctly() {
-        let strings = write_to_file_and_read_strings_out(r##"
+        let strings = write_to_file_and_read_strings_out(
+            r##"
             <?xml version="1.0" encoding="utf-8"?>
             <resources>
                 <string name="s1">Hi there. <![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> is awesome</string>
             </resources>
-        "##);
+        "##,
+        );
 
         test_utilities::list::assert_strict_list_eq(
             strings,
-            vec![AndroidString::localizable("s1", r##"Hi there. <![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> is awesome"##)]
+            vec![AndroidString::localizable(
+                "s1",
+                r##"Hi there. <![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> is awesome"##,
+            )],
         )
     }
 
     #[test]
     fn reads_string_with_whitespace_between_cdata() {
-        let strings = write_to_file_and_read_strings_out(r##"
+        let strings = write_to_file_and_read_strings_out(
+            r##"
             <?xml version="1.0" encoding="utf-8"?>
             <resources>
                 <string name="s1"><![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> <![CDATA[<a href=\"https://www.firefox.com\">Firefox</a>]]></string>
             </resources>
-        "##);
+        "##,
+        );
 
         test_utilities::list::assert_strict_list_eq(
             strings,
-            vec![AndroidString::localizable("s1", r##"<![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> <![CDATA[<a href=\"https://www.firefox.com\">Firefox</a>]]>"##)]
+            vec![AndroidString::localizable(
+                "s1",
+                r##"<![CDATA[<a href=\"https://www.mozilla.com\">Mozilla</a>]]> <![CDATA[<a href=\"https://www.firefox.com\">Firefox</a>]]>"##,
+            )],
         );
     }
 
     fn write_to_file_and_read_strings_out(file_content: &str) -> Vec<AndroidString> {
         // Write content to file
         let mut tmpfile: File = tempfile::tempfile().unwrap();
-        tmpfile.write(file_content.as_bytes()).unwrap();
+        tmpfile.write_all(file_content.as_bytes()).unwrap();
 
         // Seek to start
         tmpfile.seek(SeekFrom::Start(0)).unwrap();

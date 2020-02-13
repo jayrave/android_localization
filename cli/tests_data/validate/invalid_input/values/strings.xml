@@ -1,3 +1,5 @@
 <resources>
     <string name="string_1">string_1 ' default locale</string>
+    <string name="string_2">string_2 %1$d default locale</string>
+    <string name="string_3">string_3 extra in default locale</string>
 </resources>

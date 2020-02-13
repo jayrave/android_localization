@@ -127,7 +127,7 @@ where
     // Write out required contents into files
     default_strings
         .file
-        .write(
+        .write_all(
             test_utilities::file::read_content(format!(
                 "./tests_data/localized/{}/input/sample_res/values/strings.xml",
                 input_type
@@ -138,7 +138,7 @@ where
 
     fr_strings
         .file
-        .write(
+        .write_all(
             test_utilities::file::read_content(format!(
                 "./tests_data/localized/{}/input/sample_res/values-fr/strings.xml",
                 input_type
@@ -149,7 +149,7 @@ where
 
     es_strings
         .file
-        .write(
+        .write_all(
             test_utilities::file::read_content(format!(
                 "./tests_data/localized/{}/input/sample_res/values-es/strings.xml",
                 input_type
@@ -165,7 +165,7 @@ fn assert_status_and_stdout(output: Output) {
     assert!(output.status.success());
 
     let output = String::from_utf8(output.stdout).unwrap();
-    let mut output_lines = output.split("\n");
+    let mut output_lines = output.split('\n');
 
     // To make path testing windows friendly, we just test whether the appropriate
     // values dir are present

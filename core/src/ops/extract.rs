@@ -1,7 +1,7 @@
 use crate::android_string::AndroidString;
 use crate::localized_string::LocalizedString;
 use crate::ops::sort;
-use crate::util::two_pointer_comparison;
+use crate::util::two_pointer_traversal;
 
 /// Localized strings will be converted into `AndroidString` only if both the name
 /// & the default value from `LocalizedString` match up with whatever is in the
@@ -15,7 +15,7 @@ pub fn extract_android_strings_from_localized(
     sort::sort_localized_strings_by_name(localized_strings);
 
     let mut result = Vec::with_capacity(localized_strings.len()); // Max number of expected strings
-    two_pointer_comparison::compare(
+    two_pointer_traversal::compare(
         localized_strings,
         default_strings,
         |localized_string, default_string| localized_string.name().cmp(default_string.name()),

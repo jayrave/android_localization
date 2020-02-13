@@ -37,7 +37,7 @@ impl Error {
 }
 
 impl error::Error for Error {
-    fn cause(&self) -> Option<&error::Error> {
+    fn cause(&self) -> Option<&dyn error::Error> {
         match &self.kind {
             ErrorKind::Csv(error) => Some(error),
             ErrorKind::Io(error) => Some(error),

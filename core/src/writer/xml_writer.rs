@@ -109,8 +109,8 @@ mod tests {
                 r##"<resources>"##,
                 r##"    <string name="localizable_string">localizable string value</string>"##,
                 r##"    <string name="non_localizable_string" translatable="false">non localizable string value</string>"##,
-                r##"</resources>"##
-            ]
+                r##"</resources>"##,
+            ],
         )
     }
 
