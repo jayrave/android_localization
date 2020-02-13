@@ -60,5 +60,24 @@ fn errors_are_printed_out() {
     assert!(!output.status.success());
     assert!(String::from_utf8(output.stderr)
         .unwrap()
-        .contains("Found 2 issues across 2 files!\n"));
+        .contains("Found 5 issues across 2 files!\n"));
+}
+
+#[test]
+fn errors_can_skip_unlocalized() {
+    let output = Command::new("cargo")
+        .args(vec![
+            "run",
+            "validate",
+            "--res-dir",
+            "./tests_data/validate/invalid_input",
+            "--skip-unlocalized",
+        ])
+        .output()
+        .unwrap();
+
+    assert!(!output.status.success());
+    assert!(String::from_utf8(output.stderr)
+        .unwrap()
+        .contains("Found 3 issues across 2 files!\n"));
 }

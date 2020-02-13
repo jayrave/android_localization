@@ -104,7 +104,8 @@ of the `strings.xml` files. This uses some naive regex to validate
         "#;
 
         pub mod args {
-            pub static SKIP_UNLOCALIZED: &str = "Set this to not fail validation in case there are unlocalized default strings";
+            pub static SKIP_UNLOCALIZED: &str =
+                "Set this to not fail validation in case there are unlocalized default strings";
         }
     }
 
@@ -175,7 +176,7 @@ fn build_validate_sub_command() -> App<'static, 'static> {
         .arg(build_res_dir_arg())
         .arg(
             Arg::with_name(constants::args::SKIP_UNLOCALIZED)
-                .help(doc::localized::args::SKIP_UNLOCALIZED)
+                .help(doc::validate::args::SKIP_UNLOCALIZED)
                 .long(constants::args::SKIP_UNLOCALIZED)
                 .takes_value(false)
                 .required(false),

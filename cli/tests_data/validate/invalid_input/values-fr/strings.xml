@@ -1,3 +1,5 @@
 <resources>
-    <string name="string_2">string_2 ' french</string>
+    <string name="string_1">string_1 ' french</string>
+    <string name="string_2">string_2 %1$s french locale</string>
+    <string name="string_4">string_4 extra in french locale</string>
 </resources>

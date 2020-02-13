@@ -87,7 +87,7 @@ fn validate(matches: &ArgMatches) -> Result<(), ()> {
         matches
             .value_of(constants::args::RES_DIR)
             .expt(arg_missing_msg(constants::args::RES_DIR)),
-        !matches.is_present(constants::args::SKIP_UNLOCALIZED)
+        !matches.is_present(constants::args::SKIP_UNLOCALIZED),
     );
 
     match result {
