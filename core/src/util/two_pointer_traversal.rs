@@ -142,10 +142,10 @@ mod tests {
         super::traverse(
             &list1,
             &list2,
-            |i: &i32, f: &f32| i.cmp(&(f.clone() as i32)),
-            Some(|i: &i32, f: &f32| common.push((i.clone(), f.clone()))),
-            Some(|i: &i32| only_in_list1.push(i.clone())),
-            Some(|f: &f32| only_in_list2.push(f.clone())),
+            |i: &i32, f: &f32| i.cmp(&(*f as i32)),
+            Some(|i: &i32, f: &f32| common.push((*i, *f))),
+            Some(|i: &i32| only_in_list1.push(*i)),
+            Some(|f: &f32| only_in_list2.push(*f)),
         );
 
         assert_eq!(common, vec![(3, 3.0), (8, 8.0)]);
@@ -165,10 +165,10 @@ mod tests {
         super::traverse(
             &list1,
             &list2,
-            |f: &f32, i: &i32| (f.clone() as i32).cmp(i),
-            Some(|f: &f32, i: &i32| common.push((f.clone(), i.clone()))),
-            Some(|f: &f32| only_in_list1.push(f.clone())),
-            Some(|i: &i32| only_in_list2.push(i.clone())),
+            |f: &f32, i: &i32| (*f as i32).cmp(i),
+            Some(|f: &f32, i: &i32| common.push((*f, *i))),
+            Some(|f: &f32| only_in_list1.push(*f)),
+            Some(|i: &i32| only_in_list2.push(*i)),
         );
 
         assert_eq!(common, vec![(3.0, 3), (8.0, 8)]);
@@ -188,10 +188,10 @@ mod tests {
         super::traverse(
             &list1,
             &list2,
-            |i: &i32, f: &f32| i.cmp(&(f.clone() as i32)),
-            Some(|i: &i32, f: &f32| common.push((i.clone(), f.clone()))),
-            Some(|i: &i32| only_in_list1.push(i.clone())),
-            Some(|f: &f32| only_in_list2.push(f.clone())),
+            |i: &i32, f: &f32| i.cmp(&(*f as i32)),
+            Some(|i: &i32, f: &f32| common.push((*i, *f))),
+            Some(|i: &i32| only_in_list1.push(*i)),
+            Some(|f: &f32| only_in_list2.push(*f)),
         );
 
         assert_eq!(common, vec![(1, 1.0), (2, 2.0), (3, 3.0)]);
@@ -211,10 +211,10 @@ mod tests {
         super::traverse(
             &list1,
             &list2,
-            |i: &i32, f: &f32| i.cmp(&(f.clone() as i32)),
-            Some(|i: &i32, f: &f32| common.push((i.clone(), f.clone()))),
-            Some(|i: &i32| only_in_list1.push(i.clone())),
-            Some(|f: &f32| only_in_list2.push(f.clone())),
+            |i: &i32, f: &f32| i.cmp(&(*f as i32)),
+            Some(|i: &i32, f: &f32| common.push((*i, *f))),
+            Some(|i: &i32| only_in_list1.push(*i)),
+            Some(|f: &f32| only_in_list2.push(*f)),
         );
 
         assert_eq!(common, vec![]);

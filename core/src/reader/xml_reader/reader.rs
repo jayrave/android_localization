@@ -134,7 +134,7 @@ mod tests {
     fn write_to_file_and_read_strings_out(file_content: &str) -> Vec<AndroidString> {
         // Write content to file
         let mut tmpfile: File = tempfile::tempfile().unwrap();
-        tmpfile.write(file_content.as_bytes()).unwrap();
+        tmpfile.write_all(file_content.as_bytes()).unwrap();
 
         // Seek to start
         tmpfile.seek(SeekFrom::Start(0)).unwrap();

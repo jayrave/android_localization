@@ -41,7 +41,7 @@ mod tests {
 
     #[test]
     fn passes_in_absence_of_unescaped_apostrophes() {
-        assert!(super::validate(&vec![
+        assert!(super::validate(&[
             AndroidString::localizable("s1", "value"),
             AndroidString::localizable("s2", r"val\'ue"),
         ])
@@ -50,7 +50,7 @@ mod tests {
 
     #[test]
     fn errors_in_presence_of_unescaped_apostrophes() {
-        let invalid_strings = super::validate(&vec![
+        let invalid_strings = super::validate(&[
             AndroidString::localizable("s1", "val'ue"),
             AndroidString::localizable("s2", "value"),
             AndroidString::localizable("s3", r"val\'ue"),

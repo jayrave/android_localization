@@ -243,11 +243,10 @@ mod tests {
         fs::create_dir_all(localized_dir_path.clone()).unwrap();
         let mut localized_file = File::create(localized_file_path.clone()).unwrap();
         localized_file
-            .write(
-                r#"string_name, default_locale, french, spanish, german, chinese
+            .write_all(
+                b"string_name, default_locale, french, spanish, german, chinese
 s1, english value 1, french new value 1,,german new value 1,chinese old value 1
-s2, english value 2,,spanish new value 2,german new value 2,            "#
-                    .as_bytes(),
+s2, english value 2,,spanish new value 2,german new value 2,            ",
             )
             .unwrap();
 
@@ -314,15 +313,12 @@ s2, english value 2,,spanish new value 2,german new value 2,            "#
         let res_path = tempfile::tempdir().unwrap();
 
         let mut fr_strings = test_utilities::res::setup_empty_strings_for_locale(&res_path, "fr");
-        fr_strings
-            .file
-            .write("example old content".as_bytes())
-            .unwrap();
+        fr_strings.file.write_all(b"example old content").unwrap();
 
         let (mut file_with_new_content, file_path) =
             super::writable_empty_foreign_strings_file(res_path.path(), "fr").unwrap();
         file_with_new_content
-            .write("example new content".as_bytes())
+            .write_all(b"example new content")
             .unwrap();
 
         let mut file_contents = String::new();

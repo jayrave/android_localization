@@ -227,18 +227,14 @@ mod tests {
         let temp_dir = tempfile::tempdir().unwrap();
         let (file_paths, output_dir) = test_write_out_strings_to_localize(
             &temp_dir,
-            &contents.clone(),
-            &contents.clone(),
+            &contents,
+            &contents,
             &contents,
             default_strings,
         );
 
         test_utilities::list::assert_list_is_empty(file_paths);
-        assert!(fs::read_dir(output_dir)
-            .unwrap()
-            .into_iter()
-            .next()
-            .is_none())
+        assert!(fs::read_dir(output_dir).unwrap().next().is_none())
     }
 
     #[test]
@@ -257,8 +253,8 @@ mod tests {
         let temp_dir = tempfile::tempdir().unwrap();
         let (file_paths, output_dir) = test_write_out_strings_to_localize(
             &temp_dir,
-            &contents.clone(),
-            &contents.clone(),
+            &contents,
+            &contents,
             &contents,
             default_strings,
         );
@@ -315,15 +311,15 @@ mod tests {
         // Write out required contents into files
         fr_strings
             .file
-            .write(french_values_file_content.as_bytes())
+            .write_all(french_values_file_content.as_bytes())
             .unwrap();
         es_strings
             .file
-            .write(spanish_values_file_content.as_bytes())
+            .write_all(spanish_values_file_content.as_bytes())
             .unwrap();
         de_strings
             .file
-            .write(unmapped_german_values_file_content.as_bytes())
+            .write_all(unmapped_german_values_file_content.as_bytes())
             .unwrap();
 
         // Not including german in this map to make sure that mappings also work as a filter

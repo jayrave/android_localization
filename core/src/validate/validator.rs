@@ -231,21 +231,20 @@ mod tests {
                 .unwrap_err();
 
         let missing_strings_error_for_fr: Option<missing_strings::MissingStrings>;
-        let missing_strings_error_for_es: Option<missing_strings::MissingStrings>;
-        if fail_on_unlocalized {
+        let missing_strings_error_for_es = if fail_on_unlocalized {
             missing_strings_error_for_fr = Some(missing_strings::MissingStrings {
                 extra_in_foreign_locale: vec![],
                 extra_in_default_locale: vec![default_s2.clone()],
             });
 
-            missing_strings_error_for_es = Some(missing_strings::MissingStrings {
+            Some(missing_strings::MissingStrings {
                 extra_in_foreign_locale: vec![],
                 extra_in_default_locale: vec![default_s1.clone()],
-            });
+            })
         } else {
             missing_strings_error_for_fr = None;
-            missing_strings_error_for_es = None;
-        }
+            None
+        };
 
         // This is to make sure that `fs` iteration order doesn't matter
         invalid_strings_files.sort_by(|a, b| a.file_path.cmp(&b.file_path));

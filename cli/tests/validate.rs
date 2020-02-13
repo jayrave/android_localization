@@ -17,7 +17,7 @@ fn success_is_printed_out() {
     assert!(output.status.success());
 
     let output = String::from_utf8(output.stdout).unwrap();
-    let mut output_lines = output.split("\n");
+    let mut output_lines = output.split('\n');
 
     // To make path testing windows friendly, we just test whether the appropriate
     // values dir are present

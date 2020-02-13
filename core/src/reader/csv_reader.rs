@@ -227,7 +227,7 @@ mod tests {
     ) -> Result<Vec<LocalizedStrings>, InnerError> {
         // Write content to file
         let mut tmpfile: File = tempfile::tempfile().unwrap();
-        tmpfile.write(file_content.as_bytes()).unwrap();
+        tmpfile.write_all(file_content.as_bytes()).unwrap();
 
         // Seek to start
         tmpfile.seek(SeekFrom::Start(0)).unwrap();

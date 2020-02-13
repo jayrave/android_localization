@@ -23,7 +23,8 @@ where
         panic!(
             r#"Expected lists to have the same size
 List 1: {:?}
-List 2: {:?}"#
+List 2: {:?}"#,
+            list1, list2
         )
     }
 
