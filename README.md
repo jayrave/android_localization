@@ -96,3 +96,10 @@ git clone git@github.com:jayrave/android_localization.git
 cd android_localization
 cargo build --release
 ```
+
+
+# Deployment
+- Update version in `cli/Cargo.toml`
+- Update `CHANGELOG.md`
+- Add `release` tag which would trigger travis `deploy`
+- Once all executables are uploaded, publish the draft release
