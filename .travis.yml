@@ -33,20 +33,21 @@ before_deploy:
 deploy:
   provider: releases
   api_key: $GITHUB_TOKEN
-  file: android_localization-$TRAVIS_TAG-$TARGET.tar.gz
+  file_glob: true
+  file: android_localization-*-$TARGET.tar.gz
   skip_cleanup: true
   draft: true
   overwrite: false
   on:
     branch: master
-    tags: true
+    condition: $TRAVIS_TAG = release
 
 branches:
   only:
     # Pushes and PR to the master & develop branch
     - master
-    - develop
-    - /^\d+\.\d+\.\d+$/
+    # To let our `release` tag trigger CI builds
+    - release
 
 notifications:
   email:

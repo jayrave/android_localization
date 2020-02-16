@@ -240,7 +240,7 @@ mod tests {
 
         xml_writer::write(&mut zh_strings.file, chinese_android_strings.clone()).unwrap();
 
-        fs::create_dir_all(localized_dir_path.clone()).unwrap();
+        fs::create_dir_all(localized_dir_path).unwrap();
         let mut localized_file = File::create(localized_file_path.clone()).unwrap();
         localized_file
             .write_all(

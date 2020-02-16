@@ -92,33 +92,23 @@ fn format_errors_from_one_file(
     }
 
     if let Some(missing_strings) = invalid_strings_file.missing_strings_error {
-        if !missing_strings.extra_in_default_locale.is_empty() {
+        for extra in missing_strings.extra_in_default_locale {
             issues_count_in_file += 1;
             writeln!(
                 &mut file_output,
-                "Error {} (unlocalized string(s)): {}",
+                "Error {} (unlocalized string): {}",
                 issues_count_in_file,
-                missing_strings
-                    .extra_in_default_locale
-                    .iter()
-                    .map(|s| s.value())
-                    .collect::<Vec<&str>>()
-                    .join(", ")
+                extra.value()
             )?;
         }
 
-        if !missing_strings.extra_in_foreign_locale.is_empty() {
+        for extra in missing_strings.extra_in_foreign_locale {
             issues_count_in_file += 1;
             writeln!(
                 &mut file_output,
-                "Error {} (string(s) not in defaut locale): {}",
+                "Error {} (string not in defaut locale): {}",
                 issues_count_in_file,
-                missing_strings
-                    .extra_in_foreign_locale
-                    .iter()
-                    .map(|s| s.value())
-                    .collect::<Vec<&str>>()
-                    .join(", ")
+                extra.value()
             )?;
         }
     }
@@ -149,6 +139,8 @@ mod tests {
 
     #[test]
     fn formats() {
+        // These strings needn't be invalid. We can include them in the
+        // error & the formatter will happily report it
         let default_s1 = AndroidString::localizable("s1", "default_value1");
         let default_s2 = AndroidString::localizable("s2", "default_value2");
         let french_s1 = AndroidString::localizable("s1", "french_value1");
@@ -184,23 +176,38 @@ mod tests {
             InvalidStringsFile {
                 file_path: String::from("spanish"),
                 apostrophe_error: Some(apostrophe::InvalidStrings {
-                    invalid_strings: vec![spanish_s1.clone()],
+                    invalid_strings: vec![spanish_s1.clone(), spanish_s2.clone()],
                 }),
                 format_string_error: Some(format_string::Mismatches {
-                    mismatches: vec![format_string::Mismatch {
-                        default_parsed_data: format_string::ParsedData {
-                            android_string: default_s1.clone(),
-                            sorted_format_strings: vec![String::from("%1$s"), String::from("%1$d")],
+                    mismatches: vec![
+                        format_string::Mismatch {
+                            default_parsed_data: format_string::ParsedData {
+                                android_string: default_s1.clone(),
+                                sorted_format_strings: vec![
+                                    String::from("%1$s"),
+                                    String::from("%1$d"),
+                                ],
+                            },
+                            foreign_parsed_data: format_string::ParsedData {
+                                android_string: spanish_s1.clone(),
+                                sorted_format_strings: vec![String::from("%1$d")],
+                            },
                         },
-                        foreign_parsed_data: format_string::ParsedData {
-                            android_string: spanish_s1.clone(),
-                            sorted_format_strings: vec![String::from("%1$d")],
+                        format_string::Mismatch {
+                            default_parsed_data: format_string::ParsedData {
+                                android_string: default_s2.clone(),
+                                sorted_format_strings: vec![],
+                            },
+                            foreign_parsed_data: format_string::ParsedData {
+                                android_string: spanish_s2.clone(),
+                                sorted_format_strings: vec![String::from("%1$s")],
+                            },
                         },
-                    }],
+                    ],
                 }),
                 missing_strings_error: Some(missing_strings::MissingStrings {
-                    extra_in_default_locale: vec![default_s1.clone(), default_s2.clone()],
-                    extra_in_foreign_locale: vec![spanish_s1.clone(), spanish_s2.clone()],
+                    extra_in_default_locale: vec![default_s1, default_s2],
+                    extra_in_foreign_locale: vec![spanish_s1, spanish_s2],
                 }),
             },
         ];
@@ -215,14 +222,19 @@ Path: french (1 issue)
 Error 1 (mismatched format string(s)): Found [asdf, qwer] in french_value1
                                        Found [] in default_value1
 
-Path: spanish (4 issues)
+Path: spanish (8 issues)
 Error 1 (unescaped apostrophe): spanish_value1
-Error 2 (mismatched format string(s)): Found [%1$d] in spanish_value1
+Error 2 (unescaped apostrophe): spanish_value2
+Error 3 (mismatched format string(s)): Found [%1$d] in spanish_value1
                                        Found [%1$s, %1$d] in default_value1
-Error 3 (unlocalized string(s)): default_value1, default_value2
-Error 4 (string(s) not in defaut locale): spanish_value1, spanish_value2
+Error 4 (mismatched format string(s)): Found [%1$s] in spanish_value2
+                                       Found [] in default_value2
+Error 5 (unlocalized string): default_value1
+Error 6 (unlocalized string): default_value2
+Error 7 (string not in defaut locale): spanish_value1
+Error 8 (string not in defaut locale): spanish_value2
 
-Found 6 issues across 3 files!"#
+Found 10 issues across 3 files!"#
             )
         );
     }
