@@ -36,18 +36,16 @@ deploy:
   file_glob: true
   file: android_localization-*-$TARGET.tar.gz
   skip_cleanup: true
-  draft: true
+  draft: true # Since anyone would be able to trigger a deploy by adding `release` tag
   overwrite: false
   on:
-    branch: master
-    condition: $TRAVIS_TAG = release
+    all_branches: true # Doesn't matter which branch this is
+    condition: $TRAVIS_TAG = release # All we look for is this tag
 
 branches:
   only:
-    # Pushes and PR to the master & develop branch
-    - master
-    # To let our `release` tag trigger CI builds
-    - release
+    - master # Anything that lands/PR on master should be tested
+    - release # To let our `release` tag trigger CI builds
 
 notifications:
   email:
