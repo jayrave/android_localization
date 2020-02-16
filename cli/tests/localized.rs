@@ -5,8 +5,6 @@ use tempfile::TempDir;
 
 use test_utilities;
 
-mod file_utilities;
-
 #[test]
 fn succeeds_with_mapping() {
     execute_with_copied_sample_res(
@@ -70,7 +68,7 @@ fn warns_if_nothing_new_localized() {
                     "run",
                     "localized",
                     "--res-dir",
-                    &output_res_path.clone(),
+                    &output_res_path,
                     "--input-file",
                     "./tests_data/localized/warn/input/localized.csv",
                 ])
@@ -194,12 +192,12 @@ fn assert_status_and_stdout(output: Output) {
 }
 
 fn assert_output_files(output_res_path: String) {
-    file_utilities::assert_eq_of_file_contents(
+    test_utilities::file::assert_eq_of_file_contents(
         "./tests_data/localized/success/output/french_strings.xml",
         &format!("{}/values-fr/strings.xml", output_res_path),
     );
 
-    file_utilities::assert_eq_of_file_contents(
+    test_utilities::file::assert_eq_of_file_contents(
         "./tests_data/localized/success/output/spanish_strings.xml",
         &format!("{}/values-es/strings.xml", output_res_path),
     );

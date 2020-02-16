@@ -239,7 +239,7 @@ mod tests {
 
             Some(missing_strings::MissingStrings {
                 extra_in_foreign_locale: vec![],
-                extra_in_default_locale: vec![default_s1.clone()],
+                extra_in_default_locale: vec![default_s1],
             })
         } else {
             missing_strings_error_for_fr = None;

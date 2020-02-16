@@ -199,8 +199,8 @@ mod tests {
                     }],
                 }),
                 missing_strings_error: Some(missing_strings::MissingStrings {
-                    extra_in_default_locale: vec![default_s1.clone(), default_s2.clone()],
-                    extra_in_foreign_locale: vec![spanish_s1.clone(), spanish_s2.clone()],
+                    extra_in_default_locale: vec![default_s1, default_s2],
+                    extra_in_foreign_locale: vec![spanish_s1, spanish_s2],
                 }),
             },
         ];
