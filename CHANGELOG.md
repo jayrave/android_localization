@@ -1,3 +1,6 @@
+# 0.1.9
+- Report each unlocalized string as a separate error
+
 # 0.1.8
 - Make validate fail if there is unlocalized text with an option to turn it off
 
