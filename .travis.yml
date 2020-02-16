@@ -40,14 +40,14 @@ deploy:
   overwrite: false
   on:
     branch: master
-    tags: true
+    condition: $TRAVIS_TAG = release
 
 branches:
   only:
     # Pushes and PR to the master & develop branch
     - master
-    - develop
-    - /^\d+\.\d+\.\d+$/
+    # To let our `release` tag trigger CI builds
+    - release
 
 notifications:
   email:
